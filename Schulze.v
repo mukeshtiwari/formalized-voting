@@ -23,7 +23,7 @@ Module Evote.
   Hypothesis cand_fin : forall c: cand, In c cand_all.
   Hypothesis dec_cand : forall n m : cand, {n = m} + {n <> m}.
 
-  (* edge is the margin in Schulze counting, i.e. edge c d is the number of 
+  (* edge is the margin in Schulze counting, i.e. edge c d is the number of
      voters that perfer c over d *)
   (* TODO: possibly rename? *)
   Parameter edge: cand -> cand -> nat.
@@ -40,15 +40,15 @@ Module Evote.
 
   (* winning condition in Schulze counting *)
   Definition wins (c: cand) :=
-    forall d : cand, exists k : nat, 
-      ((Path k c d) /\ (forall l, Path l d c -> l <= k)).
+    forall d : cand, exists k : nat,
+        ((Path k c d) /\ (forall l, Path l d c -> l <= k)).
 
   (* auxilary functions: all pairs that can be formed from a list *)
   Fixpoint all_pairs {A: Type} (l: list A): list (A * A) :=
     match l with
     |   [] => []
-    |    c::cs => (c, c)::(all_pairs cs) ++ (map (fun x => (c, x)) cs) 
-                                         ++ (map (fun x => (x, c)) cs)
+    |    c::cs => (c, c)::(all_pairs cs) ++ (map (fun x => (c, x)) cs)
+                       ++ (map (fun x => (x, c)) cs)
     end.
 
   (* boolean equality on candidates derived from decidable equality *)
@@ -58,16 +58,16 @@ Module Evote.
   Proof.
     intro H. unfold cand_eqb in H. destruct (dec_cand c d). assumption. simpl in H. inversion H.
   Qed.
-  
+
   (* boolean membership in lists of pairs *)
   Definition bool_in (p: (cand * cand)%type) (l: list (cand * cand)%type) :=
-    existsb (fun q => (andb (cand_eqb (fst q) (fst p))) ((cand_eqb (snd q) (snd p)))) l. 
+    existsb (fun q => (andb (cand_eqb (fst q) (fst p))) ((cand_eqb (snd q) (snd p)))) l.
 
   (* towards the definition of co-closed sets *)
   (* el is a boolean function that returns true if the edge between two cands is <= k *)
   Definition el (k: nat) (p: (cand * cand)%type) := Compare_dec.leb (edge (fst p) (snd p)) k.
 
-  (* mp k (a, c) l (for midpoint) returns true if there's a midpoint b st. either the edge between 
+  (* mp k (a, c) l (for midpoint) returns true if there's a midpoint b st. either the edge between
      a and b is <= k or else the pair (b, c) is in l *)
   Definition mp (k: nat) (p: (cand * cand)%type) (l: list (cand *cand)%type) :=
     let a := fst p in
@@ -105,7 +105,7 @@ Module Evote.
   Lemma edge_prop : forall a b k, el k (a, b) = true -> edge a b <= k.
   Proof.
     intros a b k H; unfold el in H; simpl in H;
-    apply leb_complete in H; assumption.
+      apply leb_complete in H; assumption.
   Qed.
 
   Lemma boolin_prop :  forall a b l, bool_in (a, b) l = true -> In (a, b) l.
@@ -117,10 +117,10 @@ Module Evote.
     apply cand_eqb_prop in H1. rewrite H0 in H. rewrite H1 in H.
     assumption.
   Qed.
-  
+
   Lemma fold_left_uni :
-    forall (A : Type) (f : A -> bool) l a, 
-    fold_left (fun x y => andb x (f y)) l a = true -> a = true /\ List.Forall (fun a => f a = true) l.
+    forall (A : Type) (f : A -> bool) l a,
+      fold_left (fun x y => andb x (f y)) l a = true -> a = true /\ List.Forall (fun a => f a = true) l.
   Proof.
     induction l; simpl; intros.
     - auto.
@@ -146,21 +146,21 @@ Module Evote.
     rewrite <- orb_true_iff.
     apply H. apply cand_fin.
   Qed.
-  
 
-  Lemma forthemoment : forall k p l, mp k p l = true -> 
-    forall b, In (b, snd p) l \/ edge (fst p) b <= k.
-  Proof. 
+
+  Lemma forthemoment : forall k p l, mp k p l = true ->
+                                forall b, In (b, snd p) l \/ edge (fst p) b <= k.
+  Proof.
     intros k (u, v) l H b. unfold mp in H.
     apply fold_left_true with (c := b) in H.
     simpl in H; simpl. destruct H as [H | H].
     apply boolin_prop in H. left; assumption.
     apply edge_prop in H. right; assumption.
   Qed.
-    
+
   (* generic property of coclosed sets as commented above *)
   Lemma coclosednow : forall k l, coclosed k l -> forall s x y,
-    Path s x y -> In (x, y) l -> s <= k.
+        Path s x y -> In (x, y) l -> s <= k.
   Proof.
     intros k l Hcc.
     intros s x y.
@@ -189,7 +189,7 @@ Module Evote.
     (* non-unit path *)
     intro Hin.
     unfold coclosed in Hcc.
-    specialize (Hcc (c, e)).   specialize (Hcc Hin). 
+    specialize (Hcc (c, e)).   specialize (Hcc Hin).
     unfold W in Hcc.
     assert (HW: In (c, e) (all_pairs cand_all) /\  (Wf k l)  (c, e) = true).
     apply filter_In. assumption.
@@ -201,7 +201,7 @@ Module Evote.
     unfold el in He.
     simpl in He.
     assert (Hle: edge c e <= k). apply leb_complete. assumption.
-  (*  forall b, In (b, snd p) l \/ edge (fst p) b <= k. *)
+    (*  forall b, In (b, snd p) l \/ edge (fst p) b <= k. *)
     assert (Hmp: forall m, In (m, (snd (c, e))) l \/ edge (fst (c, e)) m <= k).
     apply  forthemoment. assumption.
     simpl in Hmp.
@@ -212,7 +212,7 @@ Module Evote.
     assumption.
     (* case first edge of small weight *)
     omega.
-Qed.
+  Qed.
 
   Theorem th1: forall c, ev c -> wins c.
   Proof.
@@ -232,6 +232,59 @@ Qed.
     assumption.
     assumption.
     assumption.
-Qed.
+  Qed.
+
+  (* reverse process. Create evidence from winner *)
+
+  Definition geb (a b : nat) :=
+    match ge_dec a b with
+    | left _ => true
+    | right _ => false
+    end.
+
+  (* elg is boolean function returns true if the edge between two candidates
+     of >= k. *)
+  Definition elg (k : nat) (p : (cand * cand)) : bool :=
+    geb (edge (fst p) (snd p)) k.
+
+  (* mp k (a, c) l (for midpoint) returns true if there's a midpoint b st.
+     the edge between a and b is >= k /\ the pair (b, c) is in l *)
+  Definition mpg (k : nat) (p : (cand * cand)) (l : list (cand * cand)) :=
+    let a := fst p in
+    let c := snd p in
+    fold_left (fun x => fun b => andb x (andb (elg k (a, b)) (bool_in (b, c) l))) cand_all true.
+
+  Definition Of k l  := (fun p => orb (elg k p) (mpg k p l)).
+  Definition O k : list (cand * cand) -> list (cand * cand) :=
+    fun l => filter (Of k l) (all_pairs cand_all).
+
+  Lemma mpg_true : forall k p l,
+      mpg k p l = true -> forall b, elg k (fst p, b) = true /\ In (b, snd p) l. 
+  Proof. Admitted.
+
+  Lemma in_list : forall c d, In c cand_all ->  In d cand_all -> In (c, d) (all_pairs cand_all).
+  Proof. Admitted.
+
+  Lemma geb_true : forall c d k, edge c d >= k ->  geb (edge c d) k = true.
+  Proof. Admitted.
+
+    
+  Theorem tmp : forall k c d l, Path k c d -> In (c, d) (O k l).
+  Proof.
+    induction 1.
+    { unfold O, Of.
+      apply filter_In. split. apply in_list; repeat (apply cand_fin).
+      apply orb_true_iff. left. unfold elg. simpl.
+      apply geb_true. assumption.
+    }
+    {
+      unfold O, Of in IHPath; apply filter_In in IHPath.
+      destruct IHPath as [H1 H2]. apply orb_true_iff in H2.
+      unfold O, Of; apply filter_In. 
+    }
+  Qed.
+
+
+
 
 End Evote.
