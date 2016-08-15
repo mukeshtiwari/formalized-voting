@@ -242,6 +242,13 @@ Module Evote.
     | right _ => false
     end.
 
+  Theorem geb_true : forall a b,
+      geb a b = true <-> a >= b.
+  Proof.
+    split; intros. unfold geb in H. destruct ge_dec in H. assumption. inversion H.
+    unfold geb. destruct ge_dec. reflexivity. congruence.
+  Qed.
+  
   (* elg is boolean function returns true if the edge between two candidates
      of >= k. *)
   Definition elg (k : nat) (p : (cand * cand)) : bool :=
@@ -259,32 +266,53 @@ Module Evote.
     fun l => filter (Of k l) (all_pairs cand_all).
 
   Lemma mpg_true : forall k p l,
-      mpg k p l = true -> forall b, elg k (fst p, b) = true /\ In (b, snd p) l. 
+      mpg k p l = true <-> exists b, elg k (fst p, b) = true /\ In (b, snd p) l. 
   Proof. Admitted.
 
   Lemma in_list : forall c d, In c cand_all ->  In d cand_all -> In (c, d) (all_pairs cand_all).
   Proof. Admitted.
 
-  Lemma geb_true : forall c d k, edge c d >= k ->  geb (edge c d) k = true.
-  Proof. Admitted.
-
-    
-  Theorem tmp : forall k c d l, Path k c d -> In (c, d) (O k l).
+  Lemma gebedge_true : forall c d k, edge c d >= k <->  geb (edge c d) k = true.
   Proof.
-    induction 1.
-    { unfold O, Of.
-      apply filter_In. split. apply in_list; repeat (apply cand_fin).
-      apply orb_true_iff. left. unfold elg. simpl.
-      apply geb_true. assumption.
-    }
-    {
-      unfold O, Of in IHPath; apply filter_In in IHPath.
-      destruct IHPath as [H1 H2]. apply orb_true_iff in H2.
-      unfold O, Of; apply filter_In. 
-    }
+    split; intros. apply geb_true. assumption.
+    apply geb_true. assumption.
   Qed.
 
+  Fixpoint iterfun {A : Type} (f : A -> A) (n : nat) (a : A) : A :=
+    match n with
+    | 0 => a
+    | S n' => f (iterfun f n' a)
+    end.
+  
+    
+  Theorem wins_evi_1: forall k c d, Path k c d -> exists (n : nat), In (c, d) (iterfun (O k) n []).
+  Proof.
+    induction 1.
+    exists 1. simpl. unfold O, Of.
+    apply filter_In. split. apply in_list; repeat (apply cand_fin).
+    apply orb_true_iff. left. apply gebedge_true. simpl.
+    assumption.
+
+    destruct IHPath.
+    exists (S x). simpl. apply filter_In. split. apply in_list; repeat (apply cand_fin).
+    unfold Of. rewrite orb_true_iff. right. apply mpg_true.
+    simpl. exists d. split. unfold elg. simpl. apply gebedge_true. assumption.
+    assumption.
+  Qed.
+
+  Theorem wins_evi_2 : forall k n c d, In (c, d) (iterfun (O k) n []) -> Path k c d.
+  Proof.
+    intros k n. induction n. simpl. intros c d H; inversion H.
+    intros c d H. simpl in H. unfold O in H. apply filter_In in H.
+    destruct H as [H1 H2]. unfold Of in H2. apply orb_true_iff in H2.
+    destruct H2 as [H2 | H2]. unfold elg in H2; simpl in H2. apply gebedge_true in H2.
+    constructor 1. assumption.
+    apply mpg_true in H2. simpl in H2. destruct H2 as [m H2]. destruct H2 as [H3 H4].
+    apply cons with (d := m). unfold elg in H3; simpl in H3. apply gebedge_true in H3.
+    assumption.  apply (IHn m d). fold (O k) in H4. assumption.
+  Qed.
+  
 
 
-
+  
 End Evote.
