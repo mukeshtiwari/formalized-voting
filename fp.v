@@ -130,7 +130,11 @@ Section Fixpoints.
   Qed.
 
   Lemma filter_app {A: Type} (l1 l2: list A) (f: A -> bool) : filter f (l1 ++ l2) = (filter f l1) ++ (filter f l2).
-  Admitted.
+  Proof.
+    induction l1. auto.
+    simpl. destruct (f a). simpl. rewrite IHl1. auto.
+    assumption.
+  Qed.
 
   Theorem  iter_aux {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
     mon O ->
@@ -142,8 +146,8 @@ Section Fixpoints.
     destruct (pred_eq_dec l Hfin (iter O n nil_pred) (iter O (n+1) nil_pred)) as [Heq | Hneq].
     (* O^0 empty  = O^1 empty *)
     left.
-    intro a. split. intro H0. specialize (Heq a). simpl. simpl in H0. simpl in Heq. rewrite <- Heq. assumption.
-    intro H1. simpl in H1. specialize (Heq a). simpl. simpl in Heq. rewrite -> Heq. assumption.
+    intro a. split. intro H0. specialize (Heq a). rewrite <- Heq. assumption.
+    intro H1. specialize (Heq a). rewrite -> Heq. assumption.
     (* case where O^0 empty != O^1 empty *)
     right.
     (* we know: O^0 emty != O^1 empty but by monotonicity, have O^0 empty (subset of) O^1 empty. *)
@@ -153,16 +157,26 @@ Section Fixpoints.
     Check increasing.
     apply (increasing O Hmon n). assumption.
     destruct Hne as [a Hne].
+    
     assert (Hsplit:  exists l1 l2, l = l1++a::l2). apply in_split. apply Hfin.
-    destruct Hsplit as [l1 Hsplit]. destruct Hsplit as [l2 Hsplit].
+    destruct Hsplit as [l1 [l2 Hsplit]].
     unfold card.
     rewrite -> Hsplit. rewrite -> filter_app. rewrite -> filter_app.
     destruct Hne as [Hnef Hnet].
     simpl. rewrite Hnet, Hnef. rewrite app_length; rewrite app_length.
-    
+    simpl. assert (Ht : forall a b : nat, plus a (S b) = plus (plus a b) 1).
+    { intros. omega. } rewrite Ht. clear Ht.
+    rewrite <- app_length; rewrite <- filter_app; rewrite <- app_length; rewrite <- filter_app.
+    assert (Hgt: forall a b : nat, a >= b -> plus a 1 >= plus b 1).
+    { intros. omega. }  apply Hgt. clear Hgt.
+    specialize (increasing O Hmon n); intros H; unfold pred_subset in H.
+    induction (l1 ++ l2). auto. simpl.
+    destruct (iter O n nil_pred a0) eqn: Ht.
+    specialize (H a0 Ht). rewrite H. simpl. omega.
+    destruct (iter O (n + 1) nil_pred a0); simpl; omega.
+  Qed.
 
-
-
+  
     Theorem iter_fin {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
       mon O -> bounded_card A k ->
       forall n: nat, forall a: A, iter O n nil_pred a = true -> iter O k nil_pred a = true.
