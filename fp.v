@@ -15,7 +15,7 @@ Section Fixpoints.
   Definition mon {A: Type} (O: (A -> bool) -> (A -> bool)) :=
     forall (p1 p2: A -> bool), pred_subset p1 p2 -> pred_subset (O p1) (O p2).
 
-  Definition bounded_card (A: Type) (n: nat) := exists l, forall a: A, In a l /\ length l <= n.
+  Definition bounded_card (A: Type) (n: nat) := exists l, (forall a: A, In a l) /\ length l <= n.
 
   Fixpoint iter {A: Type} (f: A -> A) (n: nat) (a: A) :=
     match n with
@@ -172,11 +172,31 @@ Section Fixpoints.
     specialize (increasing O Hmon n); intros H; unfold pred_subset in H.
     induction (l1 ++ l2). auto. simpl.
     destruct (iter O n nil_pred a0) eqn: Ht.
-    specialize (H a0 Ht). rewrite H. simpl. omega.
+    specialize (H a0 Ht). rewrite H.  simpl. omega.
     destruct (iter O (n + 1) nil_pred a0); simpl; omega.
   Qed.
 
+  (* 
+  Inductive NoDup {A : Type} : list A -> Prop :=
+    | NoDup_nil : NoDup nil
+    | NoDup_cons : forall x l, ~ In x l -> NoDup l -> NoDup (x::l).
+   *)
   
+  Theorem noduplicate : forall {A : Type} (l1 l2 : list A), NoDup l1 -> NoDup l2 ->
+                                            (forall a : A, In a l1) -> length l2 <= length l1.
+  Proof.
+    intros A l1 l2 H1 H2 H3.
+    apply NoDup_incl_length. assumption.
+    unfold incl. intros. specialize (H3 a).
+    assumption.
+  Qed.
+  
+    
     Theorem iter_fin {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
       mon O -> bounded_card A k ->
       forall n: nat, forall a: A, iter O n nil_pred a = true -> iter O k nil_pred a = true.
+    Proof.
+      intros Hmon Hboun; unfold bounded_card in Hboun.
+      destruct Hboun as [l Hboun]. 
+      destruct Hboun as [Hin Hlen].
+      specialize (iter_aux O l Hmon Hin). intros.
