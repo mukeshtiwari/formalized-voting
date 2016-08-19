@@ -182,7 +182,7 @@ Section Fixpoints.
     | NoDup_cons : forall x l, ~ In x l -> NoDup l -> NoDup (x::l).
    *)
   
-  Theorem noduplicate : forall {A : Type} (l1 l2 : list A), NoDup l1 -> NoDup l2 ->
+  Theorem noduplicate : forall (A : Type) (l1 l2 : list A), NoDup l1 -> NoDup l2 ->
                                             (forall a : A, In a l1) -> length l2 <= length l1.
   Proof.
     intros A l1 l2 H1 H2 H3.
