@@ -299,8 +299,9 @@ Section Fixpoints.
     induction Hler. auto. specialize (Hinc m). replace (S m) with (plus m 1).
     apply Hinc. auto. omega.
 
-    (* Now the problem here is I have cleared Hl *)
-
+    (* k < n *)
+    specialize (increasing O Hmon); intros Hinc; unfold pred_subset in Hinc.
+    
     
     
     intros Hmon Hboun; unfold bounded_card in Hboun.
