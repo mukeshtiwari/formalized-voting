@@ -191,29 +191,100 @@ Section Fixpoints.
     assumption.
   Qed.
 
-    
+
+  Theorem hoge : forall P Q R : Prop, P \/ ~(Q \/ R) -> (P \/ ~Q) /\ (P \/ ~R).
+  Proof.
+    refine (fun P Q R H => _).
+    refine (match H with
+            | or_introl HP => _
+            | or_intror  HnQR => _
+            end).
+    - exact (conj (or_introl HP) (or_introl HP)).
+    - refine (conj _ _).
+      + refine (or_intror (fun HQ => _)).
+        exact (HnQR (or_introl HQ)).
+      + refine (or_intror (fun HQ => _)).
+        exact (HnQR (or_intror HQ)).
+  Qed.
+
+  Theorem tmp : forall {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A),
+    mon O ->
+    (forall a: A, In a l) ->
+    forall (n : nat),
+      length (filter (iter O (n + 1) nil_pred) l) >= length (filter (iter O n nil_pred) l) + 1 ->
+      (exists (a : A)  (l1 l2 : list A), (l = l1 ++ a :: l2 ) /\
+                      iter O n nil_pred a = false /\ iter O (n + 1) nil_pred a = true).
+   Admitted.
+
+
+  Theorem operator_ext : forall {A : Type} (O : (A -> bool) -> (A -> bool)) (P Q : A -> bool) ,
+      mon O -> (forall a, (P a = true <-> Q a = true))  -> (forall a, (O P a = true <->  O Q a = true)). 
+  Proof.
+    intros A O P Q Hmon H.
+    assert (H1 : forall a, O P a = true -> O Q a = true).
+    unfold mon in Hmon; unfold pred_subset in Hmon.
+    apply Hmon. intros a Hp. specialize (H a). apply H. assumption.
+    assert (H2 : forall a, O Q a = true -> O P a = true).
+    unfold mon in Hmon; unfold pred_subset in Hmon. apply Hmon. intros a Hq.
+    specialize (H a). apply H. assumption.
+    intros a. split. specialize (H1 a). assumption.
+    specialize (H2 a). assumption.
+  Qed.
+  
   Theorem  iter_aux_new {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
     mon O ->
     (forall a: A, In a l) ->
     forall (n : nat), (forall a:A, iter O n nil_pred a = true <-> iter O (n+1) nil_pred a = true) \/
                card l (iter O n nil_pred) >= n.
-  Proof.              
-    intros Hmon Hfin n. specialize (iter_aux O l Hmon Hfin n); intros.
-    destruct H as [H | H]. left. assumption.
-    right. unfold mon in Hmon. unfold card in H; unfold card.
-    (* specialize (increasing O Hmon); intros Hinc.
-    unfold pred_subset in Hinc. *)
-    generalize dependent n.
+  Proof.
+    intros Hmon Hfin n.  induction n.
+    right. omega. destruct IHn as [Hfix | Hnfix].
+    left. simpl. apply operator_ext. assumption. assumption.
+    assert ((forall a : A, iter O n nil_pred a = true <-> iter O (n + 1) nil_pred a = true)
+            \/ card l (iter O (n + 1) nil_pred) >= card l (iter O n nil_pred) + 1).
+    apply (iter_aux O l Hmon Hfin n).
+    destruct H as [Hl | Hr]. left.  simpl. apply operator_ext.
+    assumption. assumption. right.
+    replace (S n) with (plus n 1). omega. omega.
+  Qed.
     
+
+   Theorem  iter_aux_newagain {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
+    mon O ->
+    (forall a: A, In a l) ->
+    forall (n : nat), (forall a:A, iter O n nil_pred a = true <-> iter O (n+1) nil_pred a = true) \/
+               card l (iter O (n+1) nil_pred) >= (n+1).
+  Proof.
+    intros Hmon Hfin n.  induction n.
+    destruct (iter_aux O l Hmon Hfin 0).
+    left; assumption.
+    right; omega.   
+    destruct IHn as [Hfix | Hnfix].
+    left. simpl. apply operator_ext. assumption. assumption.
+    assert ((forall a : A, iter O (n + 1) nil_pred a = true <-> iter O (n + 1 + 1) nil_pred a = true)
+            \/ card l (iter O (n + 1 + 1) nil_pred) >= card l (iter O (n + 1) nil_pred) + 1).
+    apply (iter_aux O l Hmon Hfin (n + 1)).
+    destruct H as [Hl | Hr]. left. replace (S n) with (plus n 1). assumption. omega.
+    right.  replace (S n) with (plus n 1). omega. omega.
+  Qed.
     
-    Theorem iter_fin {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
-      mon O -> bounded_card A k ->
-      forall n: nat, forall a: A, iter O n nil_pred a = true -> iter O k nil_pred a = true.
-    Proof.
-      intros Hmon Hboun; unfold bounded_card in Hboun.
-      destruct Hboun as [l [Hin Hlen]].
-      Check iter_aux.
-      specialize (iter_aux O l Hmon Hin); intros Hpred.
-      intros n a H. specialize (Hpred k). destruct Hpred as [Hpred | Hpred]; swap 1 2.
-      unfold card in Hpred.
-      Check iter_aux.
+
+    
+  
+  Theorem iter_fin {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
+    mon O -> bounded_card A k ->
+    forall n: nat, forall a: A, iter O n nil_pred a = true -> iter O k nil_pred a = true.
+  Proof. 
+    intros Hmon Hboun; unfold bounded_card in Hboun.
+    destruct Hboun as [l [Hin Hlen]]. intros n.
+    assert (Hle : k < n \/ k >= n). omega.
+    destruct Hle as [Hlel | Hler].
+    destruct (iter_aux_newagain O l Hmon Hin k). 
+
+
+    
+    specialize (iter_aux_new O l Hmon Hin); intros Hpred.
+    intros n a H. specialize (Hpred k). destruct Hpred as [Hpred | Hpred].
+    assert (Hle : k < n \/ k >= n). omega.
+    destruct Hle as [Hlel | Hler]. 
+    
