@@ -249,7 +249,7 @@ Section Fixpoints.
   Qed.
     
 
-   Theorem  iter_aux_newagain {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
+  Theorem  iter_aux_newagain {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
     mon O ->
     (forall a: A, In a l) ->
     forall (n : nat), (forall a:A, iter O n nil_pred a = true <-> iter O (n+1) nil_pred a = true) \/
@@ -268,8 +268,6 @@ Section Fixpoints.
     right.  replace (S n) with (plus n 1). omega. omega.
   Qed.
     
-
-    
   
   Theorem iter_fin {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
     mon O -> bounded_card A k ->
@@ -278,13 +276,7 @@ Section Fixpoints.
     intros Hmon Hboun; unfold bounded_card in Hboun.
     destruct Hboun as [l [Hin Hlen]]. intros n.
     assert (Hle : k < n \/ k >= n). omega.
-    destruct Hle as [Hlel | Hler].
-    destruct (iter_aux_newagain O l Hmon Hin k). 
-
-
-    
-    specialize (iter_aux_new O l Hmon Hin); intros Hpred.
-    intros n a H. specialize (Hpred k). destruct Hpred as [Hpred | Hpred].
-    assert (Hle : k < n \/ k >= n). omega.
-    destruct Hle as [Hlel | Hler]. 
+    destruct Hle as [Hlel | Hler]; swap 1 2.
+    destruct (iter_aux_newagain O l Hmon Hin k). intros a Hiter.
+    specialize (increasing O Hmon); intros. unfold pred_subset in H0.
     
