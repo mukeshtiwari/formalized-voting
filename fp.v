@@ -268,15 +268,43 @@ Section Fixpoints.
     right.  replace (S n) with (plus n 1). omega. omega.
   Qed.
     
+
+  Theorem length_filter : forall (A : Type) (f : A -> bool) (l : list A),
+      length (filter f l) <= length l.
+  Proof.
+    intros A f l. induction l. simpl. omega.
+    simpl. destruct (f a). simpl; omega.
+    omega.
+  Qed.
   
   Theorem iter_fin {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
     mon O -> bounded_card A k ->
     forall n: nat, forall a: A, iter O n nil_pred a = true -> iter O k nil_pred a = true.
-  Proof. 
+  Proof.
+    intros Hmon Hboun; unfold bounded_card in Hboun.
+    destruct Hboun as [l [Hin Hlen]]. intros n a H.
+    specialize (iter_aux_newagain O l Hmon Hin k); intros.
+    destruct H0 as [H0 | H0]; swap 1 2. unfold card in H0.
+    specialize (length_filter A (iter O (plus k 1) nil_pred) l); intros. omega.
+    
+    assert (Hle : k < n \/ k >= n) by omega.    
+    destruct Hle as [Hlel | Hler].
+    induction Hlel. destruct (H0 a) as [H0l  H0r].
+    apply H0r. replace (plus k 1) with (S k). assumption. omega.
+    
+    
+    
     intros Hmon Hboun; unfold bounded_card in Hboun.
     destruct Hboun as [l [Hin Hlen]]. intros n.
-    assert (Hle : k < n \/ k >= n). omega.
+    assert (Hle : k < n \/ k >= n) by omega.    
     destruct Hle as [Hlel | Hler]; swap 1 2.
     destruct (iter_aux_newagain O l Hmon Hin k). intros a Hiter.
     specialize (increasing O Hmon); intros. unfold pred_subset in H0.
+    clear Hlen;  clear H.
+    induction Hler. assumption.
+    replace (S m) with (plus m 1); swap 1 2. omega.
+    apply H0. assumption. unfold card in H.
+    specialize (length_filter A (iter O (plus k 1) nil_pred) l); intros. omega.      
+    intros a H. specialize (increasing O Hmon); intros Hiter; unfold pred_subset in Hiter.
+
     
