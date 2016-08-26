@@ -192,31 +192,6 @@ Section Fixpoints.
   Qed.
 
 
-  Theorem hoge : forall P Q R : Prop, P \/ ~(Q \/ R) -> (P \/ ~Q) /\ (P \/ ~R).
-  Proof.
-    refine (fun P Q R H => _).
-    refine (match H with
-            | or_introl HP => _
-            | or_intror  HnQR => _
-            end).
-    - exact (conj (or_introl HP) (or_introl HP)).
-    - refine (conj _ _).
-      + refine (or_intror (fun HQ => _)).
-        exact (HnQR (or_introl HQ)).
-      + refine (or_intror (fun HQ => _)).
-        exact (HnQR (or_intror HQ)).
-  Qed.
-
-  Theorem tmp : forall {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A),
-    mon O ->
-    (forall a: A, In a l) ->
-    forall (n : nat),
-      length (filter (iter O (n + 1) nil_pred) l) >= length (filter (iter O n nil_pred) l) + 1 ->
-      (exists (a : A)  (l1 l2 : list A), (l = l1 ++ a :: l2 ) /\
-                      iter O n nil_pred a = false /\ iter O (n + 1) nil_pred a = true).
-   Admitted.
-
-
   Theorem operator_ext : forall {A : Type} (O : (A -> bool) -> (A -> bool)) (P Q : A -> bool) ,
       mon O -> (forall a, (P a = true <-> Q a = true))  -> (forall a, (O P a = true <->  O Q a = true)). 
   Proof.
