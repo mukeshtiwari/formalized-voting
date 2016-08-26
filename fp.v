@@ -291,6 +291,8 @@ Section Fixpoints.
     intros Hl. omega.
 
     (*   Hl : forall a : A, iter O k nil_pred a = true <-> iter O (k + 1) nil_pred a = true *)
+
+    
     assert (Hle : k < n \/ k >= n) by omega.    
     destruct Hle as [Hlel | Hler]; swap 1 2.
     (* k >= n *)
@@ -301,6 +303,11 @@ Section Fixpoints.
 
     (* k < n *)
     specialize (increasing O Hmon); intros Hinc; unfold pred_subset in Hinc.
+    induction Hlel.
+    (* base case *)
+    destruct (Hl a) as [Hlf Hlb]. replace (plus k 1) with (S k) in Hlb.
+    apply Hlb in H. assumption. omega.
+    (* not base *)
     
     
     
