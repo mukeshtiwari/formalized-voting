@@ -332,7 +332,30 @@ Section Fixpoints.
     induction Hler. auto. specialize (Hinc m). replace (S m) with (plus m 1).
     intros. apply Hinc. auto. omega.
   Qed.
-  
-End Fixpoints.    
 
+  Definition pred_eq {A : Type} (p q : A -> bool) :=
+    pred_subset p q /\ pred_subset q p.
+
+  Lemma equal : forall (A : Type) (l : list A) (p q : A -> bool) (H : forall a : A, In a l),
+      {pred_eq p q} + { ~(pred_eq p q)}.
+  Proof.
+    intros A l p q H.
+    specialize (pred_eq_dec l H p q).
+    intros Hdec. destruct Hdec as [Hdecl | Hdecr].
+    left. unfold pred_eq; unfold pred_subset. split.
+    intros a Hp. specialize (Hdecl a). rewrite Hp in Hdecl. intuition.
+    intros a Hq. specialize (Hdecl a). rewrite Hq in Hdecl. intuition.
+    (* case not *)
+    right. unfold pred_eq. unfold pred_subset. unfold not.
+    intros Hab. destruct Hab as [Hl Hr].
+    apply Hdecr. intros a.
+    destruct (p a) eqn: Hp. destruct (q a) eqn: Hq. auto.
+    specialize (Hl a); specialize (Hr a). specialize (Hl Hp). rewrite Hl in Hq. inversion Hq.
+    destruct (q a) eqn: Hq.
+    specialize (Hl a); specialize (Hr a). specialize (Hr Hq). rewrite Hr in Hp. inversion Hp.
+    auto.
+  Qed.    
+
+
+End Fixpoints.    
 
