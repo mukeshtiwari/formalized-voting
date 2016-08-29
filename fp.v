@@ -337,7 +337,7 @@ Section Fixpoints.
     pred_subset p q /\ pred_subset q p.
 
   Lemma equal : forall (A : Type) (l : list A) (p q : A -> bool) (H : forall a : A, In a l),
-      {pred_eq p q} + { ~(pred_eq p q)}.
+      {pred_eq p q} + {~(pred_eq p q)}.
   Proof.
     intros A l p q H.
     specialize (pred_eq_dec l H p q).
