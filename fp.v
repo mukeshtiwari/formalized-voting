@@ -333,5 +333,6 @@ Section Fixpoints.
     intros. apply Hinc. auto. omega.
   Qed.
   
-    
-   
+End Fixpoints.    
+
+
