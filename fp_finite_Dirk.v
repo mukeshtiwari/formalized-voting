@@ -95,7 +95,7 @@ Module Fixpoints.
   Lemma pred_eq_dec {A: Type} (l: list A) :
     (forall a: A, In a l) ->
     forall (p1 p2: pred A), {pred_eeq p1 p2} + {~(pred_eeq p1 p2)}.
-Proof.
+  Proof.
     intros Hin p1 p2.
     destruct (pred_eq_dec_aux l p1 p2) as [Heq | Hneq].
     left.
@@ -120,7 +120,7 @@ Proof.
     specialize (H2 a Hp2t). contradict Hp1f. assumption.
     (* case p2 a = false *)
     assert (Hp2: p2 a = false) by apply (not_true_is_false (p2 a) Hp2f). congruence.
-Qed.  
+  Qed.  
 
   (* if two predicates are subsets but not equal, the larger adds an elt *)
   Lemma new_elt_aux {A: Type} (p1 p2: pred A)  (l: list A) :
@@ -171,10 +171,11 @@ Qed.
     intros a Hp1. specialize (H a (Hfin a)).  congruence.
     unfold pred_subset.
     intros a Hp2. specialize (H a (Hfin a)). congruence.
-Qed.
+  Qed.
 
   (* additivity of filter *)
-  Lemma filter_app {A: Type} (l1 l2: list A) (f: A -> bool) : filter f (l1 ++ l2) = (filter f l1) ++ (filter f l2).
+  Lemma filter_app {A: Type} (l1 l2: list A) (f: A -> bool) :
+    filter f (l1 ++ l2) = (filter f l1) ++ (filter f l2).
   Proof.
     induction l1. auto.
     simpl. destruct (f a). simpl. rewrite IHl1. auto.
@@ -196,7 +197,7 @@ Qed.
     destruct (bool_dec (p2 x) true). rewrite e. simpl. omega.
     assert (Hp2f: p2 x = false) by apply (not_true_is_false (p2 x) n0).
     rewrite Hp2f. assumption.
-Qed.
+  Qed.
 
   (**************************************)
   (* monotone operators on finite types *)
@@ -248,7 +249,7 @@ Qed.
     assumption. replace (n + S k)%nat with ((n+k)+1)%nat.
     apply inc_chain. assumption. omega.
   Qed.
-    
+  
   (* the operator is congruential on predicates *)
   Lemma op_cong {A: Type} (O: Op A) : mon O -> forall p1 p2: pred A,
         pred_eeq p1 p2 -> pred_eeq (O p1) (O p2).
