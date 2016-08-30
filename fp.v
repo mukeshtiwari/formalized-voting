@@ -350,9 +350,9 @@ Section Fixpoints.
     intros Hab. destruct Hab as [Hl Hr].
     apply Hdecr. intros a.
     destruct (p a) eqn: Hp. destruct (q a) eqn: Hq. auto.
-    specialize (Hl a); specialize (Hr a). specialize (Hl Hp). rewrite Hl in Hq. inversion Hq.
+    specialize (Hl a); specialize (Hr a). specialize (Hl Hp). congruence.
     destruct (q a) eqn: Hq.
-    specialize (Hl a); specialize (Hr a). specialize (Hr Hq). rewrite Hr in Hp. inversion Hp.
+    specialize (Hl a); specialize (Hr a). specialize (Hr Hq). congruence.
     auto.
   Qed.    
 
