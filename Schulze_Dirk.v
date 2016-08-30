@@ -1,15 +1,15 @@
-Module Evote.
+Require Import Notations.
+Require Import Coq.Lists.List.
+Require Import Coq.Arith.Le.
+Require Import Coq.Numbers.Natural.Peano.NPeano.
+Require Import Coq.Arith.Compare_dec.
+Require Import Coq.omega.Omega.
+Require Import Bool.Sumbool.
+Require Import Bool.Bool.
+Require Import fp_finite_Dirk.
+Import ListNotations.
 
-  Require Import Notations.
-  Require Import Coq.Lists.List.
-  Require Import Coq.Arith.Le.
-  Require Import Coq.Numbers.Natural.Peano.NPeano.
-  Require Import Coq.Arith.Compare_dec.
-  Require Import Coq.omega.Omega.
-  Require Import Bool.Sumbool.
-  Require Import Bool.Bool.
-  Import ListNotations.
-
+Module Evote.  
   (* type level existential quantifier *)
   Notation "'existsT' x .. y , p" :=
     (sigT (fun x => .. (sigT (fun y => p)) ..))
@@ -17,6 +17,7 @@ Module Evote.
        format "'[' 'existsT'  '/  ' x  ..  y ,  '/  ' p ']'")
     : type_scope.
 
+  
   (* candidates are a finite type with decidable equality *)
   Parameter cand : Type.
   Parameter cand_all : list cand.
@@ -125,14 +126,15 @@ Module Evote.
     (* case bool_in ... *)
     left.
     unfold bool_in in Hr. simpl in Hr.
-    assert (Hex: exists x, In x l /\ (fun q : cand * cand => cand_eqb (fst q) b && cand_eqb (snd q) (snd p)) x = true).
+    assert (Hex: exists x, In x l /\ (fun q : cand * cand
+                                => cand_eqb (fst q) b && cand_eqb (snd q) (snd p)) x = true).
     apply existsb_exists. assumption.     
     destruct Hex as [x Hx]. destruct Hx as [H1 H2].
     apply andb_true_iff in H2. destruct H2 as [H2 H3].
     apply cand_eqb_prop in H2.
     apply cand_eqb_prop in H3.
     destruct x. subst. simpl. simpl in H3. subst. assumption.
-Qed.
+  Qed.
 
   (* generic property of coclosed sets as commented above *)
   Lemma coclosed_path : forall k l, coclosed k l -> forall s x y,
@@ -188,7 +190,7 @@ Qed.
     assumption.
     (* case first edge of small weight *)
     omega.
-Qed.
+  Qed.
 
   Theorem th1: forall c, ev c -> wins c.
   Proof.
@@ -208,4 +210,8 @@ Qed.
     assumption.
     assumption.
     assumption.
-Qed.
+  Qed.
+
+  
+
+End Evote.

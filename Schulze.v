@@ -311,8 +311,4 @@ Module Evote.
     apply cons with (d := m). unfold elg in H3; simpl in H3. apply gebedge_true in H3.
     assumption.  apply (IHn m d). fold (O k) in H4. assumption.
   Qed.
-  
-
-
-  
 End Evote.

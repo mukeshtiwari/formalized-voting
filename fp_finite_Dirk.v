@@ -7,8 +7,9 @@ Require Import Coq.omega.Omega.
 Import ListNotations.
 
 
-Section Fixpoints.
+Module Fixpoints.
 
+  
   (****************************************************)
   (* boolean predicates on types and basic properties *)
   (****************************************************)
