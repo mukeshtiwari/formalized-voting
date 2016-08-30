@@ -33,26 +33,28 @@ Section Fixpoints.
   (* equality is reflexive *)
   Lemma eeq_refl {A: Type} (p: pred A) : pred_eeq p p.
   Proof.
-    unfold pred_eeq. split. apply subset_refl. apply subset_refl.
+    unfold pred_eeq. split; apply subset_refl.
   Qed.
 
   (* subset is transitive *)
-  Lemma subset_trans {A: Type} (p q r: pred A): pred_subset p q -> pred_subset q r -> pred_subset p r.
+  Lemma subset_trans {A: Type} (p q r: pred A):
+    pred_subset p q -> pred_subset q r -> pred_subset p r.
   Proof.
-    intros Hpq Hqr. unfold pred_subset in Hpq. unfold pred_subset in Hqr. unfold pred_subset.
+    intros Hpq Hqr. unfold pred_subset in Hpq, Hqr. unfold pred_subset.
     intro a. specialize (Hpq a). specialize (Hqr a).
-    intro H. apply Hqr. apply Hpq. assumption.
+    intro H. apply Hqr, Hpq. assumption.
   Qed. 
 
   (* equality is transitive *)
-  Lemma eeq_trans {A: Type} (p q r: pred A) : pred_eeq p q -> pred_eeq q r -> pred_eeq p r.
-    Proof.
+  Lemma eeq_trans {A: Type} (p q r: pred A) :
+    pred_eeq p q -> pred_eeq q r -> pred_eeq p r.
+  Proof.
     intros  Hpq Hqr.
-    unfold pred_eeq in Hpq. destruct  Hpq as [Hpq1 Hpq2].
-    unfold pred_eeq in Hqr. destruct Hqr as [Hqr1 Hqr2].
-    unfold pred_eeq. split.
-    apply (subset_trans p q r). assumption. assumption.
-    apply (subset_trans r q p). assumption. assumption.
+    unfold pred_eeq in Hpq, Hqr. destruct  Hpq as [Hpq1 Hpq2].
+    destruct Hqr as [Hqr1 Hqr2].
+    unfold pred_eeq. split. 
+    apply (subset_trans p q r); assumption.
+    apply (subset_trans r q p); assumption.
   Qed.
 
   (* the empty subset *)
@@ -75,13 +77,14 @@ Section Fixpoints.
     (* case distinction on whether p1 and p2 agree on xs *)
     destruct (IHxs p1 p2) as [H12eqxs | H12neqxs].
     (* case where p1 and p2 agree on xs *)
-    left. intros a Hin.
+    left. intros a Hin. 
     apply in_inv in Hin. destruct Hin as [Hx | Hxs].
-    rewrite -> Hx in H12eqx. assumption.
+    rewrite Hx in H12eqx. assumption.
     apply H12eqxs. assumption.
     (* p1 x = p2 x but p1 and p2 don't agree on xs *)
     right.
-    intro H. apply H12neqxs. intro a. specialize (H a). intro  Hin. apply H. simpl.   right. assumption.
+    intro H. apply H12neqxs. intro a. specialize (H a). intro  Hin.
+    apply H. simpl.   right. assumption.
     (* case where p1 x <> p2 x *)
     right.
     intro H. apply H12neqx. specialize (H x). apply H. simpl. left. trivial.
@@ -97,10 +100,10 @@ Proof.
     left.
     unfold pred_eeq. split. unfold pred_subset. intro a. 
     specialize (Heq a (Hin a)).
-    rewrite -> Heq. auto.
+    rewrite Heq. auto.
     unfold pred_subset. intro a.
     specialize (Heq a (Hin a)).
-    rewrite -> Heq. auto.
+    rewrite Heq. auto.
     (* case where p1 and p2 are different *)
     right. intro H. apply Hneq.
     unfold pred_eeq in H. destruct H as [H1 H2].
@@ -108,16 +111,14 @@ Proof.
     (* case analysis on p1 a, p2 a *)
     destruct (bool_dec (p1 a) true) as [Hp1t | Hp1f].
     (* case p1 a = true *)
-    assert (H: p2 a = true). apply H1. assumption.
-    rewrite -> Hp1t. rewrite -> H. reflexivity.
+    assert (H: p2 a = true). apply H1. assumption. congruence.
     (* case p1 a = false *)
     assert (Hp1: p1 a = false) by  apply (not_true_is_false (p1 a) Hp1f).
     destruct (bool_dec (p2 a) true) as [Hp2t | Hp2f].
     (* case p2 a = true *)
     specialize (H2 a Hp2t). contradict Hp1f. assumption.
     (* case p2 a = false *)
-    assert (Hp2: p2 a = false) by apply (not_true_is_false (p2 a) Hp2f).
-    rewrite -> Hp2. rewrite -> Hp1. reflexivity.
+    assert (Hp2: p2 a = false) by apply (not_true_is_false (p2 a) Hp2f). congruence.
 Qed.  
 
   (* if two predicates are subsets but not equal, the larger adds an elt *)
@@ -138,20 +139,20 @@ Qed.
     apply IHxs. intro H. apply Hneq.
     intros a Hin.
     apply in_inv in Hin.
-    destruct Hin as [Hxa | Haxs].
-    rewrite <- Hxa. assumption.
+    destruct Hin as [Hxa | Haxs]. congruence.
     apply (H a). assumption.
     (* case where p1 and p2 disagree on x *)
     exists x. destruct (bool_dec (p1 x) true).
     (* case where p1 x = true *)
     assert (Hp2: p2 x = false). destruct (bool_dec (p2 x) false).
     assumption.
-    rewrite -> e in n.
-    apply not_true_iff_false. auto. unfold pred_subset in Hss. specialize (Hss x). specialize (Hss e).
-    rewrite -> e in n. symmetry in Hss. unfold not in n. apply n in Hss. inversion Hss.
+    rewrite e in n.
+    apply not_true_iff_false. auto. unfold pred_subset in Hss. specialize (Hss x).
+    specialize (Hss e).
+    rewrite e in n. congruence.
     (* case where p1x is not true, i.e. false *)
     assert (Hp1: p1 x = false). apply not_true_iff_false. assumption.
-    rewrite -> Hp1 in n.
+    rewrite Hp1 in n.
     split. assumption.  apply not_false_is_true.  intro H.
     symmetry in H. apply n. assumption.
   Qed.
@@ -166,9 +167,9 @@ Qed.
     apply (new_elt_aux p1 p2 l Hss).
     intro H.  unfold pred_eeq in Hneq. apply Hneq. 
     split. unfold pred_subset.
-    intros a Hp1. specialize (H a (Hfin a)).  rewrite <- H. assumption.
+    intros a Hp1. specialize (H a (Hfin a)).  congruence.
     unfold pred_subset.
-    intros a Hp2. specialize (H a (Hfin a)). rewrite -> H. assumption.
+    intros a Hp2. specialize (H a (Hfin a)). congruence.
 Qed.
 
   (* additivity of filter *)
@@ -186,15 +187,14 @@ Qed.
     intro Hss. induction l as [| x xs IHxs].
     simpl. auto.
     simpl. destruct (bool_dec (p1 x) true).
-    rewrite -> e. simpl.
-    unfold pred_subset in Hss. specialize (Hss x e). rewrite -> Hss.
-    simpl. auto. omega.
+    rewrite e. simpl.
+    unfold pred_subset in Hss. specialize (Hss x e). rewrite Hss.
+    simpl. omega.
     assert (Hp1t: p1 x = false) by apply (not_true_is_false (p1 x) n).
-    rewrite -> Hp1t.
-    destruct (bool_dec (p2 x) true). rewrite -> e. simpl.
-    omega.
+    rewrite Hp1t.
+    destruct (bool_dec (p2 x) true). rewrite e. simpl. omega.
     assert (Hp2f: p2 x = false) by apply (not_true_is_false (p2 x) n0).
-    rewrite -> Hp2f. assumption.
+    rewrite Hp2f. assumption.
 Qed.
 
   (**************************************)
@@ -231,7 +231,7 @@ Qed.
     (* base case: n = 0 *)
     simpl.
     unfold pred_subset.
-    intro a. unfold empty_ss. simpl. intro Hf. inversion Hf.
+    intro a. unfold empty_ss. intro Hf. inversion Hf.
     (* step case *)
     simpl. unfold mon in Hmon. apply Hmon. assumption.
   Qed.
@@ -243,26 +243,24 @@ Qed.
     intros Hmon n k. induction k as [| k IHk].
     (* k = 0 *)
     replace (n+0)%nat with n. apply subset_refl. omega.
-    apply (subset_trans (iter O n empty_ss) (iter O(n+k) empty_ss) (iter O (n+ S k) empty_ss)).
+    apply (subset_trans (iter O n empty_ss) (iter O(n+k) empty_ss) (iter O (n + S k) empty_ss)).
     assumption. replace (n + S k)%nat with ((n+k)+1)%nat.
     apply inc_chain. assumption. omega.
   Qed.
     
   (* the operator is congruential on predicates *)
   Lemma op_cong {A: Type} (O: Op A) : mon O -> forall p1 p2: pred A,
-    pred_eeq p1 p2 -> pred_eeq (O p1) (O p2).
+        pred_eeq p1 p2 -> pred_eeq (O p1) (O p2).
   Proof.
     intros Hmon p1 p2 Heq. unfold pred_eeq. destruct Heq as [H1 H2]. split.
     unfold mon in Hmon. apply (Hmon p1 p2 H1). apply (Hmon p2 p1 H2).
-Qed.
+  Qed.
 
   (* for finite types, either a fixpoint is reached or the cardinality of the iterate increases *)
- Theorem  iter_aux {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
-    mon O ->
-    (forall a: A, In a l) ->
-    forall n: nat, 
-    (pred_eeq (iter O n empty_ss) (iter O (n+1) empty_ss))  \/
-       (card l (iter O (n+1) empty_ss) >= card l (iter O n empty_ss) + 1).
+  Theorem  iter_aux {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
+    mon O -> (forall a: A, In a l) ->
+   forall n: nat, (pred_eeq (iter O n empty_ss) (iter O (n+1) empty_ss))  \/
+           (card l (iter O (n+1) empty_ss) >= card l (iter O n empty_ss) + 1).
   Proof.
     intros Hmon Hfin n.
     destruct (pred_eq_dec l Hfin (iter O n empty_ss) (iter O (n+1) empty_ss)) as [Heq | Hneq].
@@ -278,30 +276,31 @@ Qed.
     assert (Hsplit:  exists l1 l2, l = l1++a::l2). apply in_split. apply Hfin.
     destruct Hsplit as [l1 [l2 Hsplit]].
     unfold card.
-    rewrite -> Hsplit. rewrite -> filter_app. rewrite -> filter_app.
+    rewrite Hsplit, filter_app, filter_app.
     destruct Hne as [Hnef Hnet].
-    rewrite -> app_length. rewrite -> app_length. simpl.
-    rewrite -> Hnef.
-    rewrite -> Hnet.  simpl.
+    rewrite app_length, app_length. simpl.
+    rewrite Hnef, Hnet. simpl.
     Check pred_filter.
-    assert (Hl1:  length (filter (iter O n empty_ss) l1) <= length (filter (iter O (n+1) empty_ss) l1)).
+    assert (Hl1:  length (filter (iter O n empty_ss) l1) <=
+                  length (filter (iter O (n+1) empty_ss) l1)).
     apply pred_filter. apply inc_chain. assumption.
-    assert (Hl2: length (filter (iter O n empty_ss) l2) <= length (filter (iter O (n+1) empty_ss) l2)).
-    apply (pred_filter). apply inc_chain. assumption.
+    assert (Hl2: length (filter (iter O n empty_ss) l2) <=
+                 length (filter (iter O (n+1) empty_ss) l2)).
+    apply pred_filter, inc_chain. assumption.
     omega.
-Qed.
+  Qed.
 
   (* for finite types, either a fixpoint is reached or the n+1-st iterate has >= n+1 elements *)
   Theorem  iter_fp {A: Type} (O: Op A) (l: list A):
-    mon O ->
-    (forall a: A, In a l) ->
+    mon O -> (forall a: A, In a l) ->
     forall (n : nat), (pred_eeq (iter O n empty_ss) (iter O (n+1) empty_ss)) \/
-      card l (iter O (n+1) empty_ss) >= (n+1).
+               card l (iter O (n+1) empty_ss) >= (n+1).
   Proof.
     intros Hmon Hfin n.  induction n.
     destruct (iter_aux O l Hmon Hfin 0).
     left; assumption.
-    right. unfold ge. unfold ge in H.   transitivity (card l (iter O 0 empty_ss) + 1)%nat. omega. assumption.
+    right. unfold ge; unfold ge in H.
+    transitivity (card l (iter O 0 empty_ss) + 1)%nat. omega. assumption.
     (* step case *)
     destruct IHn as [Hfix | Hnfix].
     left. simpl. apply op_cong. assumption. assumption.
@@ -309,7 +308,7 @@ Qed.
             \/ card l (iter O (n + 1 + 1) empty_ss) >= card l (iter O (n + 1) empty_ss) + 1).
     apply (iter_aux O l Hmon Hfin (n + 1)).
     destruct H as [Hl | Hr]. left. replace (S n) with (plus n 1). assumption. omega.
-    right.  replace (S n) with (plus n 1). omega. omega.
+    right. replace (S n) with (plus n 1). omega. omega.
   Qed.
     
 
@@ -324,12 +323,12 @@ Qed.
     replace (plus k 0) with k. apply eeq_refl. omega.
     (* S m *)
     assert (H: pred_eeq (O (iter O k empty_ss)) (O (iter O (k + m) empty_ss))) by 
-      apply (op_cong O Hmon (iter O k empty_ss) (iter O (plus k m) empty_ss) IHm).
+        apply (op_cong O Hmon (iter O k empty_ss) (iter O (plus k m) empty_ss) IHm).
     apply (eeq_trans (iter O k empty_ss) (iter O (k+1) empty_ss) (iter O (k + S m) empty_ss)).
     assumption.
     replace (k + S m)%nat with (S (k+m))%nat. replace (k+1)%nat with (S k). simpl. assumption.
     omega. omega.
-Qed.
+  Qed.
 
   (* trivia about filter *)  
   Theorem length_filter : forall (A : Type) (f : A -> bool) (l : list A),
@@ -342,8 +341,7 @@ Qed.
   
   (* for a type with at most k elements, we need at most k iterations to reach a fixpoint *)
   Theorem iter_fin {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
-    mon O -> bounded_card A k ->
-    forall n: nat, pred_subset (iter O n empty_ss) (iter O k empty_ss).
+    mon O -> bounded_card A k -> forall n: nat, pred_subset (iter O n empty_ss) (iter O k empty_ss).
   Proof.
     intros Hmon Hboun; unfold bounded_card in Hboun.
     destruct Hboun as [l [Hin Hlen]]. intros n.
@@ -357,10 +355,11 @@ Qed.
     replace (plus k (n - k)) with n in Ht. destruct Ht as [Ht1 Ht2]. assumption. omega.
     (* case too many elements *)
     unfold card in R. 
-    assert (Hlen2: length (filter (iter O (k + 1) empty_ss) l) <= length l) by apply  (length_filter A (iter O (plus k 1) empty_ss) l).
+    assert (Hlen2: length (filter (iter O (k + 1) empty_ss) l) <= length l) by
+        apply  (length_filter A (iter O (plus k 1) empty_ss) l).
     unfold ge in R. assert (Hc: k+1 <= k).
     transitivity (length (filter (iter O (k + 1) empty_ss) l)). assumption.
-    transitivity (length l). assumption. assumption.
+    transitivity (length l). assumption. assumption. 
     assert (False). omega. inversion H.
     (* case k >= n *)
     Check inc_chain_trans.
@@ -368,7 +367,6 @@ Qed.
     apply inc_chain_trans. assumption. omega.
   Qed.
 
-  
 End Fixpoints.    
 
 
