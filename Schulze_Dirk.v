@@ -212,6 +212,48 @@ Module Evote.
     assumption.
   Qed.
 
-  
+  Definition geb (a b : nat) :=
+    match ge_dec a b with
+    | left _ => true
+    | right _ => false
+    end.
 
+  Theorem geb_true : forall a b,
+      geb a b = true <-> a >= b.
+  Proof.
+    split; intros. unfold geb in H. destruct ge_dec in H. assumption. inversion H.
+    unfold geb. destruct ge_dec. reflexivity. congruence.
+  Qed.
+  
+  (* elg is boolean function returns true if the edge between two candidates of >= k. *)
+  Definition elg (k : nat) (p : (cand * cand)) : bool :=
+    geb (edge (fst p) (snd p)) k.
+
+  Lemma gebedge_true : forall c d k, edge c d >= k <->  geb (edge c d) k = true.
+  Proof.
+     split; intros. apply geb_true. assumption.
+     apply geb_true. assumption.
+  Qed.
+  
+  
+  (* mp k (a, c) f (for midpoint) returns true if there's a midpoint b st.
+     the edge between a and b is >= k /\ the function f (b, c) = true *)
+  Definition mpg (k : nat) (p : (cand * cand)) (f : (cand * cand) -> bool) :=
+    let a := fst p in
+    let c := snd p in
+    fold_left (fun x => fun b => andb x (andb (elg k (a, b)) (f (b, c)))) cand_all true.
+
+  Lemma mpg_true : forall k p f,
+      mpg k p f = true <-> exists b, elg k (fst p, b) = true /\ f (b, snd p) = true. 
+  Proof. Admitted.
+
+  Definition Of k f := (fun p => orb (elg k p) (mpg k p f)).
+  Definition O k : ((cand * cand) -> bool) -> ((cand * cand)-> bool) :=
+    fun f => Of k f.
+
+
+  Theorem wins_evi_1: forall k c d, Path k c d ->
+                               exists (n : nat), Fixpoints.iter O (c, d) (fun _ => false) = true.
+  
+  
 End Evote.
