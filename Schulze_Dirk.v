@@ -244,10 +244,10 @@ Module Evote.
     existsb (fun b  => andb (elg k (a, b)) (f (b, c))) cand_all.
 
   Definition O k := fun f => (fun p => orb (elg k p) (mpg k p f)).
-
-   Theorem wins_evi_2 :
-    forall k n c d, Fixpoints.iter (O k) n (fun _ : cand * cand => false) (c, d) = true ->
-               Path k c d.
+  
+  Theorem wins_evi_2 : forall k n c d,
+      Fixpoints.iter (O k) n (fun _ : cand * cand => false) (c, d) = true ->
+      Path k c d.
   Proof.
     intros k n.  induction n. intros c d H. inversion H.
     intros c d H. simpl in H. unfold O in H at 1.
@@ -261,14 +261,13 @@ Module Evote.
     specialize (IHn m d). apply IHn. assumption.
   Qed.
 
-  Theorem wins_evi: forall k c d, Path k c d <->
-                             exists (n : nat), Fixpoints.iter (O k) n (fun _ => false) (c, d) = true.
+  Theorem wins_evi: forall k c d,
+      Path k c d <-> exists (n : nat), Fixpoints.iter (O k) n (fun _ => false) (c, d) = true.
   Proof.
     intros k c d. split. intros Hp. induction Hp.
     exists 1. simpl. unfold O. unfold elg. simpl.
     replace (geb (edge c d) k) with true. auto.
     symmetry. apply gebedge_true. congruence.
-
     destruct IHHp as [n IHHp].
     exists (S n). simpl. unfold O at 1.
     replace (mpg k (c, e) (Fixpoints.iter (O k) n (fun _ : cand * cand => false))) with true.
@@ -278,7 +277,6 @@ Module Evote.
     apply cand_fin.
     apply andb_true_iff. split. unfold elg. simpl. apply gebedge_true. assumption.
     assumption.
-
     intros H. destruct H as [n H].
     apply (wins_evi_2 k n c d). assumption.
   Qed.
