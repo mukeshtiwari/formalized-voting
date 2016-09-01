@@ -241,19 +241,88 @@ Module Evote.
   Definition mpg (k : nat) (p : (cand * cand)) (f : (cand * cand) -> bool) :=
     let a := fst p in
     let c := snd p in
-    fold_left (fun x => fun b => andb x (andb (elg k (a, b)) (f (b, c)))) cand_all true.
+    existsb (fun b  => andb (elg k (a, b)) (f (b, c))) cand_all.
 
-  Lemma mpg_true : forall k p f,
-      mpg k p f = true <-> exists b, elg k (fst p, b) = true /\ f (b, snd p) = true. 
+  Definition O k := fun f => (fun p => orb (elg k p) (mpg k p f)).
+
+   Theorem wins_evi_2 :
+    forall k n c d, Fixpoints.iter (O k) n (fun _ : cand * cand => false) (c, d) = true ->
+               Path k c d.
+  Proof.
+    intros k n.  induction n. intros c d H. inversion H.
+    intros c d H. simpl in H. unfold O in H at 1.
+    apply orb_true_iff in H. destruct H as [H | H].
+    constructor 1. apply gebedge_true in H. simpl in H. assumption.
+    unfold mpg in H. apply existsb_exists in H. destruct H as [m H].
+    destruct H. apply andb_true_iff in H0. destruct H0 as [H1 H2].
+    simpl in H1, H2.
+    constructor 2 with (d := m). unfold elg in H1. simpl in H1.
+    apply gebedge_true in H1. assumption.
+    specialize (IHn m d). apply IHn. assumption.
+  Qed.
+
+  Theorem wins_evi: forall k c d, Path k c d <->
+                             exists (n : nat), Fixpoints.iter (O k) n (fun _ => false) (c, d) = true.
+  Proof.
+    intros k c d. split. intros Hp. induction Hp.
+    exists 1. simpl. unfold O. unfold elg. simpl.
+    replace (geb (edge c d) k) with true. auto.
+    symmetry. apply gebedge_true. congruence.
+
+    destruct IHHp as [n IHHp].
+    exists (S n). simpl. unfold O at 1.
+    replace (mpg k (c, e) (Fixpoints.iter (O k) n (fun _ : cand * cand => false))) with true.
+    apply orb_true_iff.  right. reflexivity.
+    symmetry. unfold mpg. simpl.
+    apply existsb_exists. exists d. split.
+    apply cand_fin.
+    apply andb_true_iff. split. unfold elg. simpl. apply gebedge_true. assumption.
+    assumption.
+
+    intros H. destruct H as [n H].
+    apply (wins_evi_2 k n c d). assumption.
+  Qed.
+
+
+  Lemma monotone_operator : forall k, Fixpoints.mon (O k).
+  Proof.
+    intros k. unfold Fixpoints.mon. intros p1 p2 H.
+    unfold O. unfold Fixpoints.pred_subset.
+    unfold Fixpoints.pred_subset in H. intros a H1.
+    apply orb_true_iff in H1. destruct H1 as [H1 | H1].
+    apply orb_true_iff. left. assumption.
+    apply orb_true_iff. right. unfold mpg.
+    apply existsb_exists. simpl. unfold mpg in H1.
+    apply existsb_exists in H1. destruct H1. exists x.
+    split. destruct H0. assumption.
+    apply andb_true_iff. split.
+    destruct H0. apply andb_true_iff in H1. destruct H1. assumption.
+    apply H. destruct H0. apply andb_true_iff in H1. destruct H1.
+    assumption.
+  Qed.
+
+  Lemma length_cand : forall {A : Type} n , 
+      Fixpoints.bounded_card A n -> Fixpoints.bounded_card (A * A) (n * n).
   Proof. Admitted.
 
-  Definition Of k f := (fun p => orb (elg k p) (mpg k p f)).
-  Definition O k : ((cand * cand) -> bool) -> ((cand * cand)-> bool) :=
-    fun f => Of k f.
 
+  Theorem path_decidable :
+    forall (k : nat) c d, {Path k c d} + {~(Path k c d)}.
+  Proof.
+    intros k c d.
+    pose (cc := mult (length cand_all)  (length cand_all)%nat).
+    destruct (bool_dec ((Fixpoints.iter (O k) cc (fun _  => false)) (c, d)) true) as [H | H].
+    left. apply (wins_evi_2 k cc c d). assumption.
+    apply not_true_is_false in H. right. intros Hp.
+    apply wins_evi in Hp. destruct Hp as [n Hp].
+    assert (Ht : Fixpoints.pred_subset (Fixpoints.iter (O k) n (fun _ => false))
+                                       (Fixpoints.iter (O k) cc (fun _ => false))).
+    apply Fixpoints.iter_fin. apply monotone_operator. 
+    apply length_cand. unfold Fixpoints.bounded_card.
+    exists cand_all. split. apply cand_fin. auto.
+    unfold Fixpoints.pred_subset in Ht. specialize (Ht (c, d) Hp).
+    congruence.
+  Qed.
 
-  Theorem wins_evi_1: forall k c d, Path k c d ->
-                               exists (n : nat), Fixpoints.iter O (c, d) (fun _ => false) = true.
-  
   
 End Evote.
