@@ -47,9 +47,10 @@ Module Evote.
   (* auxilary functions: all pairs that can be formed from a list *)
   Fixpoint all_pairs {A: Type} (l: list A): list (A * A) :=
     match l with
-    |   [] => []
-    |    c::cs => (c, c)::(all_pairs cs) ++ (map (fun x => (c, x)) cs) 
-                                         ++ (map (fun x => (x, c)) cs)
+    | [] => []
+    | c::cs => (c, c) :: (all_pairs cs)
+                     ++  (map (fun x => (c, x)) cs) 
+                     ++ (map (fun x => (x, c)) cs)
     end.
 
   (* boolean equality on candidates derived from decidable equality *)
@@ -299,11 +300,86 @@ Module Evote.
     assumption.
   Qed.
 
+ 
+
+  Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
+      In a1 l -> In a2 l -> In (a1, a2) (all_pairs l).
+  Proof.
+    intros A a1 a2 l H1 H2. induction l.
+    inversion H1. simpl.
+    destruct H1 as [H3 | H3].
+    {
+      destruct H2 as [H4 | H4].
+      left. congruence.
+      right. apply in_app_iff. right.
+      apply in_app_iff. left.
+      rewrite H3. apply in_map. assumption.
+    }
+    {
+      destruct H2 as [H4 | H4].
+      right. apply in_app_iff.
+      right. apply in_app_iff.
+      right. rewrite H4. apply in_map_iff.
+      exists a1. split. auto. auto.
+      right. apply in_app_iff. left.
+      apply IHl. assumption. assumption.
+    }
+  Qed.
+
+  Lemma length_pair : forall {A : Type} (n : nat) (l : list A),
+      length l <= n -> length (all_pairs l) <= n * n.
+  Proof.
+    intros A n l. generalize dependent n. induction l.
+    intros n H. auto with arith.
+    intros n H. destruct n.
+    inversion H.
+    simpl. simpl in H.
+    repeat rewrite app_length. repeat rewrite map_length.
+    apply le_n_S. apply le_S_n in H.
+    Open Scope nat_scope.
+    replace (n * S n) with (n * n + n).
+    repeat rewrite plus_assoc. replace (n + n * n + n) with (n * n + n + n).
+    assert (Ht : length l <= n -> length (all_pairs l) + length l <= n * n + n -> 
+                 length (all_pairs l) + length l + length l <= n * n + n + n) by omega.
+    apply Ht. assumption. clear Ht.
+    assert (Ht : length l <= n -> length (all_pairs l) <= n * n  ->
+                 length (all_pairs l) + length l  <= n * n + n) by omega.
+    apply Ht. assumption. clear Ht. apply IHl. assumption.
+    omega. rewrite mult_n_Sm. auto.
+  Qed.
+
   Lemma length_cand : forall {A : Type} n , 
       Fixpoints.bounded_card A n -> Fixpoints.bounded_card (A * A) (n * n).
-  Proof. Admitted.
+  Proof.
+    intros A n. unfold Fixpoints.bounded_card.
+    intros [l H]. exists (all_pairs l).
+    destruct H as [H1 H2]. split. 
+    intros (a1, a2). clear H2. induction l.
+    pose proof (H1 a1). inversion H. simpl. 
+    pose proof H1 a1. destruct H as [H3 | H3].
+    {
+      pose proof H1 a2.
+      destruct H as [H4 | H4].
+      left. congruence.
+      right. apply in_app_iff. right.
+      apply in_app_iff. left.
+      rewrite H3. apply in_map. assumption.
+    }
+    {
+      pose proof H1 a2.
+      destruct H as [H4 | H4].
+      right. apply in_app_iff.
+      right. apply in_app_iff.
+      right. rewrite H4. apply in_map_iff.
+      exists a1. split. auto. auto.
+      right. apply in_app_iff. left.
+      apply all_pairsin. assumption.
+      assumption.
+    }
 
-
+    apply length_pair. assumption.
+  Qed.
+  
   Theorem path_decidable :
     forall (k : nat) c d, {Path k c d} + {~(Path k c d)}.
   Proof.
