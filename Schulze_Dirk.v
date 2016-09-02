@@ -339,12 +339,10 @@ Module Evote.
     Open Scope nat_scope.
     replace (n * S n) with (n * n + n).
     repeat rewrite plus_assoc. replace (n + n * n + n) with (n * n + n + n).
-    assert (Ht : length l <= n -> length (all_pairs l) + length l <= n * n + n -> 
+    assert (Ht : length l <= n -> length (all_pairs l)  <= n * n -> 
                  length (all_pairs l) + length l + length l <= n * n + n + n) by omega.
     apply Ht. assumption. clear Ht.
-    assert (Ht : length l <= n -> length (all_pairs l) <= n * n  ->
-                 length (all_pairs l) + length l  <= n * n + n) by omega.
-    apply Ht. assumption. clear Ht. apply IHl. assumption.
+    apply IHl. assumption.
     omega. rewrite mult_n_Sm. auto.
   Qed.
 
