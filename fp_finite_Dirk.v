@@ -396,6 +396,7 @@ Module Fixpoints.
     replace (n + S k)%nat with ((n+k)+1)%nat.
     apply dec_chain. assumption. omega. assumption.
   Qed.
+
   
   (* for finite types, either a fixpoint is reached or 
      the cardinality of the iterate decrease *)
@@ -436,7 +437,7 @@ Module Fixpoints.
     destruct (iter_aux_dec O l Hmon Hfin 0).
     left. assumption.
     right. replace (0 + 1)%nat with 1 in *.
-    
+    transitivity (card l (iter O 0 full_ss))%nat.
 End Fixpoints.    
 
 
