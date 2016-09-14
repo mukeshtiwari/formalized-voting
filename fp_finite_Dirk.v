@@ -385,6 +385,18 @@ Module Fixpoints.
     simpl. unfold mon in Hmon. apply Hmon. assumption.
   Qed.
 
+  (* combined with transitivity *)
+  Lemma dec_chain_trans {A: Type} (O: Op A): mon O ->
+    forall (n k: nat), pred_subset (iter O (n + k) full_ss) (iter O n full_ss).
+  Proof.
+    intros Hmon n k. induction k as [| k IHk].
+    (* k = 0 *)
+    replace (n+0)%nat with n. apply subset_refl. omega.
+    apply subset_trans with (q := iter O (n + k) full_ss). 
+    replace (n + S k)%nat with ((n+k)+1)%nat.
+    apply dec_chain. assumption. omega. assumption.
+  Qed.
+  
   (* for finite types, either a fixpoint is reached or 
      the cardinality of the iterate decrease *)
   Theorem iter_aux_dec {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
@@ -410,12 +422,21 @@ Module Fixpoints.
     apply pred_filter, dec_chain. assumption.
     assert (Hl2: length (filter (iter O (n + 1) full_ss) l2) <=
                  length (filter (iter O n full_ss) l2)).
-    apply pred_filter, dec_chain. assumption.
-    omega.
+    apply pred_filter, dec_chain. assumption. omega.
   Qed.
 
-
-  
+  (* for finite types, either a fixpoint is reached or the n+1-st iterate +  n+1 <= 
+    length l elements *)
+  Theorem  iter_fp_gfp {A: Type} (O: Op A) (l: list A):
+    mon O -> (forall a: A, In a l) ->
+    forall (n : nat), (pred_eeq (iter O (n + 1) full_ss) (iter O n full_ss)) \/
+               (card l (iter O (n+1) full_ss) + (n + 1)) <= length l.
+  Proof.
+    intros Hmon Hfin n. induction n.
+    destruct (iter_aux_dec O l Hmon Hfin 0).
+    left. assumption.
+    right. replace (0 + 1)%nat with 1 in *.
+    
 End Fixpoints.    
 
 
