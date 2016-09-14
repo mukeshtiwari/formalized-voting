@@ -377,17 +377,44 @@ Module Fixpoints.
   Lemma dec_chain {A: Type} (O: Op A) :
     mon O -> forall n: nat, pred_subset (iter O (n + 1) full_ss) (iter O n full_ss).
   Proof.
-    intros Hmon n.
-    induction n.
+    intros Hmon n. induction n.
     (* base case: n = 0 *)
-    simpl.
-    unfold pred_subset.
+    simpl. unfold pred_subset.
     intro a. unfold full_ss. intro Hf. auto.
     (* step case *)
     simpl. unfold mon in Hmon. apply Hmon. assumption.
   Qed.
 
-  
+  (* for finite types, either a fixpoint is reached or 
+     the cardinality of the iterate decrease *)
+  Theorem iter_aux_dec {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
+    mon O -> (forall a: A, In a l) ->
+    forall n: nat, (pred_eeq (iter O (n + 1) full_ss) (iter O n full_ss))  \/
+            (card l (iter O n full_ss) >= card l (iter O (n + 1) full_ss) + 1).
+  Proof.
+    intros Hmon Hfin n.
+    destruct (pred_eq_dec l Hfin (iter O (n + 1) full_ss) (iter O n full_ss)) as [Heq | Hneq].
+    left. assumption.
+    right.
+    assert (Hne: exists a, iter O (n + 1) full_ss a = false /\ iter O n full_ss a = true).
+    apply (new_elt (iter O (n + 1) full_ss) (iter O n full_ss) l Hfin).
+    apply (dec_chain O Hmon n). assumption.
+    destruct Hne as [a Hne].
+    assert (Hsplit: exists l1 l2, l = l1++a::l2). apply in_split. apply Hfin.
+    destruct Hsplit as [l1 [l2 Hsplit]]. unfold card.
+    rewrite Hsplit, filter_app, filter_app.
+    destruct Hne as [Hnef Hnet]. rewrite app_length, app_length. simpl.
+    rewrite Hnef, Hnet. simpl.
+    assert (Hl1:  length (filter (iter O (n + 1) full_ss) l1) <=
+                  length (filter (iter O n full_ss) l1)).
+    apply pred_filter, dec_chain. assumption.
+    assert (Hl2: length (filter (iter O (n + 1) full_ss) l2) <=
+                 length (filter (iter O n full_ss) l2)).
+    apply pred_filter, dec_chain. assumption.
+    omega.
+  Qed.
+
+
   
 End Fixpoints.    
 
