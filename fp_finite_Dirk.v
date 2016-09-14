@@ -369,6 +369,26 @@ Module Fixpoints.
     apply inc_chain_trans. assumption. omega.
   Qed.
 
+  (* start of greatest fixed point *)
+  (* start with all the elements *)
+  Definition full_ss {A: Type} : pred A := fun a => true.
+
+   (* the iterates of a monotone operator form an decreasing chain *)
+  Lemma dec_chain {A: Type} (O: Op A) :
+    mon O -> forall n: nat, pred_subset (iter O (n + 1) full_ss) (iter O n full_ss).
+  Proof.
+    intros Hmon n.
+    induction n.
+    (* base case: n = 0 *)
+    simpl.
+    unfold pred_subset.
+    intro a. unfold full_ss. intro Hf. auto.
+    (* step case *)
+    simpl. unfold mon in Hmon. apply Hmon. assumption.
+  Qed.
+
+  
+  
 End Fixpoints.    
 
 
