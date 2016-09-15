@@ -437,7 +437,17 @@ Module Fixpoints.
     destruct (iter_aux_dec O l Hmon Hfin 0).
     left. assumption.
     right. replace (0 + 1)%nat with 1 in *.
-    transitivity (card l (iter O 0 full_ss))%nat.
+    transitivity (card l (iter O 0 full_ss))%nat.  
+    (* Here omega is not able to solve the obvious goal. Could be bug in omega as suggested
+       by jrw *)    
+    assert (card l (iter O 0 full_ss) >= card l (iter O 1 full_ss) + 1 ->
+            card l (iter O 1 full_ss) + 1 <= card l (iter O 0 full_ss)) by omega.
+    specialize (H0 H). omega.
+    
+
+
+
+
 End Fixpoints.    
 
 
