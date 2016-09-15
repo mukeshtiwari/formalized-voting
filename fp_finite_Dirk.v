@@ -426,7 +426,7 @@ Module Fixpoints.
     apply pred_filter, dec_chain. assumption. omega.
   Qed.
 
-  (* for finite types, either a fixpoint is reached or the n+1-st iterate +  n+1 <= 
+  (* for finite types, either a fixpoint is reached or the n+1-st iterate + n+1 <= 
     length l elements *)
   Theorem  iter_fp_gfp {A: Type} (O: Op A) (l: list A):
     mon O -> (forall a: A, In a l) ->
@@ -450,8 +450,23 @@ Module Fixpoints.
     right. replace (S n) with (n + 1) %nat. omega. omega.
   Qed.
 
+  (* once we have a greatest fixpoint, iterations don't add things *)
+  Theorem fp_reached_gfp : forall (A : Type) (O : Op A)  (k : nat),
+      mon O -> (pred_eeq (iter O (k + 1) full_ss) (iter O k full_ss)) ->
+      forall m, (pred_eeq (iter O (k + m) full_ss) (iter O k full_ss)).
+  Proof.
+    intros A O k Hmon Hiter m.
+    induction m as [|m IHm].
+    replace (k + 0)%nat with k. apply eeq_refl. omega.
+    assert (H: pred_eeq (O (iter O (k + m) full_ss)) (O (iter O k full_ss))) by 
+        apply (op_cong O Hmon (iter O (plus k m) full_ss) (iter O k full_ss) IHm).
+    apply (eeq_trans (iter O (k + S m) full_ss) (iter O (k+1) full_ss) (iter O k full_ss)).
+    replace (k + S m)%nat with (1 + (k + m))%nat. replace (k + 1)%nat with (1 + k)%nat.
+    simpl. assumption. omega. omega. auto.
+  Qed.
 
   
+
 End Fixpoints.    
 
 
