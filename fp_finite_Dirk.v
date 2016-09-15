@@ -437,17 +437,22 @@ Module Fixpoints.
     destruct (iter_aux_dec O l Hmon Hfin 0).
     left. assumption.
     right. replace (0 + 1)%nat with 1 in *.
-    transitivity (card l (iter O 0 full_ss))%nat.  
-    (* Here omega is not able to solve the obvious goal. Could be bug in omega as suggested
-       by jrw *)    
-    assert (card l (iter O 0 full_ss) >= card l (iter O 1 full_ss) + 1 ->
-            card l (iter O 1 full_ss) + 1 <= card l (iter O 0 full_ss)) by omega.
-    specialize (H0 H). omega.
+    transitivity (card l (iter O 0 full_ss))%nat.
+    (* This is really bizzare. Omega is not able to solve obvious goal so unfold pred in *
+       to change implicit arguments as suggested by jrw*)
+    unfold pred in *. omega. apply length_filter. omega.
+    destruct IHn as [Hfix | Hnfix].
+    left. simpl. apply op_cong. auto. auto.
     
+    assert (pred_eeq (iter O (n + 1 + 1) full_ss) (iter O (n + 1) full_ss) \/
+            card l (iter O (n + 1) full_ss) >= card l (iter O (n + 1 + 1) full_ss) + 1).
+    apply (iter_aux_dec O l Hmon Hfin (n + 1)).
+    destruct H as [Hl | Hr]. left. replace (S n) with (n + 1)%nat. auto. omega.
+    right. replace (S n) with (n + 1) %nat. omega. omega.
+  Qed.
 
 
-
-
+  
 End Fixpoints.    
 
 
