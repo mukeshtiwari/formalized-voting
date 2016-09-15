@@ -443,7 +443,6 @@ Module Fixpoints.
     unfold pred in *. omega. apply length_filter. omega.
     destruct IHn as [Hfix | Hnfix].
     left. simpl. apply op_cong. auto. auto.
-    
     assert (pred_eeq (iter O (n + 1 + 1) full_ss) (iter O (n + 1) full_ss) \/
             card l (iter O (n + 1) full_ss) >= card l (iter O (n + 1 + 1) full_ss) + 1).
     apply (iter_aux_dec O l Hmon Hfin (n + 1)).
