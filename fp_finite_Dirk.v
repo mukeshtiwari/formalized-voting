@@ -465,8 +465,23 @@ Module Fixpoints.
     simpl. assumption. omega. omega. auto.
   Qed.
 
+  (* for a type with at most k elements, we need at most k iterations to reach a fixpoint *)
+  Theorem iter_fin_gfp {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
+    mon O -> bounded_card A k -> forall n: nat, pred_subset (iter O k full_ss) (iter O n full_ss).
+  Proof.
+    intros Hmon Hboun; unfold bounded_card in Hboun.
+    destruct Hboun as [l [Hin Hlen]]. intros n.
+    assert (Hle : k < n \/ k >= n) by omega.
+    destruct Hle as [Hlel | Hler]. 
+    (* case k < n *)
+    destruct (iter_fp_gfp O l Hmon Hin k) as [L | R].
+    assert (Ht : pred_eeq (iter O (k + (n - k)) full_ss) (iter O k full_ss)).
+    apply fp_reached_gfp. assumption. assumption.
+    replace (k + (n - k))%nat with n in Ht. destruct Ht as [Ht1 Ht2]. assumption.
+    omega. omega.
+    replace k with (n + (k-n))%nat. apply dec_chain_trans. assumption. omega.
+  Qed.
   
-
 End Fixpoints.    
 
 
