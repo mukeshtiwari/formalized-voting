@@ -403,16 +403,25 @@ Module Evote.
     congruence.
   Qed.
 
-  Theorem path_lfp : forall (c d : cand) (k : nat)
-    , Fixpoints.least_fixed_point
+  Theorem path_lfp : forall (c d : cand) (k : nat),
+      Fixpoints.least_fixed_point
         (cand * cand) (all_pairs cand_all)
         (all_pairs_universal cand_all cand_fin) (O k) (monotone_operator k) (c, d) = true 
-                             <-> Path k c d.
+      <-> Path k c d.
   Proof.
-    split. intros H.
-    apply wins_evi. exists (length (all_pairs cand_all)). unfold Fixpoints.least_fixed_point in H.
-    assumption. intros H.
-    
+    split. intros H. apply wins_evi. exists (length (all_pairs cand_all)). assumption.
+    intros H. apply wins_evi in H. destruct H as [n H]. unfold Fixpoints.least_fixed_point.
+    unfold Fixpoints.empty_ss. remember (length (all_pairs cand_all)) as v.    
+    specialize (Fixpoints.iter_fin v (O k) (monotone_operator k)). intros.
+    unfold Fixpoints.bounded_card in H0.
+    assert (Ht : (exists l : list (cand * cand), (forall a : cand * cand, In a l) /\ length l <= v)).
+    {
+      exists (all_pairs cand_all). split. apply (all_pairs_universal cand_all cand_fin).
+      omega.
+    }
+    specialize (H0 Ht n). unfold Fixpoints.pred_subset in H0.
+    apply H0. assumption.
+  Qed.
 
-    
+  
 End Evote.
