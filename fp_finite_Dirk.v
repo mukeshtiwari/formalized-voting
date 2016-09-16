@@ -61,6 +61,12 @@ Module Fixpoints.
   (* the empty subset *)
   Definition empty_ss {A: Type} : pred A := fun a => false.
 
+  Lemma empty_ss_subset {A : Type} : forall (p : pred A), pred_subset empty_ss p.
+  Proof.
+    intros p. unfold pred_subset. intros a H.
+    inversion H.
+  Qed. 
+
   (* equality on boolean predicates on a finite type is decidable *)
   Lemma pred_eq_dec_aux {A: Type} (l: list A) :
     forall (p1 p2: pred A), {forall a, In a l -> p1 a = p2 a} + {~(forall a, In a l -> p1 a = p2 a)}.
@@ -481,7 +487,50 @@ Module Fixpoints.
     omega. omega.
     replace k with (n + (k-n))%nat. apply dec_chain_trans. assumption. omega.
   Qed.
+
+
+  Definition least_fixed_point (A : Type) (l : list A) (H : forall a : A, In a l)
+             (O : Op A) (Hmon : mon O) :=  iter O (length l) empty_ss. 
+
+  Definition greatest_fixed_point (A : Type) (l : list A) (H : forall a : A, In a l)
+             (O : Op A) (Hmon : mon O) := iter O (length l) full_ss.
+
+  Definition fixed_point (A : Type) (O : Op A) (f : pred A) :=
+    pred_eeq f (O f).
+
+  Theorem least_fixed_point_is_fixed_point : forall (A : Type) (l : list A) (H : forall a, In a l)
+                                               (O : Op A) (Hmon : mon O),
+      fixed_point A O (least_fixed_point A l H O Hmon).
+  Proof.
+    intros A l H O Hmon. unfold fixed_point. split.
+    unfold least_fixed_point.
+    replace (O (iter O (length l) empty_ss)) with  (iter O (length l + 1) empty_ss).
+    apply inc_chain. assumption. replace (length l + 1)%nat with (S (length l)).
+    reflexivity. omega. unfold least_fixed_point.
+    replace (O (iter O (length l) empty_ss)) with  (iter O (length l + 1) empty_ss).
+    apply iter_fin. assumption. unfold bounded_card. exists l. split. assumption.
+    omega.  replace (length l + 1)%nat with (S (length l)). reflexivity. omega.
+  Qed.
+
+  Lemma fixed_point_temp_for_now : forall (A : Type) (O : Op A) (Hmon : mon O) (f : pred A),
+      fixed_point A O f -> forall n, pred_subset (iter O n empty_ss) f.
+  Proof.
+    intros A O Hmon f Hfix.
+    induction n. simpl. apply empty_ss_subset.
+    apply (subset_trans (iter O (S n) empty_ss) (O f) f).
+    simpl. apply Hmon. assumption. unfold fixed_point in Hfix.
+    unfold pred_eeq in Hfix. intuition.
+  Qed.
+
   
+  Lemma least_fixed_point_is_least : forall (A : Type) (l : list A) (H : forall a, In a l)
+                                       (O : Op A) (Hmon : mon O) (f : pred A),
+      fixed_point A O f -> pred_subset (least_fixed_point A l H O Hmon) f.
+  Proof.
+    intros A l H O Hmon f Hfix. unfold least_fixed_point.
+    apply fixed_point_temp_for_now; assumption.
+  Qed.
+
 End Fixpoints.    
 
 
