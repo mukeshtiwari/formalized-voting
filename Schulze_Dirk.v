@@ -299,9 +299,7 @@ Module Evote.
     apply H. destruct H0. apply andb_true_iff in H1. destruct H1.
     assumption.
   Qed.
-
- 
-
+  
   Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
       In a1 l -> In a2 l -> In (a1, a2) (all_pairs l).
   Proof.
@@ -326,6 +324,15 @@ Module Evote.
     }
   Qed.
 
+  Lemma all_pairs_universal {A : Type} : forall (l : list A),
+      (forall (a : A), In a l) -> forall (x : A * A), In x (all_pairs l).
+  Proof.
+    intros l H x. destruct x.
+    apply all_pairsin. specialize (H a). assumption.
+    specialize (H a0). assumption.
+  Qed.
+  
+    
   Lemma length_pair : forall {A : Type} (n : nat) (l : list A),
       length l <= n -> length (all_pairs l) <= n * n.
   Proof.
@@ -396,5 +403,16 @@ Module Evote.
     congruence.
   Qed.
 
-  
+  Theorem path_lfp : forall (c d : cand) (k : nat)
+    , Fixpoints.least_fixed_point
+        (cand * cand) (all_pairs cand_all)
+        (all_pairs_universal cand_all cand_fin) (O k) (monotone_operator k) (c, d) = true 
+                             <-> Path k c d.
+  Proof.
+    split. intros H.
+    apply wins_evi. exists (length (all_pairs cand_all)). unfold Fixpoints.least_fixed_point in H.
+    assumption. intros H.
+    
+
+    
 End Evote.
