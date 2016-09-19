@@ -72,30 +72,57 @@ Module Evote.
 
   (* mp k (a, c) l (for midpoint) returns true if there's a midpoint b st. either the edge between 
      a and c is <= k or else the pair (b, c) is in l *)
-  Definition mpf (k: nat) (p : (cand * cand)%type) (l: list (cand * cand)%type) (b: cand) 
-    := let a := fst p in let c := snd p in 
-     (el k (a, b))  || (bool_in (b, c) l).
+  (*
+  Definition mpf (k: nat) (p : (cand * cand)%type) (l: list (cand * cand)%type) (b: cand) :=
+    let a := fst p in
+    let c := snd p in 
+    (el k (a, b))  || (bool_in (b, c) l). *)
+  
+  Definition mpf (k : nat) (p : (cand * cand)%type) (f : (cand * cand) -> bool) (b : cand) :=
+    let a := fst p in
+    let c := snd p in
+    (el k (a, b) || f (b, c)).
+  (*
   Definition mp (k: nat) (p: (cand * cand)%type) (l: list (cand * cand)%type) := 
-    let a := fst p in let c := snd p in
-      forallb (mpf k p l) cand_all.
+    let a := fst p in
+    let c := snd p in
+    forallb (mpf k p l) cand_all.
+   *)
+
+  Definition mp (k : nat) (p : (cand * cand)%type) (f : (cand * cand) -> bool) :=
+    let a := fst p in
+    let c := snd p in
+    forallb (mpf k p f) cand_all.
 
   (* W k is the dual of the operator the least fixpoint of which inductively defines paths *)
   (* W_k (l) = {(a, c) : edge a c <= k /\ forall b: (b, c) \in l \/edge a c <= k } *)
   (* Wf is the boolean predicate that expresses the operator *)
+  (* 
   Definition Wf k l :=  (fun p => andb (el k p)  (mp k p l) ).
   Definition W (k: nat) : list (cand * cand)%type -> list (cand *cand)%type :=
-    fun l => filter (Wf k l) (all_pairs cand_all).
+    fun l => filter (Wf k l) (all_pairs cand_all). *)
+
+  Definition W (k : nat) := fun f => (fun p => andb (el k p) (mp k p f)).
 
   (* a k-coclosed set is a set that is co-closed under W_k *)
   (* idea: the greatest co-closed (and indeed any co-closed set) only *)
   (* contains pairs (x, y) s.t. there's no path of strength >= k between x and y *)
+  (*
   Definition coclosed (k: nat) (l: list (cand * cand)%type) :=
-    forall x, In x l -> In x (W k l).
+    forall x, In x l -> In x (W k l). *)
+
+  Definition coclosed (k : nat) (f : (cand * cand) -> bool) :=
+    forall x, f x = true -> W k f x = true.
 
   (* evidence for winning a Schulze election. *)
+  (*
   Definition ev (c: cand) := forall d : cand, existsT (k: nat),
     (PathT k c d) * (existsT (l: list (cand * cand)%type), In (d, c) l /\ coclosed k l).
+   *)
 
+  Definition ev (c : cand) := forall d : cand, existsT (k : nat),
+    (PathT k c d) * (existsT (f : (cand * cand) -> bool), f (d, c) = true /\ coclosed k f).
+                     
   (* type-level paths allow to construct evidence for the existence of paths *)
   (* TODO: change name of lemma? *)
   Lemma equivalent : forall c d k , PathT k c d -> Path k c d.
@@ -106,6 +133,7 @@ Module Evote.
   Qed.
 
   (* logical interpretation of the midpoint function *)
+  (*
   Lemma mp_log: forall k p l, mp k p l = true ->
     forall b, In (b, snd p) l \/ edge (fst p) b <= k.
   Proof.
@@ -136,7 +164,22 @@ Module Evote.
     apply cand_eqb_prop in H3.
     destruct x. subst. simpl. simpl in H3. subst. assumption.
   Qed.
+   *)
 
+  Lemma mp_log : forall k p f,
+      mp k p f = true -> forall b, f (b, snd p) = true \/ edge (fst p) b <= k.
+  Proof.
+    intros k p f H b.
+    assert (Hin : In b cand_all). apply cand_fin.
+    assert (Hp : In b cand_all -> (mpf k p f) b = true).
+    apply forallb_forall. assumption.
+    specialize (Hp Hin). apply orb_true_iff in Hp.
+    destruct Hp as [Hpl | Hpr]. destruct p as (a, c).
+    simpl in *. right. apply leb_complete. assumption.
+    destruct p as (a, c). simpl in *. left. assumption.
+  Qed.
+  
+      
   (* generic property of coclosed sets as commented above *)
   Lemma coclosed_path : forall k l, coclosed k l -> forall s x y,
     Path s x y -> In (x, y) l -> s <= k.
@@ -423,5 +466,17 @@ Module Evote.
     apply H0. assumption.
   Qed.
 
-  
+  Check O.
+  Check W.
+  Theorem path_gfp : forall (c d : cand) (k : nat),
+      Fixpoints.greatest_fixed_point
+        (cand * cand) (all_pairs cand_all)
+        (all_pairs_universal cand_all cand_fin) (O k) (monotone_operator k) (c, d) = true <->
+      ~ (Path k c d).
+  Proof.
+    split. intros H Hp. unfold Fixpoints.greatest_fixed_point in H.
+    unfold Fixpoints.full_ss in H. remember (length (all_pairs cand_all)) as v. 
+    apply wins_evi in Hp. destruct Hp as [n Hp].
+    
+
 End Evote.
