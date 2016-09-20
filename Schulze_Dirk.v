@@ -258,22 +258,12 @@ Module Evote.
    
   Theorem th1: forall c, ev c -> wins c.
   Proof.
-    intros c H.
-    unfold wins. unfold ev in H.
-    intro d.
-    specialize (H d).
-    destruct H as [k H].
-    destruct H as [Hp Hc].
-    exists k.
-    split.
+    intros c H. unfold wins. unfold ev in H.
+    intro d. specialize (H d). destruct H as [k [Hp Hc]].
+    exists k. split.
     apply equivalent. assumption.
-    intros s p.
-    destruct Hc as [l Hc].
-    destruct Hc as [Hin Hcc].
-    apply coclosed_path with (f := l) (x := d) (y := c).
-    assumption.
-    assumption.
-    assumption.
+    intros s p. destruct Hc as [l [Hin Hcc]].
+    apply coclosed_path with (f := l) (x := d) (y := c); assumption.
   Qed.
 
   Definition geb (a b : nat) :=
