@@ -491,7 +491,7 @@ Module Evote.
   Theorem path_gfp : forall (c d : cand) (k : nat),
       Fixpoints.greatest_fixed_point
         (cand * cand) (all_pairs cand_all)
-        (all_pairs_universal cand_all cand_fin) (O k) (monotone_operator k) (c, d) = true <->
+        (all_pairs_universal cand_all cand_fin) (W k) (monotone_operator k) (c, d) = true <->
       ~ (Path k c d).
   Proof.
     split. intros H Hp. unfold Fixpoints.greatest_fixed_point in H.
