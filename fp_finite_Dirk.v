@@ -58,6 +58,7 @@ Module Fixpoints.
     apply (subset_trans r q p); assumption.
   Qed.
 
+  Definition complement {A : Type} p : pred A := fun x => negb (p x).
   (* the empty subset *)
   Definition empty_ss {A: Type} : pred A := fun a => false.
 

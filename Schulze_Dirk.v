@@ -501,7 +501,6 @@ Module Evote.
   Proof.
     split. intros H Hp. unfold Fixpoints.greatest_fixed_point in H.
     unfold Fixpoints.full_ss in H. remember (length (all_pairs cand_all)) as v. 
-    apply wins_evi in Hp. destruct Hp as [n Hp].
+    apply wins_evi in Hp. destruct Hp as [n Hp]. 
     
-
 End Evote.
