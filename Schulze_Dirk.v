@@ -360,11 +360,15 @@ Module Evote.
     intros a H1. apply andb_true_iff in H1.
     apply andb_true_iff. destruct H1 as [H2 H3].
     split. assumption. unfold mp in *.
-    apply forallb_forall. apply forallb_forall in H3.
-
-
-
-    Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
+    apply forallb_forall.
+    specialize (forallb_forall (mpf k a p1) cand_all); intros.
+    destruct H0. pose proof H0 H3. specialize (H5 x H1).
+    unfold mpf in *. apply orb_true_iff. apply orb_true_iff in H5.
+    destruct H5. left. assumption. right. pose proof H (x, snd a) H5.
+    assumption.
+  Qed.
+  
+  Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
       In a1 l -> In a2 l -> In (a1, a2) (all_pairs l).
   Proof.
     intros A a1 a2 l H1 H2. induction l.
@@ -492,7 +496,7 @@ Module Evote.
   Theorem path_gfp : forall (c d : cand) (k : nat),
       Fixpoints.greatest_fixed_point
         (cand * cand) (all_pairs cand_all)
-        (all_pairs_universal cand_all cand_fin) (W k) (monotone_operator k) (c, d) = true <->
+        (all_pairs_universal cand_all cand_fin) (W k) (monotone_operator_w k) (c, d) = true <->
       ~ (Path k c d).
   Proof.
     split. intros H Hp. unfold Fixpoints.greatest_fixed_point in H.
