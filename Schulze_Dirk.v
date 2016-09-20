@@ -181,6 +181,7 @@ Module Evote.
   
       
   (* generic property of coclosed sets as commented above *)
+  (*
   Lemma coclosed_path : forall k l, coclosed k l -> forall s x y,
     Path s x y -> In (x, y) l -> s <= k.
   Proof.
@@ -235,7 +236,26 @@ Module Evote.
     (* case first edge of small weight *)
     omega.
   Qed.
+   *)
+  
+  Lemma coclosed_path : forall k f, coclosed k f -> forall s x y,
+        Path s x y -> f (x, y) = true -> s <= k.
+   Proof.
+     intros k f Hcc x s y p. induction p.
+     intros Hin. unfold coclosed in Hcc.
+     specialize (Hcc (c, d) Hin). unfold W in Hcc.
+     apply andb_true_iff in Hcc. destruct Hcc as [Hccl Hccr].
+     apply leb_complete in Hccl. simpl in Hccl. omega.
+     (* non unit path. *)
+     intros Hin. unfold coclosed in Hcc. specialize (Hcc (c, e) Hin).
+     unfold W in Hcc.  apply andb_true_iff in Hcc. destruct Hcc as [Hccl Hccr].
+     unfold el in Hccl. simpl in Hccl. apply leb_complete in Hccl.
+     assert (Hmp: forall m, f (m, (snd (c, e))) = true \/ edge (fst (c, e)) m <= k). apply mp_log.
+     assumption. specialize (Hmp d). simpl in Hmp. destruct Hmp as [Hmp | Hmp].
+     specialize (IHp Hmp). assumption. omega.
+   Qed.
 
+   
   Theorem th1: forall c, ev c -> wins c.
   Proof.
     intros c H.
@@ -250,7 +270,7 @@ Module Evote.
     intros s p.
     destruct Hc as [l Hc].
     destruct Hc as [Hin Hcc].
-    apply coclosed_path with (x := d) (y := c) (l := l).
+    apply coclosed_path with (f := l) (x := d) (y := c).
     assumption.
     assumption.
     assumption.
