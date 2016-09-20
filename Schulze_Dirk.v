@@ -352,8 +352,19 @@ Module Evote.
     apply H. destruct H0. apply andb_true_iff in H1. destruct H1.
     assumption.
   Qed.
-  
-  Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
+
+  Lemma monotone_operator_w : forall k, Fixpoints.mon (W k).
+  Proof.
+    intros k. unfold Fixpoints.mon. intros p1 p2 H.
+    unfold W. unfold Fixpoints.pred_subset in *.
+    intros a H1. apply andb_true_iff in H1.
+    apply andb_true_iff. destruct H1 as [H2 H3].
+    split. assumption. unfold mp in *.
+    apply forallb_forall. apply forallb_forall in H3.
+
+
+
+    Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
       In a1 l -> In a2 l -> In (a1, a2) (all_pairs l).
   Proof.
     intros A a1 a2 l H1 H2. induction l.
