@@ -58,7 +58,9 @@ Module Fixpoints.
     apply (subset_trans r q p); assumption.
   Qed.
 
+  (* complement of set *)
   Definition complement {A : Type} p : pred A := fun x => negb (p x).
+
   (* the empty subset *)
   Definition empty_ss {A: Type} : pred A := fun a => false.
 
@@ -212,6 +214,10 @@ Module Fixpoints.
 
   (* operator on subsets of a type *)
   Definition Op (A: Type) := pred A -> pred A.
+
+  (* dual operator *)
+  Definition dual_op {A : Type} (O : Op A) (W : Op A) :=
+    forall p : pred A, pred_eeq (O p) (complement (W (complement p))).
 
   (* monotonicity *)
   Definition mon {A: Type} (O:Op A) :=

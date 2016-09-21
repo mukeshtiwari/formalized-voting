@@ -69,7 +69,17 @@ Module Evote.
   (* towards the definition of co-closed sets *)
   (* el is a boolean function that returns true if the edge between two cands is <= k *)
   Definition el (k: nat) (p: (cand * cand)%type) := Compare_dec.leb (edge (fst p) (snd p)) k.
+   
 
+  (* tmporary definition of < k *)
+  (*
+  Definition el (k : nat) (p : (cand * cand)) :=
+    match lt_dec (edge (fst p) (snd p)) k with
+    | left _ => true
+    | right _ => false
+    end.
+   *)
+  
   (* mp k (a, c) l (for midpoint) returns true if there's a midpoint b st. either the edge between 
      a and c is <= k or else the pair (b, c) is in l *)
   (*
@@ -175,7 +185,7 @@ Module Evote.
     apply forallb_forall. assumption.
     specialize (Hp Hin). apply orb_true_iff in Hp.
     destruct Hp as [Hpl | Hpr]. destruct p as (a, c).
-    simpl in *. right. apply leb_complete. assumption.
+    simpl in *. right. unfold el in Hpl. apply leb_complete. assumption.
     destruct p as (a, c). simpl in *. left. assumption.
   Qed.
   
@@ -266,29 +276,59 @@ Module Evote.
     apply coclosed_path with (f := l) (x := d) (y := c); assumption.
   Qed.
 
+  
   Definition geb (a b : nat) :=
     match ge_dec a b with
     | left _ => true
     | right _ => false
     end.
-
+  (*
+  Definition geb (a b : nat) : bool :=
+    match gt_dec a b with
+    | left _ => true
+    | right _ => false
+    end.
+   *)
+   
   Theorem geb_true : forall a b,
       geb a b = true <-> a >= b.
   Proof.
     split; intros. unfold geb in H. destruct ge_dec in H. assumption. inversion H.
     unfold geb. destruct ge_dec. reflexivity. congruence.
   Qed.
+
+  (*
+  Theorem geb_true : forall a b,
+      geb a b = true <-> a > b.
+  Proof.
+    split; intros. unfold geb in H. destruct gt_dec in H. assumption. inversion H.
+    unfold geb. destruct gt_dec. reflexivity. congruence.
+  Qed.
+   *)
   
   (* elg is boolean function returns true if the edge between two candidates of >= k. *)
   Definition elg (k : nat) (p : (cand * cand)) : bool :=
     geb (edge (fst p) (snd p)) k.
 
+  (*
+  (* elg is boolean function returns true if edge between two cand of > k *)
+  Definition elg (k : nat) (p : (cand * cand)) : bool :=
+    geb (edge (fst p) (snd p)) k.
+   *)
+  
   Lemma gebedge_true : forall c d k, edge c d >= k <->  geb (edge c d) k = true.
   Proof.
      split; intros. apply geb_true. assumption.
      apply geb_true. assumption.
   Qed.
   
+  (*
+  Lemma gebedge_true : forall c d k, edge c d > k <->  geb (edge c d) k = true.
+  Proof.
+    split; intros. apply geb_true. assumption.
+    apply geb_true. assumption.
+  Qed.
+   *)
   
   (* mp k (a, c) f (for midpoint) returns true if there's a midpoint b st.
      the edge between a and b is >= k /\ the function f (b, c) = true *)
@@ -493,6 +533,18 @@ Module Evote.
 
   Check O.
   Check W.
+  Lemma duality_operator : forall k, Fixpoints.dual_op (O k) (W k).
+  Proof.
+    intros k. unfold Fixpoints.dual_op. intros p.
+    unfold Fixpoints.pred_eeq. split.
+    unfold Fixpoints.pred_subset. intros. unfold O in H.
+    apply orb_true_iff in H. unfold Fixpoints.complement.
+    apply negb_true_iff. unfold W. apply andb_false_iff.
+    destruct H as [H | H]. unfold elg in H. destruct a as (a1, a2). simpl in H.
+    apply gebedge_true in H. left. unfold el. simpl.
+    apply leb_correct_conv. 
+    
+    
   Theorem path_gfp : forall (c d : cand) (k : nat),
       Fixpoints.greatest_fixed_point
         (cand * cand) (all_pairs cand_all)
