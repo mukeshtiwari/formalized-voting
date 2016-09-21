@@ -318,13 +318,7 @@ Module Evote.
     | left _ => true
     | right _ => false
     end.
-  (*
-  Definition geb (a b : nat) : bool :=
-    match gt_dec a b with
-    | left _ => true
-    | right _ => false
-    end.
-   *)
+ 
    
   Theorem geb_true : forall a b,
       geb a b = true <-> a >= b.
@@ -333,24 +327,12 @@ Module Evote.
     unfold geb. destruct ge_dec. reflexivity. congruence.
   Qed.
 
-  (*
-  Theorem geb_true : forall a b,
-      geb a b = true <-> a > b.
-  Proof.
-    split; intros. unfold geb in H. destruct gt_dec in H. assumption. inversion H.
-    unfold geb. destruct gt_dec. reflexivity. congruence.
-  Qed.
-   *)
   
   (* elg is boolean function returns true if the edge between two candidates of >= k. *)
   Definition elg (k : nat) (p : (cand * cand)) : bool :=
     geb (edge (fst p) (snd p)) k.
 
-  (*
-  (* elg is boolean function returns true if edge between two cand of > k *)
-  Definition elg (k : nat) (p : (cand * cand)) : bool :=
-    geb (edge (fst p) (snd p)) k.
-   *)
+ 
   
   Lemma gebedge_true : forall c d k, edge c d >= k <->  geb (edge c d) k = true.
   Proof.
@@ -358,13 +340,7 @@ Module Evote.
      apply geb_true. assumption.
   Qed.
   
-  (*
-  Lemma gebedge_true : forall c d k, edge c d > k <->  geb (edge c d) k = true.
-  Proof.
-    split; intros. apply geb_true. assumption.
-    apply geb_true. assumption.
-  Qed.
-   *)
+  
   
   (* mp k (a, c) f (for midpoint) returns true if there's a midpoint b st.
      the edge between a and b is >= k /\ the function f (b, c) = true *)
@@ -618,7 +594,8 @@ Module Evote.
     apply andb_true_iff. split. unfold elg. simpl. apply gebedge_true. omega.
     apply negb_false_iff in H3. assumption.
   Qed.
-  
+
+  Lemma 
   Theorem path_gfp : forall (c d : cand) (k : nat),
       Fixpoints.greatest_fixed_point
         (cand * cand) (all_pairs cand_all)
