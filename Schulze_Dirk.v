@@ -68,17 +68,17 @@ Module Evote.
 
   (* towards the definition of co-closed sets *)
   (* el is a boolean function that returns true if the edge between two cands is <= k *)
+  (*
   Definition el (k: nat) (p: (cand * cand)%type) := Compare_dec.leb (edge (fst p) (snd p)) k.
-   
+  *)
 
   (* tmporary definition of < k *)
-  (*
   Definition el (k : nat) (p : (cand * cand)) :=
     match lt_dec (edge (fst p) (snd p)) k with
     | left _ => true
     | right _ => false
     end.
-   *)
+   
   
   (* mp k (a, c) l (for midpoint) returns true if there's a midpoint b st. either the edge between 
      a and c is <= k or else the pair (b, c) is in l *)
@@ -176,6 +176,7 @@ Module Evote.
   Qed.
    *)
 
+  (*
   Lemma mp_log : forall k p f,
       mp k p f = true -> forall b, f (b, snd p) = true \/ edge (fst p) b <= k.
   Proof.
@@ -186,6 +187,20 @@ Module Evote.
     specialize (Hp Hin). apply orb_true_iff in Hp.
     destruct Hp as [Hpl | Hpr]. destruct p as (a, c).
     simpl in *. right. unfold el in Hpl. apply leb_complete. assumption.
+    destruct p as (a, c). simpl in *. left. assumption.
+  Qed.
+   *)
+  Lemma mp_log : forall k p f,
+      mp k p f = true -> forall b, f (b, snd p) = true \/ edge (fst p) b < k.
+  Proof.
+    intros k p f H b.
+    assert (Hin : In b cand_all). apply cand_fin.
+    assert (Hp : In b cand_all -> (mpf k p f) b = true).
+    apply forallb_forall. assumption.
+    specialize (Hp Hin). apply orb_true_iff in Hp.
+    destruct Hp as [Hpl | Hpr]. destruct p as (a, c).
+    simpl in *. right. unfold el in Hpl. simpl in Hpl.
+    destruct (lt_dec (edge a b) k). assumption. inversion Hpl.
     destruct p as (a, c). simpl in *. left. assumption.
   Qed.
   
@@ -247,7 +262,8 @@ Module Evote.
     omega.
   Qed.
    *)
-  
+
+  (*
   Lemma coclosed_path : forall k f, coclosed k f -> forall s x y,
         Path s x y -> f (x, y) = true -> s <= k.
    Proof.
@@ -264,8 +280,28 @@ Module Evote.
      assumption. specialize (Hmp d). simpl in Hmp. destruct Hmp as [Hmp | Hmp].
      specialize (IHp Hmp). assumption. omega.
    Qed.
+   *)
 
-   
+  Lemma coclosed_path : forall k f, coclosed k f -> forall s x y,
+        Path s x y -> f (x, y) = true -> s <= k.
+  Proof.
+    intros k f Hcc x s y p. induction p.
+    intros Hin. unfold coclosed in Hcc.
+    specialize (Hcc (c, d) Hin). unfold W in Hcc.
+    apply andb_true_iff in Hcc. destruct Hcc as [Hccl Hccr].
+    unfold el in Hccl. simpl in Hccl. destruct (lt_dec (edge c d) k).
+    omega. inversion Hccl.
+    (* non unit path *)
+    intros Hin. unfold coclosed in Hcc. specialize (Hcc (c, e) Hin).
+    unfold W in Hcc. apply andb_true_iff in Hcc. destruct Hcc as [Hccl Hccr].
+    unfold el in Hccl. simpl in Hccl.
+    assert (Hmp: forall m, f (m, (snd (c, e))) = true \/ edge (fst (c, e)) m < k).
+    apply mp_log. assumption. simpl in Hmp. specialize (Hmp d).
+    destruct Hmp. specialize (IHp H0). assumption.
+    omega.
+  Qed.
+
+  
   Theorem th1: forall c, ev c -> wins c.
   Proof.
     intros c H. unfold wins. unfold ev in H.
@@ -533,6 +569,22 @@ Module Evote.
 
   Check O.
   Check W.
+
+  Lemma forallb_false : forall (A : Type) (f : A -> bool) (l : list A), 
+                        forallb f l = false <-> (exists x, In x l /\ f x = false).
+  Proof.
+    intros A f l. split. intros H. induction l. simpl in H. inversion H.
+    simpl in H. apply andb_false_iff in H. destruct H.
+    exists a. split. simpl. left. auto. assumption.
+    pose proof IHl H. destruct H0. exists x. destruct  H0 as [H1 H2].
+    split. simpl. right. assumption. assumption.
+
+    intros. destruct H as [x [H1 H2]]. induction l. inversion H1.
+    simpl. apply andb_false_iff. simpl in H1. destruct H1.
+    left. congruence. right. apply IHl. assumption.
+  Qed.
+
+
   Lemma duality_operator : forall k, Fixpoints.dual_op (O k) (W k).
   Proof.
     intros k. unfold Fixpoints.dual_op. intros p.
@@ -542,9 +594,31 @@ Module Evote.
     apply negb_true_iff. unfold W. apply andb_false_iff.
     destruct H as [H | H]. unfold elg in H. destruct a as (a1, a2). simpl in H.
     apply gebedge_true in H. left. unfold el. simpl.
-    apply leb_correct_conv. 
-    
-    
+    destruct (lt_dec (edge a1 a2) k). omega. reflexivity.
+    right. unfold mpg in H. apply existsb_exists in H.
+    destruct H as [x [H1 H2]]. destruct a as (a1, a2).
+    simpl in H2. apply andb_true_iff in H2. destruct H2 as [H2 H3].
+    unfold elg in H2. simpl in H2. apply gebedge_true in H2.
+    unfold mp. unfold mpf. simpl. apply forallb_false.
+    exists x. split. assumption. apply orb_false_iff. split.
+    unfold el. simpl. destruct (lt_dec (edge a1 x) k).
+    omega. reflexivity. apply negb_false_iff. assumption.
+    (* other way *)
+    unfold Fixpoints.pred_subset. intros. unfold O.
+    apply orb_true_iff. unfold Fixpoints.complement in H.
+    apply negb_true_iff in H. unfold W in H. apply andb_false_iff in H.
+    destruct H as [H | H]. unfold el in H. destruct a as (a1, a2).
+    simpl in H. destruct (lt_dec (edge a1 a2) k). inversion H.
+    left. unfold elg. simpl. apply gebedge_true. omega.
+    unfold mp in H. apply forallb_false in H. destruct H as [x [H1 H2]].
+    unfold mpf in H2. apply orb_false_iff in H2. destruct H2 as [H2 H3].
+    destruct a as (a1, a2). simpl in *. unfold el in H2. simpl in H2.
+    destruct (lt_dec (edge a1 x) k). inversion H2. right. unfold mpg.
+    simpl. apply existsb_exists. exists x. split. assumption.
+    apply andb_true_iff. split. unfold elg. simpl. apply gebedge_true. omega.
+    apply negb_false_iff in H3. assumption.
+  Qed.
+  
   Theorem path_gfp : forall (c d : cand) (k : nat),
       Fixpoints.greatest_fixed_point
         (cand * cand) (all_pairs cand_all)
