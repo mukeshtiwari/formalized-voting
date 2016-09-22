@@ -67,7 +67,7 @@ Module Evote.
     existsb (fun q => (andb (cand_eqb (fst q) (fst p))) ((cand_eqb (snd q) (snd p)))) l. 
 
   (* towards the definition of co-closed sets *)
-  (* el is a boolean function that returns true if the edge between two cands is <= k *)
+  (* el is a boolean function that returns true if the edge between two cands is < k *)
   (*
   Definition el (k: nat) (p: (cand * cand)%type) := Compare_dec.leb (edge (fst p) (snd p)) k.
   *)
@@ -81,7 +81,7 @@ Module Evote.
    
   
   (* mp k (a, c) l (for midpoint) returns true if there's a midpoint b st. either the edge between 
-     a and c is <= k or else the pair (b, c) is in l *)
+     a and c is < k or else the pair (b, c) is in l *)
   (*
   Definition mpf (k: nat) (p : (cand * cand)%type) (l: list (cand * cand)%type) (b: cand) :=
     let a := fst p in
@@ -595,7 +595,7 @@ Module Evote.
     apply negb_false_iff in H3. assumption.
   Qed.
 
-  Lemma 
+  
   Theorem path_gfp : forall (c d : cand) (k : nat),
       Fixpoints.greatest_fixed_point
         (cand * cand) (all_pairs cand_all)
@@ -604,6 +604,6 @@ Module Evote.
   Proof.
     split. intros H Hp. unfold Fixpoints.greatest_fixed_point in H.
     unfold Fixpoints.full_ss in H. remember (length (all_pairs cand_all)) as v. 
-    apply wins_evi in Hp. destruct Hp as [n Hp]. 
+    apply wins_evi in Hp. destruct Hp as [n Hp].
     
 End Evote.

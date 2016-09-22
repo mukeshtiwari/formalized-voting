@@ -9,7 +9,7 @@ Import ListNotations.
 
 Module Fixpoints.
 
-  
+
   (****************************************************)
   (* boolean predicates on types and basic properties *)
   (****************************************************)
@@ -27,7 +27,7 @@ Module Fixpoints.
 
   (* subset is reflexive *)
   Lemma subset_refl {A: Type} (p: pred A) : pred_subset p p.
-    Proof.
+  Proof.
     unfold pred_subset. intro a. auto.
   Qed.
 
@@ -44,8 +44,13 @@ Module Fixpoints.
     intros Hpq Hqr. unfold pred_subset in Hpq, Hqr. unfold pred_subset.
     intro a. specialize (Hpq a). specialize (Hqr a).
     intro H. apply Hqr, Hpq. assumption.
-  Qed. 
+  Qed.
 
+  Lemma eeq_swap : forall (A : Type) (p q : pred A),  pred_eeq p q -> pred_eeq q p.
+  Proof.
+    intros A p q H. destruct H. split; auto.
+  Qed.
+    
   (* equality is transitive *)
   Lemma eeq_trans {A: Type} (p q r: pred A) :
     pred_eeq p q -> pred_eeq q r -> pred_eeq p r.
@@ -53,7 +58,7 @@ Module Fixpoints.
     intros  Hpq Hqr.
     unfold pred_eeq in Hpq, Hqr. destruct  Hpq as [Hpq1 Hpq2].
     destruct Hqr as [Hqr1 Hqr2].
-    unfold pred_eeq. split. 
+    unfold pred_eeq. split.
     apply (subset_trans p q r); assumption.
     apply (subset_trans r q p); assumption.
   Qed.
@@ -68,7 +73,7 @@ Module Fixpoints.
   Proof.
     intros p. unfold pred_subset. intros a H.
     inversion H.
-  Qed. 
+  Qed.
 
   (* equality on boolean predicates on a finite type is decidable *)
   Lemma pred_eq_dec_aux {A: Type} (l: list A) :
@@ -87,7 +92,7 @@ Module Fixpoints.
     (* case distinction on whether p1 and p2 agree on xs *)
     destruct (IHxs p1 p2) as [H12eqxs | H12neqxs].
     (* case where p1 and p2 agree on xs *)
-    left. intros a Hin. 
+    left. intros a Hin.
     apply in_inv in Hin. destruct Hin as [Hx | Hxs].
     rewrite Hx in H12eqx. assumption.
     apply H12eqxs. assumption.
@@ -108,7 +113,7 @@ Module Fixpoints.
     intros Hin p1 p2.
     destruct (pred_eq_dec_aux l p1 p2) as [Heq | Hneq].
     left.
-    unfold pred_eeq. split. unfold pred_subset. intro a. 
+    unfold pred_eeq. split. unfold pred_subset. intro a.
     specialize (Heq a (Hin a)).
     rewrite Heq. auto.
     unfold pred_subset. intro a.
@@ -129,11 +134,11 @@ Module Fixpoints.
     specialize (H2 a Hp2t). contradict Hp1f. assumption.
     (* case p2 a = false *)
     assert (Hp2: p2 a = false) by apply (not_true_is_false (p2 a) Hp2f). congruence.
-  Qed.  
+  Qed.
 
   (* if two predicates are subsets but not equal, the larger adds an elt *)
   Lemma new_elt_aux {A: Type} (p1 p2: pred A)  (l: list A) :
-    pred_subset p1 p2 -> 
+    pred_subset p1 p2 ->
     (~ (forall a: A, In a l -> p1  a = p2  a)) ->
     exists a: A, p1  a = false /\ p2 a = true.
   Proof.
@@ -170,12 +175,12 @@ Module Fixpoints.
   (* new_elt for finite types *)
   Lemma new_elt {A: Type} (p1 p2: pred A) (l: list A) :
     (forall a: A, In a l) ->
-    pred_subset p1 p2 -> ~(pred_eeq p1 p2) -> 
+    pred_subset p1 p2 -> ~(pred_eeq p1 p2) ->
     exists a: A, p1  a = false /\ p2 a = true.
   Proof.
     intros Hfin Hss Hneq.
     apply (new_elt_aux p1 p2 l Hss).
-    intro H.  unfold pred_eeq in Hneq. apply Hneq. 
+    intro H.  unfold pred_eeq in Hneq. apply Hneq.
     split. unfold pred_subset.
     intros a Hp1. specialize (H a (Hfin a)).  congruence.
     unfold pred_subset.
@@ -224,7 +229,7 @@ Module Fixpoints.
     forall (p1 p2: pred A), pred_subset p1 p2 -> pred_subset (O p1) (O p2).
 
   (* cardinality of a type bounded by a natural number *)
-  Definition bounded_card (A: Type) (n: nat) := 
+  Definition bounded_card (A: Type) (n: nat) :=
     exists l, (forall a: A, In a l) /\ length l <= n.
 
   (* iterate an endofunction on a type *)
@@ -239,7 +244,7 @@ Module Fixpoints.
 
   (* the iterates of a monotone operator form an increasing chain *)
   Lemma inc_chain {A: Type} (O: Op A) : mon O ->
-    forall n: nat, pred_subset (iter O n empty_ss) (iter O (n+1) empty_ss).
+                                        forall n: nat, pred_subset (iter O n empty_ss) (iter O (n+1) empty_ss).
   Proof.
     intros Hmon n.
     induction n.
@@ -253,7 +258,7 @@ Module Fixpoints.
 
   (* combined with transitivity *)
   Lemma inc_chain_trans {A: Type} (O: Op A): mon O ->
-    forall (n k: nat), pred_subset (iter O n empty_ss) (iter O (n+k) empty_ss).
+                                             forall (n k: nat), pred_subset (iter O n empty_ss) (iter O (n+k) empty_ss).
   Proof.
     intros Hmon n k. induction k as [| k IHk].
     (* k = 0 *)
@@ -262,7 +267,7 @@ Module Fixpoints.
     assumption. replace (n + S k)%nat with ((n+k)+1)%nat.
     apply inc_chain. assumption. omega.
   Qed.
-  
+
   (* the operator is congruential on predicates *)
   Lemma op_cong {A: Type} (O: Op A) : mon O -> forall p1 p2: pred A,
         pred_eeq p1 p2 -> pred_eeq (O p1) (O p2).
@@ -274,8 +279,8 @@ Module Fixpoints.
   (* for finite types, either a fixpoint is reached or the cardinality of the iterate increases *)
   Theorem  iter_aux {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
     mon O -> (forall a: A, In a l) ->
-   forall n: nat, (pred_eeq (iter O n empty_ss) (iter O (n+1) empty_ss))  \/
-           (card l (iter O (n+1) empty_ss) >= card l (iter O n empty_ss) + 1).
+    forall n: nat, (pred_eeq (iter O n empty_ss) (iter O (n+1) empty_ss))  \/
+            (card l (iter O (n+1) empty_ss) >= card l (iter O n empty_ss) + 1).
   Proof.
     intros Hmon Hfin n.
     destruct (pred_eq_dec l Hfin (iter O n empty_ss) (iter O (n+1) empty_ss)) as [Heq | Hneq].
@@ -325,7 +330,7 @@ Module Fixpoints.
     destruct H as [Hl | Hr]. left. replace (S n) with (plus n 1). assumption. omega.
     right. replace (S n) with (plus n 1). omega. omega.
   Qed.
-    
+
 
   (* once we have a fixpoint, iterations don't add things *)
   Theorem fp_reached : forall (A : Type) (O : Op A)  (k : nat),
@@ -337,7 +342,7 @@ Module Fixpoints.
     (* m = 0 *)
     replace (plus k 0) with k. apply eeq_refl. omega.
     (* S m *)
-    assert (H: pred_eeq (O (iter O k empty_ss)) (O (iter O (k + m) empty_ss))) by 
+    assert (H: pred_eeq (O (iter O k empty_ss)) (O (iter O (k + m) empty_ss))) by
         apply (op_cong O Hmon (iter O k empty_ss) (iter O (plus k m) empty_ss) IHm).
     apply (eeq_trans (iter O k empty_ss) (iter O (k+1) empty_ss) (iter O (k + S m) empty_ss)).
     assumption.
@@ -345,7 +350,7 @@ Module Fixpoints.
     omega. omega.
   Qed.
 
-  (* trivia about filter *)  
+  (* trivia about filter *)
   Theorem length_filter : forall (A : Type) (f : A -> bool) (l : list A),
       length (filter f l) <= length l.
   Proof.
@@ -353,14 +358,14 @@ Module Fixpoints.
     simpl. destruct (f a). simpl; omega.
     omega.
   Qed.
-  
+
   (* for a type with at most k elements, we need at most k iterations to reach a fixpoint *)
   Theorem iter_fin {A: Type} (k: nat) (O: (A -> bool) -> (A -> bool)) :
     mon O -> bounded_card A k -> forall n: nat, pred_subset (iter O n empty_ss) (iter O k empty_ss).
   Proof.
     intros Hmon Hboun; unfold bounded_card in Hboun.
     destruct Hboun as [l [Hin Hlen]]. intros n.
-    assert (Hle : k < n \/ k >= n) by omega.    
+    assert (Hle : k < n \/ k >= n) by omega.
     destruct Hle as [Hlel | Hler].
     (* case k < n *)
     destruct (iter_fp O l Hmon Hin k) as [L | R].
@@ -369,12 +374,12 @@ Module Fixpoints.
     apply fp_reached. assumption. assumption.
     replace (plus k (n - k)) with n in Ht. destruct Ht as [Ht1 Ht2]. assumption. omega.
     (* case too many elements *)
-    unfold card in R. 
+    unfold card in R.
     assert (Hlen2: length (filter (iter O (k + 1) empty_ss) l) <= length l) by
         apply  (length_filter A (iter O (plus k 1) empty_ss) l).
     unfold ge in R. assert (Hc: k+1 <= k).
     transitivity (length (filter (iter O (k + 1) empty_ss) l)). assumption.
-    transitivity (length l). assumption. assumption. 
+    transitivity (length l). assumption. assumption.
     assert (False). omega. inversion H.
     (* case k >= n *)
     Check inc_chain_trans.
@@ -386,7 +391,7 @@ Module Fixpoints.
   (* start with all the elements *)
   Definition full_ss {A: Type} : pred A := fun a => true.
 
-   (* the iterates of a monotone operator form an decreasing chain *)
+  (* the iterates of a monotone operator form an decreasing chain *)
   Lemma dec_chain {A: Type} (O: Op A) :
     mon O -> forall n: nat, pred_subset (iter O (n + 1) full_ss) (iter O n full_ss).
   Proof.
@@ -400,18 +405,18 @@ Module Fixpoints.
 
   (* combined with transitivity *)
   Lemma dec_chain_trans {A: Type} (O: Op A): mon O ->
-    forall (n k: nat), pred_subset (iter O (n + k) full_ss) (iter O n full_ss).
+                                             forall (n k: nat), pred_subset (iter O (n + k) full_ss) (iter O n full_ss).
   Proof.
     intros Hmon n k. induction k as [| k IHk].
     (* k = 0 *)
     replace (n+0)%nat with n. apply subset_refl. omega.
-    apply subset_trans with (q := iter O (n + k) full_ss). 
+    apply subset_trans with (q := iter O (n + k) full_ss).
     replace (n + S k)%nat with ((n+k)+1)%nat.
     apply dec_chain. assumption. omega. assumption.
   Qed.
 
-  
-  (* for finite types, either a fixpoint is reached or 
+
+  (* for finite types, either a fixpoint is reached or
      the cardinality of the iterate decrease *)
   Theorem iter_aux_dec {A: Type} (O: (A -> bool) -> (A -> bool)) (l: list A):
     mon O -> (forall a: A, In a l) ->
@@ -439,7 +444,7 @@ Module Fixpoints.
     apply pred_filter, dec_chain. assumption. omega.
   Qed.
 
-  (* for finite types, either a fixpoint is reached or the n+1-st iterate + n+1 <= 
+  (* for finite types, either a fixpoint is reached or the n+1-st iterate + n+1 <=
     length l elements *)
   Theorem  iter_fp_gfp {A: Type} (O: Op A) (l: list A):
     mon O -> (forall a: A, In a l) ->
@@ -471,7 +476,7 @@ Module Fixpoints.
     intros A O k Hmon Hiter m.
     induction m as [|m IHm].
     replace (k + 0)%nat with k. apply eeq_refl. omega.
-    assert (H: pred_eeq (O (iter O (k + m) full_ss)) (O (iter O k full_ss))) by 
+    assert (H: pred_eeq (O (iter O (k + m) full_ss)) (O (iter O k full_ss))) by
         apply (op_cong O Hmon (iter O (plus k m) full_ss) (iter O k full_ss) IHm).
     apply (eeq_trans (iter O (k + S m) full_ss) (iter O (k+1) full_ss) (iter O k full_ss)).
     replace (k + S m)%nat with (1 + (k + m))%nat. replace (k + 1)%nat with (1 + k)%nat.
@@ -485,7 +490,7 @@ Module Fixpoints.
     intros Hmon Hboun; unfold bounded_card in Hboun.
     destruct Hboun as [l [Hin Hlen]]. intros n.
     assert (Hle : k < n \/ k >= n) by omega.
-    destruct Hle as [Hlel | Hler]. 
+    destruct Hle as [Hlel | Hler].
     (* case k < n *)
     destruct (iter_fp_gfp O l Hmon Hin k) as [L | R].
     assert (Ht : pred_eeq (iter O (k + (n - k)) full_ss) (iter O k full_ss)).
@@ -497,7 +502,7 @@ Module Fixpoints.
 
 
   Definition least_fixed_point (A : Type) (l : list A) (H : forall a : A, In a l)
-             (O : Op A) (Hmon : mon O) :=  iter O (length l) empty_ss. 
+             (O : Op A) (Hmon : mon O) :=  iter O (length l) empty_ss.
 
   Definition greatest_fixed_point (A : Type) (l : list A) (H : forall a : A, In a l)
              (O : Op A) (Hmon : mon O) := iter O (length l) full_ss.
@@ -529,7 +534,7 @@ Module Fixpoints.
     unfold pred_eeq in Hfix. intuition.
   Qed.
 
-  
+
   Lemma least_fixed_point_is_least : forall (A : Type) (l : list A) (H : forall a, In a l)
                                        (O : Op A) (Hmon : mon O) (f : pred A),
       fixed_point A O f -> pred_subset (least_fixed_point A l H O Hmon) f.
@@ -538,6 +543,61 @@ Module Fixpoints.
     apply fixed_point_temp_for_now; assumption.
   Qed.
 
-End Fixpoints.    
+  Definition lfp {A : Type} (p : pred A) (O : Op A) :=
+    fixed_point A O p /\ forall (q : pred A), (fixed_point A O q -> pred_subset p q).
+
+  Definition gfp {A : Type} (p : pred A) (O : Op A) :=
+    fixed_point A O p /\ forall (q : pred A), (fixed_point A O q -> pred_subset q p).
+
+  (*
+  Lemma complement_id : forall (A : Type) (p : pred A),
+     pred_eeq (complement (complement p)) p.
+  Proof.
+    unfold pred_eeq. unfold pred_subset. unfold complement. intros a p.
+    split. intros a0 H. rewrite <- negb_involutive_reverse in H. assumption.
+    intros a0 H. rewrite <- negb_involutive_reverse. assumption.
+  Qed.
+   *)
+  Lemma complement_id : forall (A : Type) (p : pred A),
+      complement (complement p) = p.
+  Admitted.
+  
+  Lemma eeq_complement : forall (A : Type) (p q : pred A),
+      pred_eeq p q -> pred_eeq (complement p) (complement q).
+  Proof.
+    intros A p q H. unfold pred_eeq in *. unfold pred_subset in *.
+    destruct H. unfold complement. split. intros a Hn. apply negb_true_iff.
+    apply negb_true_iff in Hn. destruct (q a) eqn:Ht. specialize (H0 a Ht).
+    congruence. reflexivity.
+    intros a Hn. apply negb_true_iff. apply negb_true_iff in Hn.
+    destruct (p a) eqn:Ht. specialize (H a Ht). congruence.
+    reflexivity.
+  Qed.
+  
+  Lemma subset_comp : forall (A : Type) (p q : pred A),
+      pred_subset (complement p) q -> pred_subset (complement q) p.
+  Proof.
+    intros a p q H. unfold pred_subset in *. unfold complement in *.
+    intros a0 H1. apply negb_true_iff in H1. destruct (p a0) eqn:Ht.
+    reflexivity. specialize (H a0). rewrite negb_true_iff in H. apply H in Ht.
+    congruence.
+  Qed.
+  
+  Lemma operator_equality : forall (A : Type) (O W : Op A) (H : dual_op O W) (p q : pred A),
+      lfp p O -> gfp q W -> pred_eeq p (complement q).
+  Proof.
+    intros A O W H p q H1 H2. 
+    unfold dual_op in *. unfold lfp in *. unfold gfp in *.
+    destruct H1, H2. unfold fixed_point in *.
+    specialize (eeq_trans _ _ _ H0 (H p)); intros.
+    pose proof (eeq_complement _ _ _ H4). rewrite complement_id in H5.
+    pose proof  (H3 _ H5).
+    pose proof H (complement q). specialize (eeq_complement _ _ _ H7); intros.
+    rewrite complement_id in H8. rewrite complement_id in H8.
+    apply eeq_swap in H8. specialize (eeq_trans _ _ _ H2 H8); intros.
+    specialize (eeq_complement _ _ _ H9); intros. rewrite complement_id in H10.
+    apply H1 in H10. split.  assumption. apply subset_comp in H6. assumption.
+  Qed.
 
 
+End Fixpoints.
