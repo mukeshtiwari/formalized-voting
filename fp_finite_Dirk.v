@@ -618,11 +618,11 @@ Module Fixpoints.
     specialize (eeq_trans _ _ _ H Ht); intros. assumption.
   Qed.
   
-  Lemma operator_equality : forall (A : Type) (O W : Op A) (Ho : mon O) (Hw : mon W)
+  Lemma operator_equality : forall (A : Type) (O W : Op A) (Hw : mon W)
                               (H : dual_op O W) (p q : pred A),
       lfp p O -> gfp q W -> pred_eeq p (complement q).
   Proof.
-    intros A O W Ho Hw H p q H1 H2.
+    intros A O W Hw H p q H1 H2.
     unfold dual_op in *. unfold lfp in *. unfold gfp in *.
     destruct H1, H2. unfold fixed_point in *.
     specialize (eeq_trans _ _ _ H0 (H p)); intros.
