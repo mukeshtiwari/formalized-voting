@@ -391,6 +391,11 @@ Module Fixpoints.
   (* start with all the elements *)
   Definition full_ss {A: Type} : pred A := fun a => true.
 
+  Lemma full_ss_subset {A : Type} : forall (p : pred A), pred_subset p full_ss.
+  Proof.
+    intros p. unfold pred_subset. intros. reflexivity.
+  Qed.
+
   (* the iterates of a monotone operator form an decreasing chain *)
   Lemma dec_chain {A: Type} (O: Op A) :
     mon O -> forall n: nat, pred_subset (iter O (n + 1) full_ss) (iter O n full_ss).
@@ -524,6 +529,20 @@ Module Fixpoints.
     omega.  replace (length l + 1)%nat with (S (length l)). reflexivity. omega.
   Qed.
 
+  Lemma greatest_fixed_point_is_fixed_point :
+     forall (A : Type) (l : list A) (H : forall a, In a l)
+       (O : Op A) (Hmon : mon O), fixed_point A O (greatest_fixed_point A l H O Hmon).
+  Proof.
+    intros A l H O Hmon. split. unfold greatest_fixed_point.
+    replace (O (iter O (length l) full_ss)) with (iter O (length l + 1) full_ss).
+    apply iter_fin_gfp. assumption. unfold bounded_card. exists l. intuition.
+    replace (length l + 1)%nat with (S (length l)). reflexivity. omega.
+    unfold greatest_fixed_point.
+    replace (O (iter O (length l) full_ss)) with (iter O (length l + 1) full_ss).
+    apply dec_chain. assumption. replace (length l + 1)%nat with (S (length l)).
+    simpl. reflexivity. omega.
+  Qed.
+   
   Lemma fixed_point_temp_for_now : forall (A : Type) (O : Op A) (Hmon : mon O) (f : pred A),
       fixed_point A O f -> forall n, pred_subset (iter O n empty_ss) f.
   Proof.
@@ -534,7 +553,15 @@ Module Fixpoints.
     unfold pred_eeq in Hfix. intuition.
   Qed.
 
-
+  Lemma fixed_point_temp_for_now_gfp : forall (A : Type) (O : Op A) (Hmon : mon O) (f : pred A),
+      fixed_point A O f -> forall n, pred_subset f (iter O n full_ss).
+  Proof.
+    intros A O Hmon f Hfix. unfold fixed_point in Hfix.
+    induction n. simpl. apply full_ss_subset.
+    apply (subset_trans f (O f) (iter O (S n) full_ss)).
+    unfold pred_eeq in Hfix. intuition. simpl. apply Hmon. assumption.
+  Qed.
+      
   Lemma least_fixed_point_is_least : forall (A : Type) (l : list A) (H : forall a, In a l)
                                        (O : Op A) (Hmon : mon O) (f : pred A),
       fixed_point A O f -> pred_subset (least_fixed_point A l H O Hmon) f.
@@ -543,13 +570,30 @@ Module Fixpoints.
     apply fixed_point_temp_for_now; assumption.
   Qed.
 
+  Lemma greatest_fixed_point_is_greatest :
+    forall (A : Type) (l : list A) (H : forall a, In a l)
+      (O : Op A) (Hmon : mon O) (f : pred A),
+      fixed_point A O f -> pred_subset f (greatest_fixed_point A l H O Hmon).
+  Proof.
+    intros A l H O Hmon f Hfix. unfold greatest_fixed_point.
+    apply fixed_point_temp_for_now_gfp; assumption.
+  Qed.
+  
   Definition lfp {A : Type} (p : pred A) (O : Op A) :=
     fixed_point A O p /\ forall (q : pred A), (fixed_point A O q -> pred_subset p q).
 
   Definition gfp {A : Type} (p : pred A) (O : Op A) :=
     fixed_point A O p /\ forall (q : pred A), (fixed_point A O q -> pred_subset q p).
 
+  Lemma iter_lfp : forall (A : Type) (l : list A) (H : forall a, In a l)
+                     (O : Op A) (Hmon : mon O), lfp (least_fixed_point A l H O Hmon) O.
+  Proof.
+    intros A l H O Hmon. unfold lfp. split.
+    apply least_fixed_point_is_fixed_point.
+    intros q Hf. apply least_fixed_point_is_least. assumption.
+  Qed.
 
+  
   Lemma complement_id : forall (A : Type) (p : pred A),
       pred_eeq (complement (complement p)) p.
   Proof.
