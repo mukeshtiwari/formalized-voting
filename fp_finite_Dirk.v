@@ -50,7 +50,7 @@ Module Fixpoints.
   Proof.
     intros A p q H. destruct H. split; auto.
   Qed.
-    
+
   (* equality is transitive *)
   Lemma eeq_trans {A: Type} (p q r: pred A) :
     pred_eeq p q -> pred_eeq q r -> pred_eeq p r.
@@ -549,19 +549,21 @@ Module Fixpoints.
   Definition gfp {A : Type} (p : pred A) (O : Op A) :=
     fixed_point A O p /\ forall (q : pred A), (fixed_point A O q -> pred_subset q p).
 
-  (*
+
   Lemma complement_id : forall (A : Type) (p : pred A),
-     pred_eeq (complement (complement p)) p.
+      pred_eeq (complement (complement p)) p.
   Proof.
     unfold pred_eeq. unfold pred_subset. unfold complement. intros a p.
     split. intros a0 H. rewrite <- negb_involutive_reverse in H. assumption.
     intros a0 H. rewrite <- negb_involutive_reverse. assumption.
   Qed.
-   *)
+
+  (*
   Lemma complement_id : forall (A : Type) (p : pred A),
       complement (complement p) = p.
   Admitted.
-  
+   *)
+
   Lemma eeq_complement : forall (A : Type) (p q : pred A),
       pred_eeq p q -> pred_eeq (complement p) (complement q).
   Proof.
@@ -573,7 +575,7 @@ Module Fixpoints.
     destruct (p a) eqn:Ht. specialize (H a Ht). congruence.
     reflexivity.
   Qed.
-  
+
   Lemma subset_comp : forall (A : Type) (p q : pred A),
       pred_subset (complement p) q -> pred_subset (complement q) p.
   Proof.
@@ -582,22 +584,61 @@ Module Fixpoints.
     reflexivity. specialize (H a0). rewrite negb_true_iff in H. apply H in Ht.
     congruence.
   Qed.
+
+
+
+  (*
+  Lemma complement_id_1 : forall (A : Type) (p : pred A),
+      pred_eeq p 
+
   
   Lemma operator_equality : forall (A : Type) (O W : Op A) (H : dual_op O W) (p q : pred A),
       lfp p O -> gfp q W -> pred_eeq p (complement q).
   Proof.
-    intros A O W H p q H1 H2. 
+   intros A O W H p q H1 H2.
+   unfold dual_op in *. unfold lfp in *. unfold gfp in *.
+   destruct H1, H2. unfold fixed_point in *.
+   specialize (eeq_trans _ _ _ H0 (H p)); intros.
+   pose proof (eeq_complement _ _ _ H4). rewrite complement_id_1 in H5.
+   pose proof  (H3 _ H5).
+   pose proof H (complement q). specialize (eeq_complement _ _ _ H7); intros.
+   rewrite complement_id_1 in H8. rewrite complement_id_1 in H8.
+   apply eeq_swap in H8. specialize (eeq_trans _ _ _ H2 H8); intros.
+   specialize (eeq_complement _ _ _ H9); intros. rewrite complement_id_1 in H10.
+   apply H1 in H10. split.  assumption. apply subset_comp in H6. assumption.
+ Qed.
+   *)
+
+  Lemma complement_underW : forall (A : Type) (W : Op A) (H : mon W) (p q : pred A),
+      pred_eeq p (W (complement (complement q))) -> pred_eeq p (W q).
+  Proof.
+    intros A W Hmon p q H.
+    assert (Ht : pred_eeq (W (complement (complement q))) (W q)). 
+    apply op_cong. assumption. apply complement_id.
+    specialize (eeq_trans _ _ _ H Ht); intros. assumption.
+  Qed.
+  
+  Lemma operator_equality : forall (A : Type) (O W : Op A) (Ho : mon O) (Hw : mon W)
+                              (H : dual_op O W) (p q : pred A),
+      lfp p O -> gfp q W -> pred_eeq p (complement q).
+  Proof.
+    intros A O W Ho Hw H p q H1 H2.
     unfold dual_op in *. unfold lfp in *. unfold gfp in *.
     destruct H1, H2. unfold fixed_point in *.
     specialize (eeq_trans _ _ _ H0 (H p)); intros.
-    pose proof (eeq_complement _ _ _ H4). rewrite complement_id in H5.
-    pose proof  (H3 _ H5).
-    pose proof H (complement q). specialize (eeq_complement _ _ _ H7); intros.
-    rewrite complement_id in H8. rewrite complement_id in H8.
-    apply eeq_swap in H8. specialize (eeq_trans _ _ _ H2 H8); intros.
-    specialize (eeq_complement _ _ _ H9); intros. rewrite complement_id in H10.
-    apply H1 in H10. split.  assumption. apply subset_comp in H6. assumption.
+    pose proof (eeq_complement _ _ _ H4).
+    specialize (eeq_trans _ _ _ H5 (complement_id _ _)); intros.
+    pose proof (H3 _ H6). pose proof H (complement q).
+    specialize (eeq_complement _ _ _ H8); intros.
+    specialize (eeq_trans _ _ _ H9 (complement_id _ _)); intros.
+    assert (Ht : pred_eeq (complement (O (complement q))) (W (complement (complement q))) ->
+                 pred_eeq (complement (O (complement q))) (W q)).
+    apply complement_underW. assumption.    
+    apply eeq_swap in Ht. specialize (eeq_trans _ _ _ H2 Ht); intros.
+    specialize (eeq_complement _ _ _ H11); intros.
+    specialize (eeq_trans _ _ _ H12 (complement_id _ _)); intros.
+    apply H1 in H13. split. assumption. apply subset_comp in H7. assumption.
+    assumption.
   Qed.
-
-
+  
 End Fixpoints.
