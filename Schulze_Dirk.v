@@ -602,8 +602,38 @@ Module Evote.
         (all_pairs_universal cand_all cand_fin) (W k) (monotone_operator_w k) (c, d) = true <->
       ~ (Path k c d).
   Proof.
-    split. intros H Hp. unfold Fixpoints.greatest_fixed_point in H.
-    unfold Fixpoints.full_ss in H. remember (length (all_pairs cand_all)) as v. 
+    split. intros H Hp.  
+    assert (Hgfp : Fixpoints.gfp (Fixpoints.greatest_fixed_point
+                                  (cand * cand) (all_pairs cand_all)
+                                  (all_pairs_universal cand_all cand_fin)
+                                  (W k) (monotone_operator_w k)) (W k)).
+    split. apply Fixpoints.greatest_fixed_point_is_fixed_point.
+    apply Fixpoints.greatest_fixed_point_is_greatest.
+
+    assert (Hlfp : Fixpoints.lfp (Fixpoints.least_fixed_point
+                                    (cand * cand) (all_pairs cand_all)
+                                    (all_pairs_universal cand_all cand_fin)
+                                    (O k) (monotone_operator k)) (O k)).
+    split. apply Fixpoints.least_fixed_point_is_fixed_point.
+    apply Fixpoints.least_fixed_point_is_least.
+    
+    specialize (Fixpoints.operator_equality (cand * cand) (O k) (W k) (monotone_operator_w k)
+                                            (duality_operator k) _ _ Hlfp Hgfp); intros.
+
+    unfold Fixpoints.greatest_fixed_point in *.
+    unfold Fixpoints.least_fixed_point in *.
+    unfold Fixpoints.full_ss in *. unfold Fixpoints.empty_ss in *.
     apply wins_evi in Hp. destruct Hp as [n Hp].
+    remember (length (all_pairs cand_all)) as v.
+    destruct H0. unfold Fixpoints.pred_subset in H0.
+    assert (Ht: exists l : list (cand * cand), (forall a : cand * cand, In a l) /\ length l <= v).
+    exists (all_pairs cand_all). split. apply all_pairs_universal. apply cand_fin. omega.
+    specialize (Fixpoints.iter_fin v (O k) (monotone_operator k) Ht); intros.
+    specialize (H2 n). unfold Fixpoints.pred_subset in H2.
+    specialize (H2 (c, d) Hp). specialize (H0 (c, d) H2).
+    unfold Fixpoints.complement in H0.
+    apply negb_true_iff  in H0. congruence.
+
+    intros H.
     
 End Evote.
