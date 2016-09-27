@@ -609,17 +609,14 @@ Module Evote.
                                   (W k) (monotone_operator_w k)) (W k)).
     split. apply Fixpoints.greatest_fixed_point_is_fixed_point.
     apply Fixpoints.greatest_fixed_point_is_greatest.
-
     assert (Hlfp : Fixpoints.lfp (Fixpoints.least_fixed_point
                                     (cand * cand) (all_pairs cand_all)
                                     (all_pairs_universal cand_all cand_fin)
                                     (O k) (monotone_operator k)) (O k)).
     split. apply Fixpoints.least_fixed_point_is_fixed_point.
     apply Fixpoints.least_fixed_point_is_least.
-    
     specialize (Fixpoints.operator_equality (cand * cand) (O k) (W k) (monotone_operator_w k)
                                             (duality_operator k) _ _ Hlfp Hgfp); intros.
-
     unfold Fixpoints.greatest_fixed_point in *.
     unfold Fixpoints.least_fixed_point in *.
     unfold Fixpoints.full_ss in *. unfold Fixpoints.empty_ss in *.
@@ -633,7 +630,48 @@ Module Evote.
     specialize (H2 (c, d) Hp). specialize (H0 (c, d) H2).
     unfold Fixpoints.complement in H0.
     apply negb_true_iff  in H0. congruence.
-
+    (* reverse direction *)
     intros H.
-    
+    assert (Ht :
+              Fixpoints.least_fixed_point
+                (cand * cand) (all_pairs cand_all)
+                (all_pairs_universal cand_all cand_fin) (O k) (monotone_operator k) (c, d) = true 
+              <-> Path k c d). apply path_lfp.
+    assert (Hl : forall (A B : Prop), (A <-> B) -> (~A <-> ~B)) by intuition.
+    apply Hl in Ht. apply Ht in H. clear Hl. clear Ht.
+    apply not_true_is_false in H. apply negb_true_iff in H.
+
+
+     assert (Hgfp : Fixpoints.gfp (Fixpoints.greatest_fixed_point
+                                  (cand * cand) (all_pairs cand_all)
+                                  (all_pairs_universal cand_all cand_fin)
+                                  (W k) (monotone_operator_w k)) (W k)).
+    split. apply Fixpoints.greatest_fixed_point_is_fixed_point.
+    apply Fixpoints.greatest_fixed_point_is_greatest.
+    assert (Hlfp : Fixpoints.lfp (Fixpoints.least_fixed_point
+                                    (cand * cand) (all_pairs cand_all)
+                                    (all_pairs_universal cand_all cand_fin)
+                                    (O k) (monotone_operator k)) (O k)).
+    split. apply Fixpoints.least_fixed_point_is_fixed_point.
+    apply Fixpoints.least_fixed_point_is_least.
+    specialize (Fixpoints.operator_equality (cand * cand) (O k) (W k) (monotone_operator_w k)
+                                            (duality_operator k) _ _ Hlfp Hgfp); intros.
+    apply Fixpoints.eeq_complement in H0. 
+    assert
+      (Ht : Fixpoints.pred_eeq
+              (Fixpoints.complement
+                 (Fixpoints.complement
+                    (Fixpoints.greatest_fixed_point
+                       (cand * cand) (all_pairs cand_all)
+                       (all_pairs_universal cand_all cand_fin) (W k) (monotone_operator_w k))))
+              (Fixpoints.greatest_fixed_point
+                 (cand * cand) (all_pairs cand_all)
+                 (all_pairs_universal cand_all cand_fin) (W k) (monotone_operator_w k))).
+    apply Fixpoints.complement_id.
+    specialize (Fixpoints.eeq_trans _ _ _ H0 Ht); intros.
+    destruct H1. unfold Fixpoints.pred_subset in *.
+    unfold Fixpoints.complement in *.
+    pose proof (H1 (c, d)) H. assumption.
+  Qed.
+  
 End Evote.
