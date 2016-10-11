@@ -673,5 +673,9 @@ Module Evote.
     unfold Fixpoints.complement in *.
     pose proof (H1 (c, d)) H. assumption.
   Qed.
-  
+
+  Theorem th2 : forall c, wins c -> ev c.
+  Proof.
+    intros c H. unfold wins in H. unfold ev.
+    
 End Evote.
