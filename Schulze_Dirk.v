@@ -674,8 +674,22 @@ Module Evote.
     pose proof (H1 (c, d)) H. assumption.
   Qed.
 
+  Definition constructive_prop c d :=
+    fun k : nat => Path k c d  /\ (forall l : nat, Path l d c -> l <= k).
+
+  Lemma constructive_deci : forall (c d : cand) (k : nat),
+      {constructive_prop c d k} + {~(constructive_prop c d k)}.
+  Proof. Admitted.
+    
   Theorem th2 : forall c, wins c -> ev c.
   Proof.
     intros c H. unfold wins in H. unfold ev.
+    intros d. specialize (H d).
+    Require Import Coq.Logic.ConstructiveEpsilon.
+    Check constructive_indefinite_description_nat.
+    specialize (constructive_indefinite_ground_description_nat
+               (constructive_prop c d) (constructive_deci c d) H); intros H1.
+    destruct H1 as [n H1]. exists n. split.
+
     
 End Evote.
