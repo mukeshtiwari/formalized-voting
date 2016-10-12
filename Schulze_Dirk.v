@@ -686,10 +686,10 @@ Module Evote.
     intros c H. unfold wins in H. unfold ev.
     intros d. specialize (H d).
     Require Import Coq.Logic.ConstructiveEpsilon.
-    Check constructive_indefinite_description_nat.
     specialize (constructive_indefinite_ground_description_nat
                (constructive_prop c d) (constructive_deci c d) H); intros H1.
-    destruct H1 as [n H1]. exists n. split.
-
+    destruct H1 as [n H1]. exists n. split. unfold constructive_prop in H1.
+    destruct H1 as [H1 H2].
+    
     
 End Evote.
