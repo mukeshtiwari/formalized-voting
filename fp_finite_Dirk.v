@@ -684,5 +684,15 @@ Module Fixpoints.
     apply H1 in H13. split. assumption. apply subset_comp in H7. assumption.
     assumption.
   Qed.
+
+  Definition coclosed (A : Type) (O : Op A) (p : pred A) :=
+    pred_subset p (O p).
+
+  Lemma fixed_point_is_coclosed : forall (A : Type) (O : Op A) (p : pred A),
+      fixed_point A O p -> coclosed A O p.
+  Proof.
+    intros A O p H. unfold fixed_point in H.
+    unfold coclosed. unfold pred_eeq in H. firstorder.
+  Qed.
   
 End Fixpoints.
