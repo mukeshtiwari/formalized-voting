@@ -382,7 +382,7 @@ Module Fixpoints.
     transitivity (length l). assumption. assumption.
     assert (False). omega. inversion H.
     (* case k >= n *)
-    Check inc_chain_trans.
+    Check inc_chain_trans. 
     replace k with (n + (k-n))%nat.
     apply inc_chain_trans. assumption. omega.
   Qed.

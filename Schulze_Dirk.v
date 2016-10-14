@@ -6,6 +6,7 @@ Require Import Coq.Arith.Compare_dec.
 Require Import Coq.omega.Omega.
 Require Import Bool.Sumbool.
 Require Import Bool.Bool.
+Require Import Coq.Logic.ConstructiveEpsilon.
 Require Import fp_finite_Dirk.
 Import ListNotations.
 
@@ -131,7 +132,7 @@ Module Evote.
    *)
 
   Definition ev (c : cand) := forall d : cand, existsT (k : nat),
-    (PathT k c d) * (existsT (f : (cand * cand) -> bool), f (d, c) = true /\ coclosed k f).
+    (PathT k c d) * (existsT (f : (cand * cand) -> bool), f (d, c) = true /\ coclosed (k + 1) f).
                      
   (* type-level paths allow to construct evidence for the existence of paths *)
   (* TODO: change name of lemma? *)
@@ -283,7 +284,7 @@ Module Evote.
    *)
 
   Lemma coclosed_path : forall k f, coclosed k f -> forall s x y,
-        Path s x y -> f (x, y) = true -> s <= k.
+        Path s x y -> f (x, y) = true -> s < k.
   Proof.
     intros k f Hcc x s y p. induction p.
     intros Hin. unfold coclosed in Hcc.
@@ -309,7 +310,9 @@ Module Evote.
     exists k. split.
     apply equivalent. assumption.
     intros s p. destruct Hc as [l [Hin Hcc]].
+    assert (Ht : s < k + 1). 
     apply coclosed_path with (f := l) (x := d) (y := c); assumption.
+    omega.
   Qed.
 
   
@@ -530,17 +533,17 @@ Module Evote.
       <-> Path k c d.
   Proof.
     split. intros H. apply wins_evi. exists (length (all_pairs cand_all)). assumption.
-    intros H. apply wins_evi in H. destruct H as [n H]. unfold Fixpoints.least_fixed_point.
-    unfold Fixpoints.empty_ss. remember (length (all_pairs cand_all)) as v.    
-    specialize (Fixpoints.iter_fin v (O k) (monotone_operator k)). intros.
+    intros H. apply wins_evi in H. destruct H as [n H].
+    unfold Fixpoints.least_fixed_point,Fixpoints.empty_ss.
+    remember (length (all_pairs cand_all)) as v.    
+    specialize (Fixpoints.iter_fin v (O k) (monotone_operator k)); intros.
     unfold Fixpoints.bounded_card in H0.
     assert (Ht : (exists l : list (cand * cand), (forall a : cand * cand, In a l) /\ length l <= v)).
     {
       exists (all_pairs cand_all). split. apply (all_pairs_universal cand_all cand_fin).
       omega.
     }
-    specialize (H0 Ht n). unfold Fixpoints.pred_subset in H0.
-    apply H0. assumption.
+    specialize (H0 Ht n). auto.
   Qed.
 
   Check O.
@@ -642,7 +645,7 @@ Module Evote.
     apply not_true_is_false in H. apply negb_true_iff in H.
 
 
-     assert (Hgfp : Fixpoints.gfp (Fixpoints.greatest_fixed_point
+    assert (Hgfp : Fixpoints.gfp (Fixpoints.greatest_fixed_point
                                   (cand * cand) (all_pairs cand_all)
                                   (all_pairs_universal cand_all cand_fin)
                                   (W k) (monotone_operator_w k)) (W k)).
@@ -674,22 +677,85 @@ Module Evote.
     pose proof (H1 (c, d)) H. assumption.
   Qed.
 
-  Definition constructive_prop c d :=
-    fun k : nat => Path k c d  /\ (forall l : nat, Path l d c -> l <= k).
+  Definition constructive_prop c d k :=
+    Path k c d  /\ (forall l : nat, Path l d c -> l <= k).
 
   Lemma constructive_deci : forall (c d : cand) (k : nat),
       {constructive_prop c d k} + {~(constructive_prop c d k)}.
-  Proof. Admitted.
-    
+  Proof.
+    intros c d k. unfold constructive_prop.
+  Admitted.
+
+  
+  Lemma existsb_exists_type :
+    forall (A : Type) (f : A -> bool) l, existsb f l = true -> existsT x, In x l /\ f x = true.
+  Proof.    
+      induction l; simpl; intuition.
+      inversion H.
+      destruct (f a) eqn: Ht. exists a. split. firstorder. intuition.
+      destruct (existsb f l) eqn : Ht1. specialize (IHl eq_refl).
+      destruct IHl. exists x. split. right. firstorder. intuition.
+      inversion H.
+  Qed.
+  
+ 
+
+  Lemma pathT_fixpoint : forall k n c d,
+      Fixpoints.iter (O k) n (fun _ => false) (c, d) = true ->
+      PathT k c d.
+  Proof.
+    intros k. induction n.
+    intros c d H. inversion H.
+    intros c d H. simpl in H. unfold O in H at 1.
+    destruct (elg k (c, d)) eqn:Ht. unfold elg in Ht.
+    apply gebedge_true in Ht. simpl in Ht. constructor 1. assumption.
+    destruct (mpg k (c, d) (Fixpoints.iter (O k) n (fun _ : cand * cand => false))) eqn:Ht1.
+    unfold mpg in Ht1.  simpl in Ht1.
+    specialize (existsb_exists_type _
+               (fun b : cand =>
+                  elg k (c, b) && Fixpoints.iter (O k) n (fun _ : cand * cand => false) (b, d))
+               cand_all Ht1); intros H1.
+    destruct H1 as [m H1]. constructor 2 with (d := m). destruct H1.
+    apply andb_true_iff in H1. destruct H1. unfold elg in H1. simpl in H1.
+    apply gebedge_true in H1. auto.
+    destruct H1. apply IHn. apply andb_true_iff in H1. firstorder.
+    inversion H.
+  Qed.
+  
+  (*
+  Lemma fixpoint_is_coclosed : (A : Type) (k : nat) (H : Op A) (f : pred A), 
+                               (H1 : Fixpoints.fixed_point A H f) ->
+                               coclosed k 
+    *)
   Theorem th2 : forall c, wins c -> ev c.
   Proof.
     intros c H. unfold wins in H. unfold ev.
     intros d. specialize (H d).
-    Require Import Coq.Logic.ConstructiveEpsilon.
     specialize (constructive_indefinite_ground_description_nat
                (constructive_prop c d) (constructive_deci c d) H); intros H1.
     destruct H1 as [n H1]. exists n. split. unfold constructive_prop in H1.
-    destruct H1 as [H1 H2].
+    destruct H1 as [H1 H2]. specialize (wins_evi n c d); intros H3.
+    destruct H3 as [H3 H4]. specialize (H3 H1).
+    remember (all_pairs cand_all) as v.
+    assert (Ht1 : Fixpoints.iter (O n) (length v) Fixpoints.empty_ss (c, d) = true).
+    assert (Ht2 : (exists l : list (cand * cand), (forall a : cand * cand, In a l) /\ length l <= (length v))).
+    {
+      exists (all_pairs cand_all). split. apply (all_pairs_universal cand_all cand_fin).
+      rewrite Heqv. omega.
+    }
+    destruct H3 as [n0 H5].
+    assert (Ht3 : Fixpoints.pred_subset (Fixpoints.iter (O n) n0 Fixpoints.empty_ss)
+                                        (Fixpoints.iter (O n) (length v) Fixpoints.empty_ss)).
+    apply (Fixpoints.iter_fin (length v) (O n) (monotone_operator n) Ht2).
+    unfold Fixpoints.pred_subset in Ht3. specialize (Ht3 (c, d) H5). assumption.
+    apply pathT_fixpoint with (n := length v). auto.
+
+    (* second one *)
+    exists (Fixpoints.greatest_fixed_point (cand * cand) (all_pairs cand_all)
+                                      (all_pairs_universal cand_all cand_fin)
+                                      (W (S n)) (monotone_operator_w (S n))).  split.
+    unfold constructive_prop in H1. destruct H1 as [H1 H2].
+    apply path_gfp; intros H3. specialize (H2 (S n) H3). omega.
     
     
 End Evote.
