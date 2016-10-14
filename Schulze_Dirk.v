@@ -721,12 +721,10 @@ Module Evote.
     destruct H1. apply IHn. apply andb_true_iff in H1. firstorder.
     inversion H.
   Qed.
+
+ 
   
-  (*
-  Lemma fixpoint_is_coclosed : (A : Type) (k : nat) (H : Op A) (f : pred A), 
-                               (H1 : Fixpoints.fixed_point A H f) ->
-                               coclosed k 
-    *)
+ 
   Theorem th2 : forall c, wins c -> ev c.
   Proof.
     intros c H. unfold wins in H. unfold ev.
@@ -756,6 +754,9 @@ Module Evote.
                                       (W (S n)) (monotone_operator_w (S n))).  split.
     unfold constructive_prop in H1. destruct H1 as [H1 H2].
     apply path_gfp; intros H3. specialize (H2 (S n) H3). omega.
-    
+
+    apply Fixpoints.fixed_point_is_coclosed. replace (n + 1) with (S n).
+    apply Fixpoints.greatest_fixed_point_is_fixed_point. omega.
+  Qed.    
     
 End Evote.
