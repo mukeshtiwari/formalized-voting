@@ -696,8 +696,9 @@ Module Evote.
     apply not_true_is_false in H.
     right. intros [Hk Hl]. apply path_lfp in Hk. 
     unfold Fixpoints.least_fixed_point, Fixpoints.empty_ss in Hk.
-    rewrite <- Heqv in Hk.
-
+    unfold Fixpoints.pred in Hk. congruence.
+    
+    
     
   Lemma existsb_exists_type :
     forall (A : Type) (f : A -> bool) l, existsb f l = true -> existsT x, In x l /\ f x = true.
