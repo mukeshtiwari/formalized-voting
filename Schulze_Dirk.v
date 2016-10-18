@@ -684,9 +684,21 @@ Module Evote.
       {constructive_prop c d k} + {~(constructive_prop c d k)}.
   Proof.
     intros c d k. unfold constructive_prop.
-  Admitted.
+    remember (all_pairs cand_all) as v.
+    destruct (bool_dec ((Fixpoints.iter (O k) (length v) (fun _  => false)) (c, d)) true) as [H | H].
+    left. split. apply path_lfp. unfold Fixpoints.least_fixed_point. unfold Fixpoints.empty_ss.
+    rewrite <- Heqv. assumption.
+    intros l Hl. apply path_lfp in Hl.
+    unfold Fixpoints.least_fixed_point in Hl. unfold Fixpoints.empty_ss in Hl.
+    rewrite <- Heqv in Hl.
+    (* admit it for the moment *)
+    admit.
+    apply not_true_is_false in H.
+    right. intros [Hk Hl]. apply path_lfp in Hk. 
+    unfold Fixpoints.least_fixed_point, Fixpoints.empty_ss in Hk.
+    rewrite <- Heqv in Hk.
 
-  
+    
   Lemma existsb_exists_type :
     forall (A : Type) (f : A -> bool) l, existsb f l = true -> existsT x, In x l /\ f x = true.
   Proof.    
