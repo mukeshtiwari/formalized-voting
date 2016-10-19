@@ -697,10 +697,7 @@ Module Evote.
     intros l Hp. assert ( Ht: l <= k \/ l >= (k + 1) ) by omega.
     destruct Ht. assumption.
     specialize (path_lk l (k + 1) c d H0 Hp); intros. congruence.
-  Qed.
-
-
-    
+  Qed. 
     
   Lemma constructive_deci : forall (c d : cand) (k : nat),
       {constructive_prop c d k} + {~(constructive_prop c d k)}.
@@ -727,13 +724,10 @@ Module Evote.
 
     right. unfold not. intros H1. destruct H1 as [H1 H2].
     apply not_true_is_false in H.
-    apply path_lfp in H1. unfold Fixpoints.least_fixed_point, Fixpoints.empty_ss,
-      Fixpoints.pred in H1. congruence.
-    
-  Qed.
-  
-  
-    
+    apply path_lfp in H1.
+    unfold Fixpoints.least_fixed_point, Fixpoints.empty_ss,Fixpoints.pred in H1.
+    congruence.
+  Qed.  
     
   Lemma existsb_exists_type :
     forall (A : Type) (f : A -> bool) l, existsb f l = true -> existsT x, In x l /\ f x = true.
@@ -746,8 +740,6 @@ Module Evote.
       inversion H.
   Qed.
   
- 
-
   Lemma pathT_fixpoint : forall k n c d,
       Fixpoints.iter (O k) n (fun _ => false) (c, d) = true ->
       PathT k c d.
@@ -769,9 +761,6 @@ Module Evote.
     destruct H1. apply IHn. apply andb_true_iff in H1. firstorder.
     inversion H.
   Qed.
-
- 
-  
  
   Theorem th2 : forall c, wins c -> ev c.
   Proof.
