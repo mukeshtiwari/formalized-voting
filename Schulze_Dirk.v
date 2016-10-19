@@ -680,24 +680,59 @@ Module Evote.
   Definition constructive_prop c d k :=
     Path k c d  /\ (forall l : nat, Path l d c -> l <= k).
 
+  Lemma path_lk :
+    forall l k c d, l >= k -> Path l c d -> Path k c d.
+  Proof.
+    intros l k c d Hl Hp. induction Hp.
+    constructor 1. omega.
+    constructor 2 with (d := d). omega. assumption.
+  Qed.
+  
+  Lemma path_l_less_than_k :
+    forall k c d, (forall l, Path l c d -> l <= k) <-> ~Path (k + 1) c d.
+  Proof.
+    intros k c d. split; intros H. unfold not; intros Hk.
+    specialize (H (k + 1) Hk). omega.
+
+    intros l Hp. assert ( Ht: l <= k \/ l >= (k + 1) ) by omega.
+    destruct Ht. assumption.
+    specialize (path_lk l (k + 1) c d H0 Hp); intros. congruence.
+  Qed.
+
+
+    
+    
   Lemma constructive_deci : forall (c d : cand) (k : nat),
       {constructive_prop c d k} + {~(constructive_prop c d k)}.
   Proof.
     intros c d k. unfold constructive_prop.
     remember (all_pairs cand_all) as v.
     destruct (bool_dec ((Fixpoints.iter (O k) (length v) (fun _  => false)) (c, d)) true) as [H | H].
-    left. split. apply path_lfp. unfold Fixpoints.least_fixed_point. unfold Fixpoints.empty_ss.
-    rewrite <- Heqv. assumption.
-    intros l Hl. apply path_lfp in Hl.
-    unfold Fixpoints.least_fixed_point in Hl. unfold Fixpoints.empty_ss in Hl.
-    rewrite <- Heqv in Hl.
-    (* admit it for the moment *)
-    admit.
-    apply not_true_is_false in H.
-    right. intros [Hk Hl]. apply path_lfp in Hk. 
-    unfold Fixpoints.least_fixed_point, Fixpoints.empty_ss in Hk.
-    unfold Fixpoints.pred in Hk. congruence.
+    destruct (bool_dec ((Fixpoints.iter (W (k + 1)) (length v) (fun _  => true)) (d, c)) true)
+      as [H1 | H1].
     
+    left. split. apply path_lfp. unfold Fixpoints.least_fixed_point, Fixpoints.empty_ss.
+    rewrite <- Heqv. assumption.
+    apply path_l_less_than_k. apply path_gfp.
+    unfold Fixpoints.greatest_fixed_point, Fixpoints.full_ss.
+    rewrite <- Heqv. assumption.
+
+    apply not_true_is_false in H1.
+    right. unfold not. intros H2. destruct H2 as [H2 H3].
+
+    specialize (path_l_less_than_k k d c); intros. destruct H0.
+    specialize (H0 H3). apply path_gfp in H0.
+    unfold Fixpoints.greatest_fixed_point, Fixpoints.full_ss, Fixpoints.pred in H0.
+    congruence.
+
+    right. unfold not. intros H1. destruct H1 as [H1 H2].
+    apply not_true_is_false in H.
+    apply path_lfp in H1. unfold Fixpoints.least_fixed_point, Fixpoints.empty_ss,
+      Fixpoints.pred in H1. congruence.
+    
+  Qed.
+  
+  
     
     
   Lemma existsb_exists_type :
