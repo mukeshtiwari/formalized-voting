@@ -14,7 +14,7 @@ Import ListNotations.
 Module Voting.
 
   Parameter cand : Type.
-  Parameter ballot : list (list cand).
+  Parameter ballot : list cand.
 
   
   
