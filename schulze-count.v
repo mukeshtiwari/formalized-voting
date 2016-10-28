@@ -2,6 +2,7 @@
 
 Require Import Coq.ZArith.ZArith. (* integers *)
 Require Import Coq.Lists.List.    (* lists *)
+Require Import Coq.Lists.ListDec.
 
 Section Count.
 
@@ -60,20 +61,7 @@ Section Count.
   (* theorem to be proved: for all ballots, there exists a count *)
   (* that either ends in fin or inv. *)
 
-  
-  Lemma decidable_nodup : forall (A : Type)  (Hdec : forall (x y : A), {x = y} + {x <> y}) (l : list A),
-      {NoDup l} + {~NoDup l}.
-  Proof.
-    Require Export Coq.Lists.ListDec. intros A Hxy l.
-    apply NoDup_dec. assumption.
-  Qed.
-  
-  Lemma include_dec : forall (A : Type) (Hdec : forall (x y : A), {x = y} + {x <> y})
-                        (l1 l2 : list A),
-      {forall a : A, In a l1 -> In a l2} + {~(forall a : A, In a l1 -> In a l2)}.
-  Proof.
-    apply incl_dec.
-  Qed.
+ 
 
   Lemma equivalence : forall b : ballot, (forall c : cand, In c (concat b)) <->
                                     (forall c : cand, In c cand_all -> In c (concat b)).
@@ -83,8 +71,8 @@ Section Count.
   
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
-    pose proof decidable_nodup cand dec_cand.
-    pose proof include_dec cand dec_cand. intros b.
+    pose proof NoDup_dec dec_cand.
+    pose proof incl_dec dec_cand. intros b.
     unfold ballot_valid.
     destruct (X (concat b)).
     destruct (X0 cand_all (concat b)).
