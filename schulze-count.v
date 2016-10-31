@@ -85,6 +85,10 @@ Section Count.
   
   Theorem exists_cound : forall (bs : list ballot), {b : ballot & Count bs (invalid b)}
                                              + Count bs checked.
-  Proof. Admitted.
-
-  
+  Proof.
+    induction bs. admit.
+    destruct IHbs. destruct s. left. exists x.
+    apply inv. inversion c. firstorder.
+    unfold not; intros H. inversion c. firstorder.
+    right. inversion c. apply chk with (b := b). firstorder.
+    auto.
