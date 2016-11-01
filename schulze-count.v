@@ -51,9 +51,9 @@ Section Count.
   (* we interpret an element of Count n as evidence of a count *)
   (* having proceeded to stage n.                              *)
   Inductive Count (bs: list ballot): Node -> Type :=
-  | chk : (forall b, In b bs -> ballot_valid b) -> Count bs (checked)
+  | chk : (forall b, In b bs -> ballot_valid b) -> Count bs checked
   | inv : forall b, In b bs -> ~ (ballot_valid b) -> Count bs (invalid b)
-  | mrg : Count bs (checked) -> forall m: cand -> cand -> Z,
+  | mrg : Count bs checked -> forall m: cand -> cand -> Z,
       is_marg m bs -> Count bs (margin m)
   | fin : forall m, Count bs (margin m) -> forall r, Count bs (counted m r).
 
@@ -100,6 +100,7 @@ Section Count.
     assumption.
   Qed.
 
+  
   
 
   
