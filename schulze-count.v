@@ -51,7 +51,7 @@ Section Count.
   (* we interpret an element of Count n as evidence of a count *)
   (* having proceeded to stage n.                              *)
   Inductive Count (bs: list ballot): Node -> Type :=
-  | chk : forall b, In b bs -> ballot_valid b -> Count bs (checked)
+  | chk : (forall b, In b bs -> ballot_valid b) -> Count bs (checked)
   | inv : forall b, In b bs -> ~ (ballot_valid b) -> Count bs (invalid b)
   | mrg : Count bs (checked) -> forall m: cand -> cand -> Z,
       is_marg m bs -> Count bs (margin m)
@@ -86,9 +86,21 @@ Section Count.
   Theorem exists_cound : forall (bs : list ballot), {b : ballot & Count bs (invalid b)}
                                              + Count bs checked.
   Proof.
-    induction bs. admit.
-    destruct IHbs. destruct s. left. exists x.
+    induction bs. right.
+    apply chk. intros b H. inversion H.
+    pose proof valid_or_invalid_ballot a as Ha.
+    destruct Ha.
+    destruct IHbs. left. destruct s. exists x.
     apply inv. inversion c. firstorder.
     unfold not; intros H. inversion c. firstorder.
-    right. inversion c. apply chk with (b := b). firstorder.
-    auto.
+    right. apply chk. intros. apply in_inv in H.
+    destruct H. rewrite <- H. assumption.
+    inversion c. specialize (H0 b0 H). assumption.
+    left. exists a. apply inv. firstorder.
+    assumption.
+  Qed.
+
+  
+   
+    
+    
