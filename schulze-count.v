@@ -83,9 +83,9 @@ Section Count.
     right. firstorder.
   Qed.
   
-  Theorem exists_cound : forall (bs : list ballot), {b : ballot & Count bs (invalid b)}
+  Theorem exists_count : forall (bs : list ballot), {b : ballot & Count bs (invalid b)}
                                              + Count bs checked.
-  Proof.
+  Proof.    
     induction bs. right.
     apply chk. intros b H. inversion H.
     pose proof valid_or_invalid_ballot a as Ha.
@@ -99,6 +99,8 @@ Section Count.
     left. exists a. apply inv. firstorder.
     assumption.
   Qed.
+
+  
 
   
    
