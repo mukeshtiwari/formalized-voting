@@ -3,6 +3,14 @@
 Require Import Coq.ZArith.ZArith. (* integers *)
 Require Import Coq.Lists.List.    (* lists *)
 Require Import Coq.Lists.ListDec.
+Require Import Notations.
+Require Import Coq.Lists.List.
+Require Import Coq.Arith.Le.
+Require Import Coq.Numbers.Natural.Peano.NPeano.
+Require Import Coq.Arith.Compare_dec.
+Require Import Coq.omega.Omega.
+Require Import Bool.Sumbool.
+Require Import Bool.Bool.
 
 Section Count.
 
@@ -100,8 +108,30 @@ Section Count.
     assumption.
   Qed.
 
+ 
+  Definition bool_in c l :=
+    proj1_sig (bool_of_sumbool (in_dec dec_cand c l)).
   
   
+  Fixpoint list_preorder l (c d : cand) : bool :=
+    match l with
+    | nil => false
+    | h :: t =>
+      match bool_in c h, bool_in d h with
+      | true, true => false
+      | true, false => true
+      | false, true => false
+      | false, false => list_preorder t c d
+      end
+      (*
+      if andb (bool_in c h) (bool_in d h) then false
+      else if andb (bool_in c h) (negb (bool_in d h)) then true
+           else if andb (negb (bool_in c h)) (bool_in d h) then false
+                else list_preorder t c d *)
+    end.
+
+  
+                                  
 
   
    
