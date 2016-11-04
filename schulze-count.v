@@ -51,9 +51,38 @@ Section Count.
   | checked : Node
   | invalid : ballot -> Node
   | margin  : (cand -> cand -> Z) -> Node
-  | counted (m: cand -> cand -> Z): (forall c, (wins c m) + (loses c m)) -> Node.
+  | counted (m: cand -> cand -> Z): (forall c, (wins c m) + (loses c m)) -> Node
+  | state : (list ballot * list ballot) -> (cand -> cand -> Z) -> Node.
 
   Check counted.
+
+  Definition bool_in c l :=
+    proj1_sig (bool_of_sumbool (in_dec dec_cand c l)).
+
+  Fixpoint list_preorder l (c d : cand) : bool :=
+    match l with
+    | nil => false
+    | h :: t =>
+      match bool_in c h, bool_in d h with
+      | true, true => false
+      | true, false => true
+      | false, true => false
+      | false, false => list_preorder t c d
+      end
+    (*
+      if andb (bool_in c h) (bool_in d h) then false
+      else if andb (bool_in c h) (negb (bool_in d h)) then true
+           else if andb (negb (bool_in c h)) (bool_in d h) then false
+                else list_preorder t c d *)
+    end.
+
+  Definition nty (c d : cand) := 0%Z.
+
+  Definition inc (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
+    (nt c d = t c d + 1)%Z /\ forall e f, nt e f = t e f.
+
+  Definition dec (c d : cand) (t : cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
+    (nt c d = t c d - 1)%Z /\  forall e f, nt e f = t e f.
 
   (* the type Count describes how valid counts are conducted.  *)
   (* we interpret an element of Count n as evidence of a count *)
@@ -62,21 +91,31 @@ Section Count.
   | chk : (forall b, In b bs -> ballot_valid b) -> Count bs checked
   | inv : forall b, In b bs -> ~ (ballot_valid b) -> Count bs (invalid b)
   | mrg : Count bs checked -> forall m: cand -> cand -> Z,
-      is_marg m bs -> Count bs (margin m)
-  | fin : forall m, Count bs (margin m) -> forall r, Count bs (counted m r).
-
-
+        is_marg m bs -> Count bs (margin m)
+  | fin : forall m, Count bs (margin m) -> forall r, Count bs (counted m r)
+  | ax u t : u = bs -> t = nty -> Count bs (state (nil, u) t) (* mine addition *)
+  | c1 c d  u0 m u1 t nt :
+      bs = (u0 ++ (cons m nil) ++ u1) -> Count bs (state (u0, m :: u1) t) ->
+      list_preorder m c d = true -> inc c d t nt ->
+      Count bs (state (u0 ++ (cons m nil) , u1) nt)
+  | c2  c d  u0 m u1 t nt :
+      bs = (u0 ++ (cons m nil) ++ u1) -> Count bs (state (u0, m :: u1) t) ->
+      list_preorder m c d = false -> dec c d t nt ->
+      Count bs (state (u0 ++ (cons m nil) , u1) nt)
+  | c3 m r t ls : bs = ls ->  Count bs (state (ls, nil) t) -> m = t -> Count bs (counted m r).
+  (* replacing m with t is not working *)
+  
   (* theorem to be proved: for all ballots, there exists a count *)
   (* that either ends in fin or inv. *)
 
- 
+
 
   Lemma equivalence : forall b : ballot, (forall c : cand, In c (concat b)) <->
                                     (forall c : cand, In c cand_all -> In c (concat b)).
   Proof.
     split; intros; firstorder.
   Qed.
-  
+
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
     pose proof NoDup_dec dec_cand.
@@ -90,10 +129,10 @@ Section Count.
     right. firstorder.
     right. firstorder.
   Qed.
-  
+
   Theorem exists_count : forall (bs : list ballot), {b : ballot & Count bs (invalid b)}
-                                             + Count bs checked.
-  Proof.    
+                                               + Count bs checked.
+  Proof.
     induction bs. right.
     apply chk. intros b H. inversion H.
     pose proof valid_or_invalid_ballot a as Ha.
@@ -108,11 +147,11 @@ Section Count.
     assumption.
   Qed.
 
- 
+
   Definition bool_in c l :=
     proj1_sig (bool_of_sumbool (in_dec dec_cand c l)).
-  
-  
+
+
   Fixpoint list_preorder l (c d : cand) : bool :=
     match l with
     | nil => false
@@ -123,17 +162,9 @@ Section Count.
       | false, true => false
       | false, false => list_preorder t c d
       end
-      (*
+    (*
       if andb (bool_in c h) (bool_in d h) then false
       else if andb (bool_in c h) (negb (bool_in d h)) then true
            else if andb (negb (bool_in c h)) (bool_in d h) then false
                 else list_preorder t c d *)
     end.
-
-  
-                                  
-
-  
-   
-    
-    
