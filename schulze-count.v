@@ -79,10 +79,11 @@ Section Count.
   Definition nty (c d : cand) := 0%Z.
 
   Definition inc (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
-    (nt c d = t c d + 1)%Z /\ forall e f, e <> c -> d <> f -> nt e f = t e f.
+    (nt c d = t c d + 1)%Z /\
+    (nt d c = t d c - 1)%Z.
 
   Definition dec (c d : cand) (t : cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
-    (nt c d = t c d - 1)%Z /\  forall e f, e <> c -> d <> f -> nt e f = t e f.
+    nt c d = t c d.
 
   (* the type Count describes how valid counts are conducted.  *)
   (* we interpret an element of Count n as evidence of a count *)
@@ -94,14 +95,14 @@ Section Count.
         is_marg m bs -> Count bs (margin m)
   | fin : forall m, Count bs (margin m) -> forall r, Count bs (counted m r)
   | ax us t : us = bs -> t = nty -> Count bs (state ([], us) t) (* mine addition *)
-  | c1 c d  u0 m u1 t nt :
+  | c1 u0 m u1 t nt :
       bs = (u0 ++ [m] ++ u1) -> Count bs (state (u0, m :: u1) t) ->
-      list_preorder m c d = true -> inc c d t nt ->
-      Count bs (state (u0 ++ [m] , u1) nt)
-  | c2  c d  u0 m u1 t nt :
+      (forall (c : cand), (forall (d : cand), c <> d -> list_preorder m c d = true -> inc c d t nt)) ->
+      Count bs (state (u0 ++ [m] , u1) nt)          
+  | c2  u0 m u1 t nt :
       bs = (u0 ++ [m] ++ u1) -> Count bs (state (u0, m :: u1) t) ->
-      list_preorder m c d = false -> dec c d t nt ->
-      Count bs (state (u0 ++ [m] , u1) nt)
+      (forall (c : cand), (forall (d : cand), c <> d -> list_preorder m c d = false -> dec c d t nt)) ->
+      Count bs (state (u0 ++ [m] , u1) nt) 
   | c3 m r t us : us = bs ->  Count bs (state (us, []) t) -> m = t -> Count bs (counted m r).
   (* replacing m with t is not working *)
   
@@ -214,9 +215,14 @@ Lemma l3 : Count cand cand_decidable wins loses is_marg [one_vote]
                  (state cand wins loses ([one_vote], []) margin_fun).
 Proof.
   Check c1.
-  apply (c1 cand cand_decidable wins loses is_marg [one_vote] a b [] one_vote [] (nty cand) margin_fun). auto.
-  apply l2. unfold list_preorder.
-  simpl. unfold bool_in at 1.
+  apply (c1 cand cand_decidable wins loses is_marg [one_vote] [] one_vote [] (nty cand) margin_fun). auto.
+  apply l2. intros c d H H1.
+  unfold inc. split.
+  unfold margin_fun. destruct c.
+  destruct d. unfold not in H. specialize (H eq_refl). inversion H.
+  simpl. reflexivity. simpl.
+  
+  unfold bool_in at 1.
   Check (in_dec cand_decidable a [a]).
   
   replace (proj1_sig (bool_of_sumbool (in_dec cand_decidable a [a]))) with true.
