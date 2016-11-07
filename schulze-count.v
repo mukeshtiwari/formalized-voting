@@ -108,8 +108,9 @@ Section Count.
   (* theorem to be proved: for all ballots, there exists a count *)
   (* that either ends in fin or inv. *)
 
-
-
+ 
+  
+  
   Lemma equivalence : forall b : ballot, (forall c : cand, In c (concat b)) <->
                                     (forall c : cand, In c cand_all -> In c (concat b)).
   Proof.
@@ -147,24 +148,83 @@ Section Count.
     assumption.
   Qed.
 
+End Count.
 
-  Definition bool_in c l :=
-    proj1_sig (bool_of_sumbool (in_dec dec_cand c l)).
+Inductive cand : Type :=
+| a : cand
+| b : cand
+| c : cand.
 
+Definition cand_all : list cand := [a; b; c].
 
-  Fixpoint list_preorder l (c d : cand) : bool :=
-    match l with
-    | nil => false
-    | h :: t =>
-      match bool_in c h, bool_in d h with
-      | true, true => false
-      | true, false => true
-      | false, true => false
-      | false, false => list_preorder t c d
-      end
-    (*
-      if andb (bool_in c h) (bool_in d h) then false
-      else if andb (bool_in c h) (negb (bool_in d h)) then true
-           else if andb (negb (bool_in c h)) (bool_in d h) then false
-                else list_preorder t c d *)
-    end.
+Lemma finite_cand : forall c : cand, In c cand_all.
+Proof.
+  intros c0. destruct c0. unfold cand_all.
+  firstorder. firstorder. firstorder.
+Qed.
+
+Lemma cand_decidable : forall c d : cand, {c = d} + {c <> d}.
+Proof.
+  decide equality.
+Qed.
+
+Definition one_vote := [[a]; [b]; [c]].
+Check ballot_valid.
+
+Lemma valid_vote : ballot_valid cand one_vote.
+Proof.
+  compute. firstorder. destruct c0; firstorder.
+  constructor. unfold not. intros. destruct H. inversion H.
+  inversion H. inversion H0. inversion H0.
+  constructor. unfold not; intros. inversion H.
+  inversion H0. inversion H0.
+  constructor. unfold not; intros. inversion H.
+  constructor.
+Qed.
+Check Count.
+
+Definition wins (a : cand)  (m : cand -> cand -> Z) := nat.
+Definition loses (a : cand) (m : cand -> cand -> Z) := nat.
+Check Count.
+
+Definition is_marg (m : cand -> cand -> Z) (bs : list (ballot cand)) := True.
+Check Count.
+Check checked.
+Lemma l1 : Count cand cand_decidable wins loses is_marg [one_vote]
+                 (checked cand wins loses).
+Proof.
+  constructor. intros. Check in_inv.
+  apply in_inv in H. destruct H. rewrite <- H.
+  apply valid_vote. inversion H.
+Qed.
+Check state.
+Lemma l2 : Count cand cand_decidable wins loses is_marg [one_vote]
+                 (state cand wins loses ([], [one_vote]) (fun (c d : cand) => 0%Z)).
+Proof.
+  constructor. auto. unfold nty. auto.
+Qed.
+
+Definition margin_fun (c d : cand) : Z:=
+  match c, d with
+  |a, b => 1
+  | _, _ => 0
+  end.
+
+Lemma l3 : Count cand cand_decidable wins loses is_marg [one_vote]
+                 (state cand wins loses ([one_vote], []) margin_fun).
+Proof.
+  Check c1.
+  apply (c1 cand cand_decidable wins loses is_marg [one_vote] a b [] one_vote [] (nty cand) margin_fun). auto.
+  apply l2. unfold list_preorder.
+  simpl. unfold bool_in at 1.
+  Check (in_dec cand_decidable a [a]).
+  
+  replace (proj1_sig (bool_of_sumbool (in_dec cand_decidable a [a]))) with true.
+  replace (bool_in cand cand_decidable b [a]) with false.
+  auto. unfold bool_in. admit. admit.
+  unfold inc. split. unfold margin_fun. auto.
+  intros. unfold margin_fun, nty. destruct e. destruct f. auto.
+  unfold not in H. specialize (H eq_refl). inversion H.
+  unfold not in H. specialize (H eq_refl). inversion H.
+  auto. auto.
+Admitted.
