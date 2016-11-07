@@ -11,7 +11,7 @@ Require Import Coq.Arith.Compare_dec.
 Require Import Coq.omega.Omega.
 Require Import Bool.Sumbool.
 Require Import Bool.Bool.
-
+Import ListNotations.
 Section Count.
 
   Variable cand : Type.
@@ -79,10 +79,10 @@ Section Count.
   Definition nty (c d : cand) := 0%Z.
 
   Definition inc (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
-    (nt c d = t c d + 1)%Z /\ forall e f, nt e f = t e f.
+    (nt c d = t c d + 1)%Z /\ forall e f, e <> c -> d <> f -> nt e f = t e f.
 
   Definition dec (c d : cand) (t : cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
-    (nt c d = t c d - 1)%Z /\  forall e f, nt e f = t e f.
+    (nt c d = t c d - 1)%Z /\  forall e f, e <> c -> d <> f -> nt e f = t e f.
 
   (* the type Count describes how valid counts are conducted.  *)
   (* we interpret an element of Count n as evidence of a count *)
@@ -93,16 +93,16 @@ Section Count.
   | mrg : Count bs checked -> forall m: cand -> cand -> Z,
         is_marg m bs -> Count bs (margin m)
   | fin : forall m, Count bs (margin m) -> forall r, Count bs (counted m r)
-  | ax u t : u = bs -> t = nty -> Count bs (state (nil, u) t) (* mine addition *)
+  | ax us t : us = bs -> t = nty -> Count bs (state ([], us) t) (* mine addition *)
   | c1 c d  u0 m u1 t nt :
-      bs = (u0 ++ (cons m nil) ++ u1) -> Count bs (state (u0, m :: u1) t) ->
+      bs = (u0 ++ [m] ++ u1) -> Count bs (state (u0, m :: u1) t) ->
       list_preorder m c d = true -> inc c d t nt ->
-      Count bs (state (u0 ++ (cons m nil) , u1) nt)
+      Count bs (state (u0 ++ [m] , u1) nt)
   | c2  c d  u0 m u1 t nt :
-      bs = (u0 ++ (cons m nil) ++ u1) -> Count bs (state (u0, m :: u1) t) ->
+      bs = (u0 ++ [m] ++ u1) -> Count bs (state (u0, m :: u1) t) ->
       list_preorder m c d = false -> dec c d t nt ->
-      Count bs (state (u0 ++ (cons m nil) , u1) nt)
-  | c3 m r t ls : bs = ls ->  Count bs (state (ls, nil) t) -> m = t -> Count bs (counted m r).
+      Count bs (state (u0 ++ [m] , u1) nt)
+  | c3 m r t us : us = bs ->  Count bs (state (us, []) t) -> m = t -> Count bs (counted m r).
   (* replacing m with t is not working *)
   
   (* theorem to be proved: for all ballots, there exists a count *)
