@@ -97,11 +97,11 @@ Section Count.
   | ax us t : us = bs -> t = nty -> Count bs (state ([], us) t) (* mine addition *)
   | c1 u0 m u1 t nt :
       bs = (u0 ++ [m] ++ u1) -> Count bs (state (u0, m :: u1) t) ->
-      (forall (c : cand), (forall (d : cand), c <> d -> list_preorder m c d = true -> inc c d t nt)) ->
+      (forall (c : cand), (forall (d : cand), list_preorder m c d = true -> inc c d t nt)) ->
       Count bs (state (u0 ++ [m] , u1) nt)          
   | c2  u0 m u1 t nt :
       bs = (u0 ++ [m] ++ u1) -> Count bs (state (u0, m :: u1) t) ->
-      (forall (c : cand), (forall (d : cand), c <> d -> list_preorder m c d = false -> dec c d t nt)) ->
+      (forall (c : cand), (forall (d : cand), list_preorder m c d = false -> dec c d t nt)) ->
       Count bs (state (u0 ++ [m] , u1) nt) 
   | c3 m r t us : us = bs ->  Count bs (state (us, []) t) -> m = t -> Count bs (counted m r).
   (* replacing m with t is not working *)
@@ -207,8 +207,15 @@ Qed.
 
 Definition margin_fun (c d : cand) : Z:=
   match c, d with
+  |a, a => 0
   |a, b => 1
-  | _, _ => 0
+  |a, c => 1
+  |b, a => -1
+  |b, b => 0
+  |b, c => 1
+  |c, a => -1
+  |c, b => -1
+  |c, c => 0
   end.
 
 Lemma l3 : Count cand cand_decidable wins loses is_marg [one_vote]
@@ -216,21 +223,46 @@ Lemma l3 : Count cand cand_decidable wins loses is_marg [one_vote]
 Proof.
   Check c1.
   apply (c1 cand cand_decidable wins loses is_marg [one_vote] [] one_vote [] (nty cand) margin_fun). auto.
-  apply l2. intros c d H H1.
+  apply l2. intros c d H.
   unfold inc. split.
   unfold margin_fun. destruct c.
-  destruct d. unfold not in H. specialize (H eq_refl). inversion H.
-  simpl. reflexivity. simpl.
-  
-  unfold bool_in at 1.
-  Check (in_dec cand_decidable a [a]).
-  
-  replace (proj1_sig (bool_of_sumbool (in_dec cand_decidable a [a]))) with true.
-  replace (bool_in cand cand_decidable b [a]) with false.
-  auto. unfold bool_in. admit. admit.
-  unfold inc. split. unfold margin_fun. auto.
-  intros. unfold margin_fun, nty. destruct e. destruct f. auto.
-  unfold not in H. specialize (H eq_refl). inversion H.
-  unfold not in H. specialize (H eq_refl). inversion H.
-  auto. auto.
-Admitted.
+  destruct d. unfold one_vote in H.
+  simpl in H.
+  replace ( bool_in cand cand_decidable a [a]) with true in H.
+  inversion H. unfold bool_in.
+  simpl (in_dec cand_decidable a [a]).
+  destruct (cand_decidable a a) eqn : H1. simpl.
+  auto. unfold not in n.
+  pose proof (n eq_refl). inversion H0.
+  simpl. auto. simpl. auto.
+  destruct d. unfold one_vote in H.
+  unfold list_preorder in H.
+  replace (bool_in cand cand_decidable b [a]) with false in H.
+  replace (bool_in cand cand_decidable a [a]) with true in H.
+  inversion H. unfold bool_in.
+  simpl (in_dec cand_decidable a [a]).
+  destruct (cand_decidable a a). auto.
+  unfold not in n. pose proof (n eq_refl). inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable b [a]).
+  destruct (cand_decidable a b). inversion e.
+  simpl. auto.
+  unfold one_vote in H.
+  unfold list_preorder in H.
+  replace (bool_in cand cand_decidable b [a]) with false in H.
+  replace (bool_in cand cand_decidable b [b]) with true in H.
+  inversion H. unfold bool_in.
+  simpl (in_dec cand_decidable b [b]).
+  destruct (cand_decidable b b). auto.
+  pose proof (n eq_refl). inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable b [a]).
+  destruct (cand_decidable a b). inversion e.
+  auto. auto. destruct d.
+  admit. admit. admit.
+
+  destruct c. destruct d. admit.
+  simpl. auto. simpl. auto.
+  destruct d. admit. admit.
+  simpl. auto.
+  destruct d. admit. admit. admit.
