@@ -259,10 +259,140 @@ Proof.
   simpl (in_dec cand_decidable b [a]).
   destruct (cand_decidable a b). inversion e.
   auto. auto. destruct d.
-  admit. admit. admit.
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable c [a]) with false in H.
+  replace (bool_in cand cand_decidable a [a]) with true in H.
+  inversion H. unfold bool_in.
+  simpl (in_dec cand_decidable a [a]).
+  destruct (cand_decidable a a). auto.
+  unfold not in n. pose proof (n eq_refl). inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [a]).
+  destruct (cand_decidable a c). inversion e.
+  auto.
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable c [a]) with false in H.
+  replace (bool_in cand cand_decidable b [a]) with false in H.
+  replace (bool_in cand cand_decidable c [b]) with false in H.
+  replace (bool_in cand cand_decidable b [b]) with true in H.
+  inversion H.
+  unfold bool_in.
+  simpl (in_dec cand_decidable b [b]).
+  destruct (cand_decidable b b). auto.
+  pose proof (n eq_refl). inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [b]).
+  destruct (cand_decidable b c). inversion e. auto.
+  unfold bool_in.
+  simpl (in_dec cand_decidable b [a]).
+  destruct (cand_decidable a b). inversion e. auto.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [a]).
+  destruct (cand_decidable a c). inversion e. auto.
+  unfold one_vote, list_preorder in H.
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable c [a]) with false in H.
+  replace (bool_in cand cand_decidable c [b]) with false in H.
+  replace (bool_in cand cand_decidable c [c]) with true in H.
+  inversion H. unfold bool_in.
+  simpl (in_dec cand_decidable c [c]).
+  destruct (cand_decidable c c). auto. pose proof (n eq_refl).
+  inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [b]).
+  destruct (cand_decidable b c).
+  inversion e. auto.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [a]).
+  destruct (cand_decidable a c). inversion e. auto.
 
-  destruct c. destruct d. admit.
-  simpl. auto. simpl. auto.
-  destruct d. admit. admit.
-  simpl. auto.
-  destruct d. admit. admit. admit.
+  destruct c. destruct d.
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable a [a]) with true in H.
+  inversion H. unfold bool_in.
+  simpl (in_dec cand_decidable a [a]).
+  destruct (cand_decidable a a).
+  auto. pose proof (n eq_refl). inversion H0.
+  simpl. auto. simpl. auto. destruct d.
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable b [a]) with false in H.
+  replace (bool_in cand cand_decidable a [a]) with true in H.
+  inversion H. unfold bool_in.
+  simpl (in_dec cand_decidable a [a]).
+  destruct (cand_decidable a a).
+  auto. pose proof (n eq_refl). inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable b [a]).
+  destruct (cand_decidable a b). inversion e.
+  auto.
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable b [a]) with false in H.
+  replace (bool_in cand cand_decidable b [b]) with true in H.
+  inversion H.
+  unfold bool_in.
+  simpl (in_dec cand_decidable b [b]).
+  destruct (cand_decidable b b).
+  auto. pose proof (n eq_refl). inversion H0.
+   unfold bool_in.
+  simpl (in_dec cand_decidable b [a]).
+  destruct (cand_decidable a b). inversion e.
+  auto. auto.
+  destruct d. 
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable c [a]) with false in H.
+  replace (bool_in cand cand_decidable a [a]) with true in H.
+  inversion H.
+  unfold bool_in.
+  simpl (in_dec cand_decidable a [a]).
+  destruct (cand_decidable a a).
+  auto. pose proof (n eq_refl). inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [a]).
+  destruct (cand_decidable a c). inversion e.
+  auto.
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable c [a]) with false in H.
+  replace (bool_in cand cand_decidable b [a]) with false in H.
+  replace (bool_in cand cand_decidable c [b]) with false in H.
+  replace (bool_in cand cand_decidable b [b]) with true in H.
+  inversion H.
+  unfold bool_in.
+  simpl (in_dec cand_decidable b [b]).
+  destruct (cand_decidable b b).
+  auto. pose proof (n eq_refl). inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [b]).
+  destruct (cand_decidable b c). inversion e.
+  auto.
+  unfold bool_in.
+  simpl (in_dec cand_decidable b [a]).
+  destruct (cand_decidable a b). inversion e.
+  auto.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [a]).
+  destruct (cand_decidable a c). inversion e.
+  auto.
+  unfold one_vote, list_preorder in H.
+  replace (bool_in cand cand_decidable c [a]) with false in H.
+  replace (bool_in cand cand_decidable c [b]) with false in H.
+  replace (bool_in cand cand_decidable c [c]) with true in H.
+  inversion H.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [c]).
+  destruct (cand_decidable c c).
+  auto. pose proof (n eq_refl). inversion H0.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [b]).
+  destruct (cand_decidable b c). inversion e.
+  auto.
+  unfold bool_in.
+  simpl (in_dec cand_decidable c [a]).
+  destruct (cand_decidable a c). inversion e.
+  auto.
+Qed.
+
+
+  
+  
+  
+  
