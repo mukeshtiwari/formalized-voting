@@ -56,26 +56,6 @@ Section Count.
 
 
 
-  Definition bool_in c l :=
-    proj1_sig (bool_of_sumbool (in_dec dec_cand c l)).
-
-  Fixpoint list_preorder l (c d : cand) : bool :=
-    match l with
-    | nil => false
-    | h :: t =>
-      match bool_in c h, bool_in d h with
-      | true, true => false
-      | true, false => true
-      | false, true => false
-      | false, false => list_preorder t c d
-      end
-    (*
-      if andb (bool_in c h) (bool_in d h) then false
-      else if andb (bool_in c h) (negb (bool_in d h)) then true
-           else if andb (negb (bool_in c h)) (bool_in d h) then false
-                else list_preorder t c d *)
-    end.
-
   (* earlier c d b means that c occurs earlier in the ballot b *)
   Definition earlier (c d: cand) (b: ballot) : Prop :=
     exists l1 lc l2 ld l3, b = l1++[lc]++l2++[ld]++l3 /\ In c lc /\ In d ld.
@@ -94,27 +74,20 @@ Section Count.
     (nt c d = t c d + 1)%Z /\
     (nt d c = t d c - 1)%Z.
 
-  Definition dec (c d : cand) (t : cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
-    nt c d = t c d.
-
+ 
   (* the type Count describes how valid counts are conducted.  *)
   (* we interpret an element of Count n as evidence of a count *)
   (* having proceeded to stage n.                              *)
   Inductive Count (bs: list ballot): Node -> Type :=
   | chk : (forall b, In b bs -> ballot_valid b) -> Count bs checked (* added it for the moment *)
   | inv : forall b, In b bs -> ~ (ballot_valid b) -> Count bs (invalid b)
-  | ax us t : us = bs -> t = nty -> (forall b, In b bs -> ballot_valid b) -> Count bs (state us t) (* mine addition *)
+  | ax us t : us = bs -> t = nty -> (forall b, In b bs -> ballot_valid b) -> Count bs (state us t)
   | c1: forall u us m nm, Count bs (state (u :: us) m) ->
       (forall (c d: cand), earlier c d u -> inc c d m nm) ->
       Count bs (state us nm)           
   | fin: forall m, Count bs (state [] m) -> (forall c: cand, (wins c m) + (loses c m)) -> Count bs done.
 
-  (*
-End Count.
-Extraction Language Haskell.
-Extraction Implicit c1 [m u].
-Extraction Implicit fin [m].
-Extraction Count. *)
+
   
   (* theorem to be proved: for all ballots, there exists a count *)
   (* that either ends in fin or inv. *)
@@ -161,6 +134,7 @@ Extraction Count. *)
 
 End Count.
 
+
 Inductive cand : Type :=
 | a : cand
 | b : cand
@@ -201,205 +175,53 @@ Check Count.
 Definition is_marg (m : cand -> cand -> Z) (bs : list (ballot cand)) := True.
 Check Count.
 Check checked.
-Lemma l1 : Count cand cand_decidable wins loses is_marg [one_vote]
-                 (checked cand wins loses).
+Lemma l1 : Count cand wins loses [one_vote]
+                 (checked cand).
 Proof.
   constructor. intros. Check in_inv.
   apply in_inv in H. destruct H. rewrite <- H.
   apply valid_vote. inversion H.
 Qed.
+
 Check state.
-Lemma l2 : Count cand cand_decidable wins loses is_marg [one_vote]
-                 (state cand wins loses ([], [one_vote]) (fun (c d : cand) => 0%Z)).
+Lemma l2 : Count cand wins loses [one_vote]
+                 (state cand [one_vote] (fun (c d : cand) => 0%Z)).
 Proof.
   constructor. auto. unfold nty. auto.
+  intros b0 H. apply in_inv in H. destruct H.
+  unfold ballot_valid. split.
+  intros c0. rewrite <- H. unfold one_vote.
+  simpl. destruct c0; intuition.
+  rewrite <- H. simpl. constructor.
+  unfold not; intros. apply in_inv in H0. destruct H0.
+  inversion H0. apply in_inv in H0. destruct H0. inversion H0.
+  inversion H0.
+  constructor.
+  unfold not; intros. apply in_inv in H0. destruct H0.
+  inversion H0. inversion H0.
+  constructor. unfold not; intros. inversion H0.
+  constructor. inversion H.
 Qed.
 
 Definition margin_fun (c d : cand) : Z:=
   match c, d with
-  |a, a => 5
+  |a, a => 0
   |a, b => 1
   |a, c => 1
   |b, a => -1
-  |b, b => 10
+  |b, b => 0
   |b, c => 1
   |c, a => -1
   |c, b => -1
-  |c, c => 10
+  |c, c => 0
   end.
 
-Lemma l3 : Count cand cand_decidable wins loses is_marg [one_vote]
-                 (state cand wins loses ([one_vote], []) margin_fun).
-Proof.
-  Check c1.
-  apply (c1 cand cand_decidable wins loses is_marg [one_vote] [] one_vote [] (nty cand) margin_fun). auto.
-  apply l2. intros c d H.
-  unfold inc. split.
-  unfold margin_fun. destruct c.
-  destruct d. unfold one_vote in H.
-  simpl in H.
-  replace ( bool_in cand cand_decidable a [a]) with true in H.
-  inversion H. unfold bool_in.
-  simpl (in_dec cand_decidable a [a]).
-  destruct (cand_decidable a a) eqn : H1. simpl.
-  auto. unfold not in n.
-  pose proof (n eq_refl). inversion H0.
-  simpl. auto. simpl. auto.
-  destruct d. unfold one_vote in H.
-  unfold list_preorder in H.
-  replace (bool_in cand cand_decidable b [a]) with false in H.
-  replace (bool_in cand cand_decidable a [a]) with true in H.
-  inversion H. unfold bool_in.
-  simpl (in_dec cand_decidable a [a]).
-  destruct (cand_decidable a a). auto.
-  unfold not in n. pose proof (n eq_refl). inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable b [a]).
-  destruct (cand_decidable a b). inversion e.
-  simpl. auto.
-  unfold one_vote in H.
-  unfold list_preorder in H.
-  replace (bool_in cand cand_decidable b [a]) with false in H.
-  replace (bool_in cand cand_decidable b [b]) with true in H.
-  inversion H. unfold bool_in.
-  simpl (in_dec cand_decidable b [b]).
-  destruct (cand_decidable b b). auto.
-  pose proof (n eq_refl). inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable b [a]).
-  destruct (cand_decidable a b). inversion e.
-  auto. auto. destruct d.
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable c [a]) with false in H.
-  replace (bool_in cand cand_decidable a [a]) with true in H.
-  inversion H. unfold bool_in.
-  simpl (in_dec cand_decidable a [a]).
-  destruct (cand_decidable a a). auto.
-  unfold not in n. pose proof (n eq_refl). inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [a]).
-  destruct (cand_decidable a c). inversion e.
-  auto.
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable c [a]) with false in H.
-  replace (bool_in cand cand_decidable b [a]) with false in H.
-  replace (bool_in cand cand_decidable c [b]) with false in H.
-  replace (bool_in cand cand_decidable b [b]) with true in H.
-  inversion H.
-  unfold bool_in.
-  simpl (in_dec cand_decidable b [b]).
-  destruct (cand_decidable b b). auto.
-  pose proof (n eq_refl). inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [b]).
-  destruct (cand_decidable b c). inversion e. auto.
-  unfold bool_in.
-  simpl (in_dec cand_decidable b [a]).
-  destruct (cand_decidable a b). inversion e. auto.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [a]).
-  destruct (cand_decidable a c). inversion e. auto.
-  unfold one_vote, list_preorder in H.
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable c [a]) with false in H.
-  replace (bool_in cand cand_decidable c [b]) with false in H.
-  replace (bool_in cand cand_decidable c [c]) with true in H.
-  inversion H. unfold bool_in.
-  simpl (in_dec cand_decidable c [c]).
-  destruct (cand_decidable c c). auto. pose proof (n eq_refl).
-  inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [b]).
-  destruct (cand_decidable b c).
-  inversion e. auto.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [a]).
-  destruct (cand_decidable a c). inversion e. auto.
 
-  destruct c. destruct d.
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable a [a]) with true in H.
-  inversion H. unfold bool_in.
-  simpl (in_dec cand_decidable a [a]).
-  destruct (cand_decidable a a).
-  auto. pose proof (n eq_refl). inversion H0.
-  simpl. auto. simpl. auto. destruct d.
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable b [a]) with false in H.
-  replace (bool_in cand cand_decidable a [a]) with true in H.
-  inversion H. unfold bool_in.
-  simpl (in_dec cand_decidable a [a]).
-  destruct (cand_decidable a a).
-  auto. pose proof (n eq_refl). inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable b [a]).
-  destruct (cand_decidable a b). inversion e.
-  auto.
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable b [a]) with false in H.
-  replace (bool_in cand cand_decidable b [b]) with true in H.
-  inversion H.
-  unfold bool_in.
-  simpl (in_dec cand_decidable b [b]).
-  destruct (cand_decidable b b).
-  auto. pose proof (n eq_refl). inversion H0.
-   unfold bool_in.
-  simpl (in_dec cand_decidable b [a]).
-  destruct (cand_decidable a b). inversion e.
-  auto. auto.
-  destruct d. 
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable c [a]) with false in H.
-  replace (bool_in cand cand_decidable a [a]) with true in H.
-  inversion H.
-  unfold bool_in.
-  simpl (in_dec cand_decidable a [a]).
-  destruct (cand_decidable a a).
-  auto. pose proof (n eq_refl). inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [a]).
-  destruct (cand_decidable a c). inversion e.
-  auto.
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable c [a]) with false in H.
-  replace (bool_in cand cand_decidable b [a]) with false in H.
-  replace (bool_in cand cand_decidable c [b]) with false in H.
-  replace (bool_in cand cand_decidable b [b]) with true in H.
-  inversion H.
-  unfold bool_in.
-  simpl (in_dec cand_decidable b [b]).
-  destruct (cand_decidable b b).
-  auto. pose proof (n eq_refl). inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [b]).
-  destruct (cand_decidable b c). inversion e.
-  auto.
-  unfold bool_in.
-  simpl (in_dec cand_decidable b [a]).
-  destruct (cand_decidable a b). inversion e.
-  auto.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [a]).
-  destruct (cand_decidable a c). inversion e.
-  auto.
-  unfold one_vote, list_preorder in H.
-  replace (bool_in cand cand_decidable c [a]) with false in H.
-  replace (bool_in cand cand_decidable c [b]) with false in H.
-  replace (bool_in cand cand_decidable c [c]) with true in H.
-  inversion H.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [c]).
-  destruct (cand_decidable c c).
-  auto. pose proof (n eq_refl). inversion H0.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [b]).
-  destruct (cand_decidable b c). inversion e.
-  auto.
-  unfold bool_in.
-  simpl (in_dec cand_decidable c [a]).
-  destruct (cand_decidable a c). inversion e.
-  auto.
-Qed.
+Check Count.
+Lemma l3 : Count cand wins loses [one_vote]
+                 (state cand  [one_vote]  margin_fun).
+Proof. Admitted.  
+
 
 
   
