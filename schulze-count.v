@@ -50,11 +50,11 @@ Section Count.
   Inductive Node : Type :=
   | checked : Node
   | invalid : ballot -> Node
-  | margin  : (cand -> cand -> Z) -> Node
-  | counted (m: cand -> cand -> Z): (forall c, (wins c m) + (loses c m)) -> Node
-  | state : (list ballot * list ballot) -> (cand -> cand -> Z) -> Node.
+  | state : (list ballot) -> (cand -> cand -> Z) -> Node
+  | done.
+  
 
-  Check counted.
+
 
   Definition bool_in c l :=
     proj1_sig (bool_of_sumbool (in_dec dec_cand c l)).
@@ -76,6 +76,18 @@ Section Count.
                 else list_preorder t c d *)
     end.
 
+  (* earlier c d b means that c occurs earlier in the ballot b *)
+  Definition earlier (c d: cand) (b: ballot) : Prop :=
+    exists l1 lc l2 ld l3, b = l1++[lc]++l2++[ld]++l3 /\ In c lc /\ In d ld.
+
+  (* which one is more convincing?
+
+  list_preorder b c d = true
+  earlier c d b
+
+  in the sense that you can satisfy yourself that the property expresses that
+  c occurs earlier than d in ballot b *)
+
   Definition nty (c d : cand) := 0%Z.
 
   Definition inc (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
@@ -89,22 +101,20 @@ Section Count.
   (* we interpret an element of Count n as evidence of a count *)
   (* having proceeded to stage n.                              *)
   Inductive Count (bs: list ballot): Node -> Type :=
-  | chk : (forall b, In b bs -> ballot_valid b) -> Count bs checked
+  | chk : (forall b, In b bs -> ballot_valid b) -> Count bs checked (* added it for the moment *)
   | inv : forall b, In b bs -> ~ (ballot_valid b) -> Count bs (invalid b)
-  | mrg : Count bs checked -> forall m: cand -> cand -> Z,
-        is_marg m bs -> Count bs (margin m)
-  | fin : forall m, Count bs (margin m) -> forall r, Count bs (counted m r)
-  | ax us t : us = bs -> t = nty -> Count bs (state ([], us) t) (* mine addition *)
-  | c1 u0 m u1 t nt :
-      bs = (u0 ++ [m] ++ u1) -> Count bs (state (u0, m :: u1) t) ->
-      (forall (c : cand), (forall (d : cand), list_preorder m c d = true -> inc c d t nt)) ->
-      Count bs (state (u0 ++ [m] , u1) nt)          
-  | c2  u0 m u1 t nt :
-      bs = (u0 ++ [m] ++ u1) -> Count bs (state (u0, m :: u1) t) ->
-      (forall (c : cand), (forall (d : cand), list_preorder m c d = false -> dec c d t nt)) ->
-      Count bs (state (u0 ++ [m] , u1) nt) 
-  | c3 m r t us : us = bs ->  Count bs (state (us, []) t) -> m = t -> Count bs (counted m r).
-  (* replacing m with t is not working *)
+  | ax us t : us = bs -> t = nty -> (forall b, In b bs -> ballot_valid b) -> Count bs (state us t) (* mine addition *)
+  | c1: forall u us m nm, Count bs (state (u :: us) m) ->
+      (forall (c d: cand), earlier c d u -> inc c d m nm) ->
+      Count bs (state us nm)           
+  | fin: forall m, Count bs (state [] m) -> (forall c: cand, (wins c m) + (loses c m)) -> Count bs done.
+
+  (*
+End Count.
+Extraction Language Haskell.
+Extraction Implicit c1 [m u].
+Extraction Implicit fin [m].
+Extraction Count. *)
   
   (* theorem to be proved: for all ballots, there exists a count *)
   (* that either ends in fin or inv. *)
@@ -207,15 +217,15 @@ Qed.
 
 Definition margin_fun (c d : cand) : Z:=
   match c, d with
-  |a, a => 0
+  |a, a => 5
   |a, b => 1
   |a, c => 1
   |b, a => -1
-  |b, b => 0
+  |b, b => 10
   |b, c => 1
   |c, a => -1
   |c, b => -1
-  |c, c => 0
+  |c, c => 10
   end.
 
 Lemma l3 : Count cand cand_decidable wins loses is_marg [one_vote]
