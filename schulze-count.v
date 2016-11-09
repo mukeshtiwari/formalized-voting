@@ -132,6 +132,23 @@ Section Count.
     assumption.
   Qed.
 
+  Theorem exists_count_invalid_or_done :
+    forall (bs : list ballot), {b : ballot & Count bs (invalid b)} + Count bs done.
+  Proof.
+    induction bs. right.
+    apply fin with (m := nty). constructor. auto.
+    auto. intros b H. inversion H.
+    intros c. admit.
+
+    pose proof valid_or_invalid_ballot a as Ha.
+    destruct Ha. destruct IHbs. left. destruct s.
+    exists x. apply inv. inversion c. firstorder.
+    unfold not; intros H. inversion c. firstorder.
+    right. admit.
+    left. exists a. apply inv. firstorder.
+    assumption.
+  
+  
 End Count.
 
 
