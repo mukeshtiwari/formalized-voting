@@ -31,15 +31,23 @@ Section Count.
   (* i.e. x1 and x2 are equally ranked, both are preferred    *)
   (* over x3 and x3 is preferred over the equally ranked      *)
   (* candidates x4, x5 and x6.                                *)
-  Definition ballot := list (list cand).
+  (*
+  Definition ballot := list (list cand). *)
+
+  (* new definition of ballot *)
+  Definition ballot := cand -> nat.
 
   (* ballots are valid if every candidate is mentioned        *)
   (* precisely once.                                          *)
+  (*
   Definition ballot_valid (b: ballot) : Prop :=
-    (forall c: cand, In c (concat b)) /\ NoDup (concat b).
+    (forall c: cand, In c (concat b)) /\ NoDup (concat b). *)
 
-  Print concat.
-  Print flat_map.
+  Definition ballot_valid (b : ballot) : Prop :=
+    (forall c : cand, exists (n : nat), b c = n).
+  (* we don't need the NoDup logic for ballots as a function ? *)
+
+  
   (* the following needs to be instantiated with a definition *)
   (* that ensures that m is the margin function of ballots bs *)
   Variable is_marg: (cand -> cand -> Z) -> (list ballot) -> Prop.
@@ -48,8 +56,8 @@ Section Count.
   (* node type: checking ballots, computing margins and       *)
   (* determining winners + evidence.                          *)
   Inductive Node : Type :=
-  | checked : Node
-  | invalid : ballot -> Node
+  | checked : Node (* we don't need this *)
+  | invalid : ballot -> Node (* this either *)
   | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
   | done.
 
@@ -58,19 +66,30 @@ Section Count.
 
 
   (* earlier c d b means that c occurs earlier in the ballot b *)
+  (*
   Definition earlier (c d: cand) (b: ballot) : Prop :=
-    exists l1 lc l2 ld l3, b = l1++[lc]++l2++[ld]++l3 /\ In c lc /\ In d ld.
+    exists l1 lc l2 ld l3, b = l1++[lc]++l2++[ld]++l3 /\ In c lc /\ In d ld. *)
+
+  Definition earlier (c d : cand) (b : ballot) : Prop :=
+    b c > 0 /\ b d > 0 /\ (b c > b d).
+
+  (*
+  Definition equal (c d : cand) (b : ballot) : Prop :=
+    exists l1 l l2, b = l1 ++ [l] ++ l2 /\ In c l /\ In d l. *)
 
   Definition equal (c d : cand) (b : ballot) : Prop :=
-    exists l1 l l2, b = l1 ++ [l] ++ l2 /\ In c l /\ In d l.
+    b c = b d. 
 
-   
+  (*
+  (* Now we don't need the concept of ballot being valid or invalid ? *)
+
   Lemma equivalence : forall b : ballot, (forall c : cand, In c (concat b)) <->
                                     (forall c : cand, In c cand_all -> In c (concat b)).
   Proof.
     split; intros; firstorder.
   Qed.
 
+ 
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
     pose proof NoDup_dec dec_cand.
@@ -84,7 +103,8 @@ Section Count.
     right. firstorder.
     right. firstorder.
   Qed.
-
+   *)
+  
   Definition nty (c d : cand) := 0%Z.
 
   Definition inc (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
@@ -109,6 +129,7 @@ Section Count.
                   (forall c, (wins c m) + (loses c m)) -> Count bs done.
  
 
+   
  
   (* the type Count describes how valid counts are conducted.  *)
   (* we interpret an element of Count n as evidence of a count *)
