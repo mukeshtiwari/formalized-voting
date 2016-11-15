@@ -45,6 +45,7 @@ Section Count.
 
   Definition ballot_valid (b : ballot) : Prop :=
     (forall c : cand, exists (n : nat), b c = n).
+  (* What if voter did not rank some candidate ? *)
   (* we don't need the NoDup logic for ballots as a function ? *)
 
   
