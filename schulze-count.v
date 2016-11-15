@@ -50,9 +50,10 @@ Section Count.
   Inductive Node : Type :=
   | checked : Node
   | invalid : ballot -> Node
-  | state : (list ballot) -> (cand -> cand -> Z) -> Node
+  | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
   | done.
-  
+
+  (* state with uncounted and invalid votes so far *)
 
 
 
@@ -60,41 +61,10 @@ Section Count.
   Definition earlier (c d: cand) (b: ballot) : Prop :=
     exists l1 lc l2 ld l3, b = l1++[lc]++l2++[ld]++l3 /\ In c lc /\ In d ld.
 
-  (* which one is more convincing?
+  Definition equal (c d : cand) (b : ballot) : Prop :=
+    exists l1 l l2, b = l1 ++ [l] ++ l2 /\ In c l /\ In d l.
 
-  list_preorder b c d = true
-  earlier c d b
-
-  in the sense that you can satisfy yourself that the property expresses that
-  c occurs earlier than d in ballot b *)
-
-  Definition nty (c d : cand) := 0%Z.
-
-  Definition inc (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
-    (nt c d = t c d + 1)%Z /\
-    (nt d c = t d c - 1)%Z.
-
- 
-  (* the type Count describes how valid counts are conducted.  *)
-  (* we interpret an element of Count n as evidence of a count *)
-  (* having proceeded to stage n.                              *)
-  Inductive Count (bs: list ballot): Node -> Type :=
-  | chk : (forall b, In b bs -> ballot_valid b) -> Count bs checked (* added it for the moment *)
-  | inv : forall b, In b bs -> ~ (ballot_valid b) -> Count bs (invalid b)
-  | ax us t : us = bs -> t = nty -> (forall b, In b bs -> ballot_valid b) -> Count bs (state us t)
-  | c1: forall u us m nm, Count bs (state (u :: us) m) ->
-      (forall (c d: cand), earlier c d u -> inc c d m nm) ->
-      Count bs (state us nm)           
-  | fin: forall m, Count bs (state [] m) -> (forall c: cand, (wins c m) + (loses c m)) -> Count bs done.
-
-
-  
-  (* theorem to be proved: for all ballots, there exists a count *)
-  (* that either ends in fin or inv. *)
-
- 
-  
-  
+   
   Lemma equivalence : forall b : ballot, (forall c : cand, In c (concat b)) <->
                                     (forall c : cand, In c cand_all -> In c (concat b)).
   Proof.
@@ -115,8 +85,55 @@ Section Count.
     right. firstorder.
   Qed.
 
+  Definition nty (c d : cand) := 0%Z.
+
+  Definition inc (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
+    (nt c d = t c d + 1)%Z /\
+    (nt d c = t d c - 1)%Z.
+
+  Definition nochange (c d : cand) (t : cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
+    nt c d = t c d.
+  
+  
+   Inductive Count (bs : list ballot) : Node -> Type :=
+   | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
+   | cvalid u us m nm inbs :
+       Count bs (state (u :: us, inbs) m) -> ballot_valid u -> 
+       (forall c d : cand, (earlier c d u -> inc c d m nm) /\
+                      (equal c d u -> nochange c d m nm)) ->
+       Count bs (state (us, inbs) nm)
+   | cinvalid u us m inbs :
+       Count bs (state (u :: us, inbs) m) -> ~(ballot_valid u) ->
+       Count bs (state (us, u :: inbs) m)
+   | fin m inbs : Count bs (state ([], inbs) m) ->
+                  (forall c, (wins c m) + (loses c m)) -> Count bs done.
+ 
+
+ 
+  (* the type Count describes how valid counts are conducted.  *)
+  (* we interpret an element of Count n as evidence of a count *)
+  (* having proceeded to stage n.                              *)
+  Inductive Count (bs: list ballot): Node -> Type :=
+  (*| chk : (forall b, In b bs -> ballot_valid b) -> Count bs checked *) (* added it for the moment *)
+  | inv : forall b, In b bs -> ~ (ballot_valid b) -> Count bs (invalid b)
+  | ax us t : us = bs -> t = nty -> (forall b, In b bs -> ballot_valid b) -> Count bs (state us t)
+  | c1: forall u us m nm, Count bs (state (u :: us) m) ->
+      (forall (c d: cand), (earlier c d u -> inc c d m nm) /\ (equal c d u -> nochange c d n nm)) ->
+      Count bs (state us nm)           
+  | fin: forall m, Count bs (state [] m) -> (forall c: cand, (wins c m) + (loses c m)) -> Count bs done.
+
+
+  
+  (* theorem to be proved: for all ballots, there exists a count *)
+  (* that either ends in fin or inv. *)
+
+ 
+  
+  
+ 
+
   Theorem exists_count : forall (bs : list ballot), {b : ballot & Count bs (invalid b)}
-                                               + Count bs checked.
+                                               + Count bs (state bs nty).
   Proof.
     induction bs. right.
     apply chk. intros b H. inversion H.
@@ -136,15 +153,16 @@ Section Count.
     forall (bs : list ballot), {b : ballot & Count bs (invalid b)} + Count bs done.
   Proof.
     induction bs. right.
-    apply fin with (m := nty). constructor. auto.
+    eapply fin. constructor. auto.
     auto. intros b H. inversion H.
-    intros c. admit.
+    
 
     pose proof valid_or_invalid_ballot a as Ha.
     destruct Ha. destruct IHbs. left. destruct s.
     exists x. apply inv. inversion c. firstorder.
     unfold not; intros H. inversion c. firstorder.
-    right. admit.
+    right. 
+    
     left. exists a. apply inv. firstorder.
     assumption.
   
