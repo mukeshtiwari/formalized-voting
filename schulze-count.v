@@ -104,13 +104,13 @@ Section Count.
 
  
 
-  Theorem indecidable :
+  Theorem in_decidable :
     forall (b : ballot) (l : list cand),
       {forall c : cand, In c l -> b c > 0} + {~(forall c : cand, In c l -> b c > 0)}.
   Proof.
     intros b. induction l.
     left. intros. inversion H. 
-    destruct IHl. destruct (le_gt_dec (b a) 0).
+    destruct IHl. destruct (le_gt_dec (b a) 0) as [H1 | H2].
     right. intro. pose proof (H a (or_introl eq_refl)). omega.
     left. intros. destruct H. subst. assumption. auto.
     right. firstorder.
@@ -118,7 +118,7 @@ Section Count.
 
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
-    intros b. pose proof indecidable b cand_all.
+    intros b. pose proof in_decidable b cand_all.
     destruct H. left.  unfold ballot_valid. intros c.
     apply g. specialize (cand_fin c). assumption.
     unfold not in n. right. unfold not, ballot_valid; intros H.
@@ -150,7 +150,7 @@ Section Count.
                   (forall c, (wins c m) + (loses c m)) -> Count bs done.
  
    
-     
+  
      
   (* the type Count describes how valid counts are conducted.  *)
   (* we interpret an element of Count n as evidence of a count *)
