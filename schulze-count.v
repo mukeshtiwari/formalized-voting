@@ -43,12 +43,11 @@ Section Count.
   Definition ballot_valid (b: ballot) : Prop :=
     (forall c: cand, In c (concat b)) /\ NoDup (concat b). *)
 
-  Definition ballot_valid (b : ballot) : Prop :=
-    (forall c : cand, exists (n : nat), b c = n).
-  (* What if voter did not rank some candidate ? *)
-  (* we don't need the NoDup logic for ballots as a function ? *)
+  Definition ballot_valid (p : ballot) : Prop :=
+    forall c : cand, p c > 0.
 
-  
+ 
+ 
   (* the following needs to be instantiated with a definition *)
   (* that ensures that m is the margin function of ballots bs *)
   Variable is_marg: (cand -> cand -> Z) -> (list ballot) -> Prop.
@@ -57,8 +56,6 @@ Section Count.
   (* node type: checking ballots, computing margins and       *)
   (* determining winners + evidence.                          *)
   Inductive Node : Type :=
-  | checked : Node (* we don't need this *)
-  | invalid : ballot -> Node (* this either *)
   | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
   | done.
 
@@ -71,26 +68,26 @@ Section Count.
   Definition earlier (c d: cand) (b: ballot) : Prop :=
     exists l1 lc l2 ld l3, b = l1++[lc]++l2++[ld]++l3 /\ In c lc /\ In d ld. *)
 
-  Definition earlier (c d : cand) (b : ballot) : Prop :=
-    b c > 0 /\ b d > 0 /\ (b c > b d).
+  Definition earlier (c d : cand) (p : ballot) : Prop :=
+    p c > 0 /\ p d > 0 /\ (p c < p d).
+  
 
   (*
   Definition equal (c d : cand) (b : ballot) : Prop :=
     exists l1 l l2, b = l1 ++ [l] ++ l2 /\ In c l /\ In d l. *)
 
-  Definition equal (c d : cand) (b : ballot) : Prop :=
-    b c = b d. 
+  Definition equal (c d : cand) (p : ballot) : Prop :=
+    p c > 0 /\ p d > 0 /\ p c = p d. 
 
-  (*
-  (* Now we don't need the concept of ballot being valid or invalid ? *)
 
-  Lemma equivalence : forall b : ballot, (forall c : cand, In c (concat b)) <->
-                                    (forall c : cand, In c cand_all -> In c (concat b)).
+
+  (* 
+  Lemma equivalence : forall b : ballot, (forall c : cand, b c > 0) <->
+                                    (forall c : cand, In c cand_all -> b c > 0).
   Proof.
     split; intros; firstorder.
-  Qed.
+  Qed. 
 
- 
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
     pose proof NoDup_dec dec_cand.
@@ -103,12 +100,35 @@ Section Count.
     destruct (X0 cand_all (concat b)).
     right. firstorder.
     right. firstorder.
+  Qed. *)
+
+ 
+
+  Theorem indecidable :
+    forall (b : ballot) (l : list cand),
+      {forall c : cand, In c l -> b c > 0} + {~(forall c : cand, In c l -> b c > 0)}.
+  Proof.
+    intros b. induction l.
+    left. intros. inversion H. 
+    destruct IHl. destruct (le_gt_dec (b a) 0).
+    right. intro. pose proof (H a (or_introl eq_refl)). omega.
+    left. intros. destruct H. subst. assumption. auto.
+    right. firstorder.
   Qed.
-   *)
+
+  Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
+  Proof.
+    intros b. pose proof indecidable b cand_all.
+    destruct H. left.  unfold ballot_valid. intros c.
+    apply g. specialize (cand_fin c). assumption.
+    unfold not in n. right. unfold not, ballot_valid; intros H.
+    apply n; intros. specialize (H c). assumption.
+  Qed.
+  
   
   Definition nty (c d : cand) := 0%Z.
 
-  Definition inc (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
+  Definition incdec (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
     (nt c d = t c d + 1)%Z /\
     (nt d c = t d c - 1)%Z.
 
@@ -120,7 +140,7 @@ Section Count.
    | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
    | cvalid u us m nm inbs :
        Count bs (state (u :: us, inbs) m) -> ballot_valid u -> 
-       (forall c d : cand, (earlier c d u -> inc c d m nm) /\
+       (forall c d : cand, (earlier c d u -> incdec c d m nm) /\
                       (equal c d u -> nochange c d m nm)) ->
        Count bs (state (us, inbs) nm)
    | cinvalid u us m inbs :
@@ -129,9 +149,9 @@ Section Count.
    | fin m inbs : Count bs (state ([], inbs) m) ->
                   (forall c, (wins c m) + (loses c m)) -> Count bs done.
  
-
    
- 
+     
+     
   (* the type Count describes how valid counts are conducted.  *)
   (* we interpret an element of Count n as evidence of a count *)
   (* having proceeded to stage n.                              *)
