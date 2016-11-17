@@ -14,6 +14,11 @@ Require Import Bool.Bool.
 Import ListNotations.
 Section Count.
 
+  Notation "'existsT' x .. y , p" :=
+    (sigT (fun x => .. (sigT (fun y => p)) ..))
+      (at level 200, x binder, right associativity,
+       format "'[' 'existsT'  '/  ' x  ..  y ,  '/  ' p ']'")
+                                     : type_scope.
   Variable cand : Type.
   Variable cand_all : list cand.
   Hypothesis dec_cand : forall n m : cand, {n = m} + {n <> m}.
@@ -165,10 +170,28 @@ Section Count.
        Count bs (state (us, u :: inbs) m)
    | fin m inbs : Count bs (state ([], inbs) m) ->
                   (forall c, (wins c m) + (loses c m)) -> Count bs done.
+
+   Lemma extract_prog :
+     forall (bs : list ballot), existsT i m, (Count bs (state ([], i) m)). 
+  Proof.
+    induction bs. repeat eexists. constructor; auto.
+    destruct IHbs as [Hinv [Hmar H3]].
+    pose proof valid_or_invalid_ballot a.
+    destruct H. eexists Hinv. (* because ballot a  is valid so Hinv will not change *)
+    eexists. (* ?m is new margin function computed after counting ballot a *)
+    eapply cvalid with (u := a). 
+
+    
+   Lemma wins_loses : forall c m, (wins c m) + (loses c m).
+   Proof. Admitted.
+
+
+
+
+
+
+   (* 
    
-   
-  
-     
   (* the type Count describes how valid counts are conducted.  *)
   (* we interpret an element of Count n as evidence of a count *)
   (* having proceeded to stage n.                              *)
@@ -223,7 +246,7 @@ Section Count.
     right. 
     
     left. exists a. apply inv. firstorder.
-    assumption.
+    assumption. *)
   
   
 End Count.
