@@ -132,17 +132,14 @@ Section Count.
     left. intros. inversion H. 
     destruct IHl. destruct (le_gt_dec (b a) 0) as [H1 | H2].
     right. intro. pose proof (H a (or_introl eq_refl)). omega.
-    left. intros. destruct H. subst. assumption. auto.
+    left. firstorder. subst. assumption.
     right. firstorder.
   Qed.
 
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
     intros b. pose proof in_decidable b cand_all.
-    destruct H. left.  unfold ballot_valid. intros c.
-    apply g. specialize (cand_fin c). assumption.
-    unfold not in n. right. unfold not, ballot_valid; intros H.
-    apply n; intros. specialize (H c). assumption.
+    destruct H. left; firstorder. right; firstorder. 
   Qed.
   
   
@@ -168,7 +165,7 @@ Section Count.
        Count bs (state (us, u :: inbs) m)
    | fin m inbs : Count bs (state ([], inbs) m) ->
                   (forall c, (wins c m) + (loses c m)) -> Count bs done.
- 
+   
    
   
      
