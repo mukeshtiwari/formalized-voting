@@ -139,7 +139,7 @@ Section Count.
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
     intros b. pose proof in_decidable b cand_all.
-    destruct H. left; firstorder. right; firstorder. 
+    destruct H; [left | right]; firstorder. 
   Qed.
   
   
