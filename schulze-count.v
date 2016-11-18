@@ -158,48 +158,48 @@ Section Count.
     nt c d = t c d.
   
   
-   Inductive Count (bs : list ballot) : Node -> Type :=
-   | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
-   | cvalid u us m nm inbs :
-       Count bs (state (u :: us, inbs) m) -> ballot_valid u -> 
-       (forall c d : cand, (earlier c d u -> incdec c d m nm) /\
-                      (equal c d u -> nochange c d m nm)) ->
-       Count bs (state (us, inbs) nm)
-   | cinvalid u us m inbs :
-       Count bs (state (u :: us, inbs) m) -> ~(ballot_valid u) ->
-       Count bs (state (us, u :: inbs) m)
-   | fin m inbs : Count bs (state ([], inbs) m) ->
-                  (forall c, (wins c m) + (loses c m)) -> Count bs done.
+  Inductive Count (bs : list ballot) : Node -> Type :=
+  | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
+  | cvalid u us m nm inbs :
+      Count bs (state (u :: us, inbs) m) -> ballot_valid u -> 
+      (forall c d : cand, (earlier c d u -> incdec c d m nm) /\
+                     (equal c d u -> nochange c d m nm)) ->
+      Count bs (state (us, inbs) nm)
+  | cinvalid u us m inbs :
+      Count bs (state (u :: us, inbs) m) -> ~(ballot_valid u) ->
+      Count bs (state (us, u :: inbs) m)
+  | fin m inbs : Count bs (state ([], inbs) m) ->
+                 (forall c, (wins c m) + (loses c m)) -> Count bs done.
 
-   
-   Definition incdect (p : ballot) (m : cand -> cand -> Z) : cand -> cand -> Z :=
-     fun c d =>
-       match nat_compare_alt (p c) (p d) with
-       | Lt => (m c d + 1)%Z
-       | Eq => m c d
-       | Gt => (m c d - 1)%Z
-       end.
+  
+  Definition incdect (p : ballot) (m : cand -> cand -> Z) : cand -> cand -> Z :=
+    fun c d =>
+      match nat_compare_alt (p c) (p d) with
+      | Lt => (m c d + 1)%Z
+      | Eq => m c d
+      | Gt => (m c d - 1)%Z
+      end.
 
        
-   Lemma incdec_proof : forall m (p : ballot) (c d : cand),
-       (earlier c d p -> incdec c d m (incdect p m)) /\
-       (equal c d p -> nochange c d m (incdect p m)).
-   Proof.
-     intros m p c d. split; intros.
-     unfold earlier in H. unfold incdec. unfold incdect.
-     destruct H as [H1 [H2 H3]]. split.
-     unfold nat_compare_alt. destruct (lt_eq_lt_dec (p c) (p d)) eqn:H.
-     destruct s. auto. omega. omega.
-     unfold nat_compare_alt. destruct (lt_eq_lt_dec (p d) (p c)) eqn:H.
-     destruct s. omega. omega. auto.
-     unfold equal in H. destruct H as [H1 [H2 H3]].
-     unfold nochange, incdect, nat_compare_alt.
-     rewrite H3. destruct (lt_eq_lt_dec (p d) (p d)) eqn:H.
-     destruct s; omega. omega.
-   Qed.
+  Lemma incdec_proof : forall m (p : ballot) (c d : cand),
+      (earlier c d p -> incdec c d m (incdect p m)) /\
+      (equal c d p -> nochange c d m (incdect p m)).
+  Proof.
+    intros m p c d. split; intros.
+    unfold earlier in H. unfold incdec. unfold incdect.
+    destruct H as [H1 [H2 H3]]. split.
+    unfold nat_compare_alt. destruct (lt_eq_lt_dec (p c) (p d)) eqn:H.
+    destruct s. auto. omega. omega.
+    unfold nat_compare_alt. destruct (lt_eq_lt_dec (p d) (p c)) eqn:H.
+    destruct s. omega. omega. auto.
+    unfold equal in H. destruct H as [H1 [H2 H3]].
+    unfold nochange, incdect, nat_compare_alt.
+    rewrite H3. destruct (lt_eq_lt_dec (p d) (p d)) eqn:H.
+    destruct s; omega. omega.
+  Qed.
    
-   Lemma extract_prog_gen : forall bs u inbs m,
-       Count bs (state (u, inbs) m) -> existsT i m, (Count bs (state ([], i) m)).
+  Lemma extract_prog_gen : forall bs u inbs m,
+      Count bs (state (u, inbs) m) -> existsT i m, (Count bs (state ([], i) m)).
   Proof.
     intros bs. induction u.
     intros. exists inbs, m. auto.
