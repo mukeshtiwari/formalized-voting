@@ -171,19 +171,57 @@ Section Count.
    | fin m inbs : Count bs (state ([], inbs) m) ->
                   (forall c, (wins c m) + (loses c m)) -> Count bs done.
 
-   Lemma extract_prog :
-     forall (bs : list ballot), existsT i m, (Count bs (state ([], i) m)). 
+   
+   Definition incdect (p : ballot) (m : cand -> cand -> Z) : cand -> cand -> Z :=
+     fun c d =>
+       match nat_compare_alt (p c) (p d) with
+       | Lt => (m c d + 1)%Z
+       | Eq => m c d
+       | Gt => (m d c - 1)%Z
+       end.
+
+       
+   Lemma incdec_proof : forall m (p : ballot) (c d : cand),
+       (earlier c d p -> incdec c d m (incdect p m)) /\
+       (equal c d p -> nochange c d m (incdect p m)).
+   Proof.
+     intros m p c d. split; intros.
+     unfold earlier in H. unfold incdec. unfold incdect.
+     destruct H as [H1 [H2 H3]]. split.
+     destruct (p c), (p d); try omega.
+   Admitted.
+  
+     
+   Lemma extract_prog_gen : forall bs u inbs m,
+     Count bs (state (u, inbs) m) -> existsT i m, (Count bs (state ([], i) m)).
   Proof.
-    induction bs. repeat eexists. constructor; auto.
-    destruct IHbs as [Hinv [Hmar H3]].
+    intros bs. induction u.
+    intros. exists inbs, m. auto.
     pose proof valid_or_invalid_ballot a.
-    destruct H. eexists Hinv. (* because ballot a  is valid so Hinv will not change *)
-    eexists. (* ?m is new margin function computed after counting ballot a *)
-    eapply cvalid with (u := a). 
+    destruct H; swap 1 2. intros.
+    pose proof (cinvalid bs a u m inbs X n).
+    specialize (IHu (a :: inbs) m X0).
+    destruct IHu as [Hinv [Hmar H3]].
+    exists Hinv, Hmar. assumption.
+    intros. pose proof (cvalid bs a u m (incdect a m) inbs X b (incdec_proof m a)).
+    specialize (IHu inbs (incdect a m) X0). destruct IHu as [Hinv [Hm H]].
+    exists Hinv, Hm. assumption.
+  Qed.
+  
+    
 
     
-   Lemma wins_loses : forall c m, (wins c m) + (loses c m).
-   Proof. Admitted.
+  Lemma extract_prog :
+     forall (bs : list ballot), existsT i m, (Count bs (state ([], i) m)). 
+  Proof.
+    intros bs. Check ax.
+    pose proof (extract_prog_gen bs bs [] nty (ax bs bs nty eq_refl eq_refl)).
+    destruct X as [i [m Hc]].
+    exists i, m. assumption.
+  Qed.
+  
+  Lemma wins_loses : forall c m, (wins c m) + (loses c m).
+  Proof. Admitted.
 
 
 
