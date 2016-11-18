@@ -177,7 +177,7 @@ Section Count.
        match nat_compare_alt (p c) (p d) with
        | Lt => (m c d + 1)%Z
        | Eq => m c d
-       | Gt => (m d c - 1)%Z
+       | Gt => (m c d - 1)%Z
        end.
 
        
@@ -188,12 +188,18 @@ Section Count.
      intros m p c d. split; intros.
      unfold earlier in H. unfold incdec. unfold incdect.
      destruct H as [H1 [H2 H3]]. split.
-     destruct (p c), (p d); try omega.
-   Admitted.
-  
-     
+     unfold nat_compare_alt. destruct (lt_eq_lt_dec (p c) (p d)) eqn:H.
+     destruct s. auto. omega. omega.
+     unfold nat_compare_alt. destruct (lt_eq_lt_dec (p d) (p c)) eqn:H.
+     destruct s. omega. omega. auto.
+     unfold equal in H. destruct H as [H1 [H2 H3]].
+     unfold nochange, incdect, nat_compare_alt.
+     rewrite H3. destruct (lt_eq_lt_dec (p d) (p d)) eqn:H.
+     destruct s; omega. omega.
+   Qed.
+   
    Lemma extract_prog_gen : forall bs u inbs m,
-     Count bs (state (u, inbs) m) -> existsT i m, (Count bs (state ([], i) m)).
+       Count bs (state (u, inbs) m) -> existsT i m, (Count bs (state ([], i) m)).
   Proof.
     intros bs. induction u.
     intros. exists inbs, m. auto.
