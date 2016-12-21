@@ -9,7 +9,6 @@ Require Import Bool.Bool.
 Require Import Coq.Logic.ConstructiveEpsilon.
 Require Import fp_finite_Dirk.
 Import ListNotations.
-
 Module Evote.  
   (* type level existential quantifier *)
   Notation "'existsT' x .. y , p" :=
@@ -29,7 +28,7 @@ Module Evote.
      voters that perfer c over d *)
   (* TODO: possibly rename? *)
   Parameter edge: cand -> cand -> nat.
-
+  
   (* prop-level path *)
   Inductive Path (k: nat) : cand -> cand -> Prop :=
   | unit c d : edge c d >= k -> Path k c d
@@ -73,6 +72,7 @@ Module Evote.
   Definition el (k: nat) (p: (cand * cand)%type) := Compare_dec.leb (edge (fst p) (snd p)) k.
   *)
 
+
   (* tmporary definition of < k *)
   Definition el (k : nat) (p : (cand * cand)) :=
     match lt_dec (edge (fst p) (snd p)) k with
@@ -101,8 +101,6 @@ Module Evote.
    *)
 
   Definition mp (k : nat) (p : (cand * cand)%type) (f : (cand * cand) -> bool) :=
-    let a := fst p in
-    let c := snd p in
     forallb (mpf k p f) cand_all.
 
   (* W k is the dual of the operator the least fixpoint of which inductively defines paths *)
@@ -144,53 +142,7 @@ Module Evote.
   Qed.
 
   (* logical interpretation of the midpoint function *)
-  (*
-  Lemma mp_log: forall k p l, mp k p l = true ->
-    forall b, In (b, snd p) l \/ edge (fst p) b <= k.
-  Proof.
-    intros k p l H b.
-    assert (Hin: In b cand_all).
-    apply cand_fin.
-    assert (Hp: In b cand_all  -> (mpf k p l) b = true).
-    apply forallb_forall.
-    unfold mp in H. assumption.
-    specialize (Hp Hin).
-    unfold mpf in Hp.
-    assert (Hor: el k (fst p, b) = true \/ bool_in (b, snd p) l = true).
-    apply orb_prop. assumption.
-    destruct Hor as [Hl | Hr].
-    (* case e k (fst p, b) = true *)
-    unfold el in Hl. simpl in Hl.
-    right.
-    apply leb_complete. assumption.
-    (* case bool_in ... *)
-    left.
-    unfold bool_in in Hr. simpl in Hr.
-    assert (Hex: exists x, In x l /\ (fun q : cand * cand
-                                => cand_eqb (fst q) b && cand_eqb (snd q) (snd p)) x = true).
-    apply existsb_exists. assumption.     
-    destruct Hex as [x Hx]. destruct Hx as [H1 H2].
-    apply andb_true_iff in H2. destruct H2 as [H2 H3].
-    apply cand_eqb_prop in H2.
-    apply cand_eqb_prop in H3.
-    destruct x. subst. simpl. simpl in H3. subst. assumption.
-  Qed.
-   *)
-
-  (*
-  Lemma mp_log : forall k p f,
-      mp k p f = true -> forall b, f (b, snd p) = true \/ edge (fst p) b <= k.
-  Proof.
-    intros k p f H b.
-    assert (Hin : In b cand_all). apply cand_fin.
-    assert (Hp : In b cand_all -> (mpf k p f) b = true).
-    apply forallb_forall. assumption.
-    specialize (Hp Hin). apply orb_true_iff in Hp.
-    destruct Hp as [Hpl | Hpr]. destruct p as (a, c).
-    simpl in *. right. unfold el in Hpl. apply leb_complete. assumption.
-    destruct p as (a, c). simpl in *. left. assumption.
-  Qed.
-   *)
+ 
   Lemma mp_log : forall k p f,
       mp k p f = true -> forall b, f (b, snd p) = true \/ edge (fst p) b < k.
   Proof.
@@ -202,87 +154,10 @@ Module Evote.
     destruct Hp as [Hpl | Hpr]. destruct p as (a, c).
     simpl in *. right. unfold el in Hpl. simpl in Hpl.
     destruct (lt_dec (edge a b) k). assumption. inversion Hpl.
-    destruct p as (a, c). simpl in *. left. assumption.
+    left. assumption.
   Qed.
   
       
-  (* generic property of coclosed sets as commented above *)
-  (*
-  Lemma coclosed_path : forall k l, coclosed k l -> forall s x y,
-    Path s x y -> In (x, y) l -> s <= k.
-  Proof.
-    intros k l Hcc.
-    intros s x y.
-    intro p.
-    induction p.
-    (* path of length one *)
-    intro Hin.
-    unfold coclosed in Hcc.
-    specialize (Hcc (c, d)).
-    specialize (Hcc Hin).
-    unfold W in Hcc.
-    Check filter_In.
-    assert (HW: In (c, d) (all_pairs cand_all) /\  (Wf k l)  (c, d) = true).
-    apply filter_In.
-    assumption.
-    destruct HW as [HW1 HW2].
-    unfold Wf in HW2.
-
-    assert ( el k (c, d) = true /\ mp k (c, d) l = true).
-    apply andb_true_iff. assumption.
-    destruct H0 as [He Hc].
-    unfold el in He.
-    simpl in He.
-    assert (Hle: edge c d <= k). apply leb_complete. assumption.
-    omega.
-    (* non-unit path *)
-    intro Hin.
-    unfold coclosed in Hcc.
-    specialize (Hcc (c, e)).   specialize (Hcc Hin). 
-    unfold W in Hcc.
-    assert (HW: In (c, e) (all_pairs cand_all) /\  (Wf k l)  (c, e) = true).
-    apply filter_In. assumption.
-    destruct HW as [HW1 HW2].
-    unfold Wf in HW2.
-    assert ( el k (c, e) = true /\ mp k (c, e) l = true).
-    apply andb_true_iff. assumption.
-    destruct H0 as [He Hc].
-    unfold el in He.
-    simpl in He.
-    assert (Hle: edge c e <= k). apply leb_complete. assumption.
-  (*  forall b, In (b, snd p) l \/ edge (fst p) b <= k. *)
-    assert (Hmp: forall m, In (m, (snd (c, e))) l \/ edge (fst (c, e)) m <= k).
-    apply  mp_log. assumption.
-    simpl in Hmp.
-    specialize (Hmp d).
-    destruct Hmp as [Hm1 | Hm2].
-    (* case 2nd part of path in coclosed list *)
-    specialize (IHp Hm1).
-    assumption.
-    (* case first edge of small weight *)
-    omega.
-  Qed.
-   *)
-
-  (*
-  Lemma coclosed_path : forall k f, coclosed k f -> forall s x y,
-        Path s x y -> f (x, y) = true -> s <= k.
-   Proof.
-     intros k f Hcc x s y p. induction p.
-     intros Hin. unfold coclosed in Hcc.
-     specialize (Hcc (c, d) Hin). unfold W in Hcc.
-     apply andb_true_iff in Hcc. destruct Hcc as [Hccl Hccr].
-     apply leb_complete in Hccl. simpl in Hccl. omega.
-     (* non unit path. *)
-     intros Hin. unfold coclosed in Hcc. specialize (Hcc (c, e) Hin).
-     unfold W in Hcc.  apply andb_true_iff in Hcc. destruct Hcc as [Hccl Hccr].
-     unfold el in Hccl. simpl in Hccl. apply leb_complete in Hccl.
-     assert (Hmp: forall m, f (m, (snd (c, e))) = true \/ edge (fst (c, e)) m <= k). apply mp_log.
-     assumption. specialize (Hmp d). simpl in Hmp. destruct Hmp as [Hmp | Hmp].
-     specialize (IHp Hmp). assumption. omega.
-   Qed.
-   *)
-
   Lemma coclosed_path : forall k f, coclosed k f -> forall s x y,
         Path s x y -> f (x, y) = true -> s < k.
   Proof.
