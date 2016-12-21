@@ -258,18 +258,19 @@ Module Evote.
   Proof.
     intros k c d.  split. intros Hp. induction Hp.
     exists 1%nat. simpl. unfold O. unfold elg. simpl.
-
-    replace (geb (edge c d) k) with true. auto.
-    symmetry. apply gebedge_true. congruence.
+    apply orb_true_iff. left. pose proof (Zge_is_le_bool (edge c d) k). 
+    destruct H0. specialize (H0 H). replace (edge c d >=? k) with (k <=? edge c d). 
+    auto. symmetry. apply Z.geb_leb.
     destruct IHHp as [n IHHp].
     exists (S n). simpl. unfold O at 1.
     replace (mpg k (c, e) (Fixpoints.iter (O k) n (fun _ : cand * cand => false))) with true.
     apply orb_true_iff.  right. reflexivity.
     symmetry. unfold mpg. simpl.
     apply existsb_exists. exists d. split.
-    apply cand_fin.
-    apply andb_true_iff. split. unfold elg. simpl. apply gebedge_true. assumption.
-    assumption.
+    apply cand_fin. apply andb_true_iff. split. unfold elg. simpl.
+    pose proof (Zge_is_le_bool (edge c d) k).
+    destruct H0. specialize (H0 H). replace (edge c d >=? k) with (k <=? edge c d). 
+    auto. symmetry. apply Z.geb_leb. assumption.
     intros H. destruct H as [n H].
     apply (wins_evi_2 k n c d). assumption.
   Qed.
