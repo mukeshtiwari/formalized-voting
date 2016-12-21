@@ -342,7 +342,7 @@ Module Evote.
   
     
   Lemma length_pair : forall {A : Type} (n : nat) (l : list A),
-      length l <= n -> length (all_pairs l) <= n * n.
+      (length l <= n)%nat -> (length (all_pairs l) <= n * n)%nat.
   Proof.
     intros A n l. generalize dependent n. induction l.
     intros n H. auto with arith.
@@ -394,7 +394,7 @@ Module Evote.
   Qed.
   
   Theorem path_decidable :
-    forall (k : nat) c d, {Path k c d} + {~(Path k c d)}.
+    forall (k : Z) c d, {Path k c d} + {~(Path k c d)}.
   Proof.
     intros k c d.
     pose (cc := mult (length cand_all)  (length cand_all)%nat).
@@ -411,7 +411,7 @@ Module Evote.
     congruence.
   Qed.
 
-  Theorem path_lfp : forall (c d : cand) (k : nat),
+  Theorem path_lfp : forall (c d : cand) (k : Z),
       Fixpoints.least_fixed_point
         (cand * cand) (all_pairs cand_all)
         (all_pairs_universal cand_all cand_fin) (O k) (monotone_operator k) (c, d) = true 
@@ -457,30 +457,36 @@ Module Evote.
     apply orb_true_iff in H. unfold Fixpoints.complement.
     apply negb_true_iff. unfold W. apply andb_false_iff.
     destruct H as [H | H]. unfold elg in H. destruct a as (a1, a2). simpl in H.
-    apply gebedge_true in H. left. unfold el. simpl.
-    destruct (lt_dec (edge a1 a2) k). omega. reflexivity.
+    left. unfold el. simpl. apply Z.ltb_ge.
+    replace (edge a1 a2 >=? k)%Z with (k <=? edge a1 a2)%Z in H.
+    apply Zle_is_le_bool. auto. symmetry. apply Z.geb_leb.
     right. unfold mpg in H. apply existsb_exists in H.
     destruct H as [x [H1 H2]]. destruct a as (a1, a2).
     simpl in H2. apply andb_true_iff in H2. destruct H2 as [H2 H3].
-    unfold elg in H2. simpl in H2. apply gebedge_true in H2.
+    unfold elg in H2. simpl in H2. replace (edge a1 x >=? k)%Z with (k <=? edge a1 x)%Z in H2.
+    pose proof Zle_is_le_bool k (edge a1 x). destruct H. specialize (H0 H2).
     unfold mp. unfold mpf. simpl. apply forallb_false.
     exists x. split. assumption. apply orb_false_iff. split.
-    unfold el. simpl. destruct (lt_dec (edge a1 x) k).
-    omega. reflexivity. apply negb_false_iff. assumption.
+    unfold el. simpl. apply Z.ltb_ge. assumption.
+    apply negb_false_iff. assumption. symmetry. apply Z.geb_leb.
     (* other way *)
     unfold Fixpoints.pred_subset. intros. unfold O.
     apply orb_true_iff. unfold Fixpoints.complement in H.
     apply negb_true_iff in H. unfold W in H. apply andb_false_iff in H.
     destruct H as [H | H]. unfold el in H. destruct a as (a1, a2).
-    simpl in H. destruct (lt_dec (edge a1 a2) k). inversion H.
-    left. unfold elg. simpl. apply gebedge_true. omega.
+    simpl in H.
+    left. unfold elg. simpl. apply Z.ltb_ge in H.
+    replace (edge a1 a2 >=? k)%Z with (k <=? edge a1 a2)%Z.
+    apply Zle_is_le_bool. assumption. symmetry. apply Z.geb_leb.
     unfold mp in H. apply forallb_false in H. destruct H as [x [H1 H2]].
     unfold mpf in H2. apply orb_false_iff in H2. destruct H2 as [H2 H3].
     destruct a as (a1, a2). simpl in *. unfold el in H2. simpl in H2.
-    destruct (lt_dec (edge a1 x) k). inversion H2. right. unfold mpg.
-    simpl. apply existsb_exists. exists x. split. assumption.
-    apply andb_true_iff. split. unfold elg. simpl. apply gebedge_true. omega.
-    apply negb_false_iff in H3. assumption.
+    apply Z.ltb_ge in H2. apply negb_false_iff in H3.
+    right. unfold mpg. simpl.  apply existsb_exists. exists x.
+    split. assumption. apply andb_true_iff. split. unfold elg.
+    simpl. replace (edge a1 x >=? k)%Z with (k <=? edge a1 x)%Z.
+    apply Zle_is_le_bool. assumption. symmetry. apply Z.geb_leb.
+    assumption.
   Qed.
 
   
