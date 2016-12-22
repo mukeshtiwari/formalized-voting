@@ -655,12 +655,48 @@ Module Evote.
     destruct H1. apply IHn. apply andb_true_iff in H1. firstorder.
     inversion H.
   Qed.
- 
+
+  
+  Fixpoint f_Z_nat (n : Z) : nat :=
+    match n with
+    | Z0 => 0
+    | Zpos p => 2 * Z.to_nat (Zpos p) - 1
+    | Zneg p => 2 * Z.to_nat (Zpos p)
+    end.
+
+  Eval compute in (f_Z_nat 10).
+  Eval compute in (f_Z_nat (-2)).
+
+  Fixpoint f_nat_Z (n : nat) : Z :=
+    match n with
+    | 0 => Z0
+    | _ => if even n then 
+            match Z.of_nat (div n 2) with
+            | Z0 => Z0
+            | Zpos p => Zneg p
+            | Zneg p => Zneg p
+            end
+          else
+            match Z.of_nat (S (div n 2)) with
+            | Z0 => Z0
+            | Zpos p => Zpos p
+            | Zneg p => Zpos p
+            end              
+  end.
+
+  Eval compute in (f_Z_nat (f_nat_Z 11)) = 11.
+
+  Lemma identity_Z_nat : forall n, f_nat_Z (f_Z_nat n) = n.
+  Proof. Admitted.
+    
+  Check (constructive_indefinite_ground_description).
+  Check (constructive_indefinite_ground_description_nat).
   Theorem th2 : forall c, wins c -> ev c.
   Proof.
     intros c H. unfold wins in H. unfold ev.
     intros d. specialize (H d).
-    specialize (constructive_indefinite_ground_description_nat
+    specialize (constructive_indefinite_ground_description
+                  _ f_Z_nat f_nat_Z identity_Z_nat
                (constructive_prop c d) (constructive_deci c d) H); intros H1.
     destruct H1 as [n H1]. exists n. split. unfold constructive_prop in H1.
     destruct H1 as [H1 H2]. specialize (wins_evi n c d); intros H3.
@@ -682,12 +718,11 @@ Module Evote.
     (* second one *)
     exists (Fixpoints.greatest_fixed_point (cand * cand) (all_pairs cand_all)
                                       (all_pairs_universal cand_all cand_fin)
-                                      (W (S n)) (monotone_operator_w (S n))).  split.
+                                      (W (n + 1)) (monotone_operator_w (n + 1))).  split.
     unfold constructive_prop in H1. destruct H1 as [H1 H2].
-    apply path_gfp; intros H3. specialize (H2 (S n) H3). omega.
-
-    apply Fixpoints.fixed_point_is_coclosed. replace (n + 1) with (S n).
-    apply Fixpoints.greatest_fixed_point_is_fixed_point. omega.
+    apply path_gfp; intros H3. specialize (H2 (n + 1)%Z H3). omega.
+    apply Fixpoints.fixed_point_is_coclosed.
+    apply Fixpoints.greatest_fixed_point_is_fixed_point.
   Qed.    
     
 End Evote.
