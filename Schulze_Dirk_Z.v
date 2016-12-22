@@ -490,7 +490,7 @@ Module Evote.
   Qed.
 
   
-  Theorem path_gfp : forall (c d : cand) (k : nat),
+  Theorem path_gfp : forall (c d : cand) (k : Z),
       Fixpoints.greatest_fixed_point
         (cand * cand) (all_pairs cand_all)
         (all_pairs_universal cand_all cand_fin) (W k) (monotone_operator_w k) (c, d) = true <->
@@ -569,10 +569,10 @@ Module Evote.
   Qed.
 
   Definition constructive_prop c d k :=
-    Path k c d  /\ (forall l : nat, Path l d c -> l <= k).
+    Path k c d  /\ (forall l : Z, Path l d c -> l <= k)%Z.
 
   Lemma path_lk :
-    forall l k c d, l >= k -> Path l c d -> Path k c d.
+    forall (l k : Z) c d, (l >= k -> Path l c d -> Path k c d)%Z.
   Proof.
     intros l k c d Hl Hp. induction Hp.
     constructor 1. omega.
@@ -580,17 +580,17 @@ Module Evote.
   Qed.
   
   Lemma path_l_less_than_k :
-    forall k c d, (forall l, Path l c d -> l <= k) <-> ~Path (k + 1) c d.
+    forall k c d, (forall l, Path l c d -> l <= k)%Z <-> ~Path (k + 1) c d.
   Proof.
     intros k c d. split; intros H. unfold not; intros Hk.
-    specialize (H (k + 1) Hk). omega.
+    specialize (H (k + 1) Hk)%Z. omega.
 
-    intros l Hp. assert ( Ht: l <= k \/ l >= (k + 1) ) by omega.
+    intros l Hp. assert ( Ht: (l <= k)%Z \/ (l >= (k + 1))%Z ) by omega.
     destruct Ht. assumption.
     specialize (path_lk l (k + 1) c d H0 Hp); intros. congruence.
   Qed. 
     
-  Lemma constructive_deci : forall (c d : cand) (k : nat),
+  Lemma constructive_deci : forall (c d : cand) (k : Z),
       {constructive_prop c d k} + {~(constructive_prop c d k)}.
   Proof.
     intros c d k. unfold constructive_prop.
@@ -639,7 +639,9 @@ Module Evote.
     intros c d H. inversion H.
     intros c d H. simpl in H. unfold O in H at 1.
     destruct (elg k (c, d)) eqn:Ht. unfold elg in Ht.
-    apply gebedge_true in Ht. simpl in Ht. constructor 1. assumption.
+    simpl in Ht. constructor 1. apply Zge_is_le_bool.
+    replace (k <=? edge c d)%Z with (edge c d >=? k)%Z.
+    auto. apply Z.geb_leb.
     destruct (mpg k (c, d) (Fixpoints.iter (O k) n (fun _ : cand * cand => false))) eqn:Ht1.
     unfold mpg in Ht1.  simpl in Ht1.
     specialize (existsb_exists_type _
@@ -648,7 +650,8 @@ Module Evote.
                cand_all Ht1); intros H1.
     destruct H1 as [m H1]. constructor 2 with (d := m). destruct H1.
     apply andb_true_iff in H1. destruct H1. unfold elg in H1. simpl in H1.
-    apply gebedge_true in H1. auto.
+    apply Zge_is_le_bool. replace (k <=? edge c m)%Z with (edge c m >=? k)%Z.
+    auto. apply Z.geb_leb.
     destruct H1. apply IHn. apply andb_true_iff in H1. firstorder.
     inversion H.
   Qed.
