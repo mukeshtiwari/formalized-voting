@@ -666,31 +666,40 @@ Module Evote.
 
   Eval compute in (f_Z_nat 10).
   Eval compute in (f_Z_nat (-2)).
-
+  
   Fixpoint f_nat_Z (n : nat) : Z :=
     match n with
     | 0 => Z0
-    | _ => if even n then 
-            match Z.of_nat (div n 2) with
-            | Z0 => Z0
-            | Zpos p => Zneg p
-            | Zneg p => Zneg p
-            end
-          else
-            match Z.of_nat (S (div n 2)) with
-            | Z0 => Z0
-            | Zpos p => Zpos p
-            | Zneg p => Zpos p
-            end              
-  end.
+    | _ => if even n then  Z.of_nat (div n 2) * (-1) else Z.of_nat ((div (S n) 2))
+    end.
 
-  Eval compute in (f_Z_nat (f_nat_Z 11)) = 11.
 
+  Check Z.of_nat.
+  Eval compute in f_nat_Z (f_Z_nat (-2)).
+  
   Lemma identity_Z_nat : forall n, f_nat_Z (f_Z_nat n) = n.
   Proof. Admitted.
+  (*
+    intros n. destruct n. auto.
+    simpl.  replace (Pos.to_nat p + 0) with (Pos.to_nat p).
+    replace (Pos.to_nat p + Pos.to_nat p - 1) with (2 * Pos.to_nat p - 1).
+    unfold f_nat_Z.
+    replace (2 * Pos.to_nat p - 1) with (S (2 * (Pos.to_nat p - 1))).
+    destruct  (NPeano.Nat.even (S (2 * (Pos.to_nat p - 1)))) eqn : Ht.
+    remember (Pos.to_nat p)  as v.
+    pose proof (even_spec). destruct (H (S (2 * (v - 1)))).
+    specialize (H0 Ht). clear H1. inversion H0. omega.
+    remember (Pos.to_nat p) as v. 
     
-  Check (constructive_indefinite_ground_description).
-  Check (constructive_indefinite_ground_description_nat).
+    
+    Require Import Coq.ZArith.Znat.
+    induction n; auto.
+    simpl. replace (Pos.to_nat p + 0) with (Pos.to_nat p).
+    remember (Pos.to_nat p + Pos.to_nat p - 1) as v.
+    
+    rewrite <- Zabs2Nat.inj_pos.*)
+    
+    
   Theorem th2 : forall c, wins c -> ev c.
   Proof.
     intros c H. unfold wins in H. unfold ev.
