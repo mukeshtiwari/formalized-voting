@@ -677,49 +677,35 @@ Module Evote.
   
   Lemma identity_Z_nat : forall n, f_nat_Z (f_Z_nat n) = n.
   Proof.
-    (*
     intros n. destruct n.
-    auto. simpl.
-    specialize (Pos2Nat.is_succ p); intros.
+    auto.
+    simpl. specialize (Pos2Nat.is_succ p); intros.
     destruct H. rewrite H.
     replace (S x + (S x + 0) - 1) with (S (x + x)).
-    unfold f_nat_Z. destruct (NPeano.Nat.even (S (x + x))).
-    *)
+    unfold f_nat_Z. destruct (NPeano.Nat.even (S (x + x))) eqn:Ht.
+    pose proof (even_spec (S (x + x))). destruct H0.
+    specialize (H0 Ht). inversion H0. omega.
+    replace (S (S (x + x))) with (2 * (S x)) by omega.
+    rewrite Nat.mul_comm. rewrite Nat.div_mul.
+    rewrite <- H. apply positive_nat_Z. omega. omega.
     
-    (* Thank you Cypi *)
-    intros n. destruct n; simpl.
-    - reflexivity.
-    - remember (Pos.to_nat p) as v.
-      replace (v + 0) with v by auto.
-      destruct v.
-      + pose proof (Pos2Nat.is_pos p).
-        rewrite Heqv in H. apply Nat.lt_irrefl in H. elim H.
-      + simpl. replace (v + S v - 0) with (S (2 * v)) by omega.
-        unfold f_nat_Z. assert (Nat.even (S (2 * v)) = false).
-        { change (Nat.even (1 + 2 * v) = false).
-          rewrite (Nat.even_add_mul_2 1 v). reflexivity. }
-        rewrite H. replace (S (S (2 * v)) / 2) with (S v).
-        rewrite Heqv. apply positive_nat_Z.
-        enough (S v = (2 * S v) / 2).
-        * rewrite H0. f_equal. omega.
-        * rewrite Nat.mul_comm. rewrite Nat.div_mul; auto.
-    - remember (Pos.to_nat p) as v.
-      replace (v + 0) with v by auto.
-      destruct v.
-      + pose proof (Pos2Nat.is_pos p).
-        rewrite Heqv in H. apply Nat.lt_irrefl in H. elim H.
-      + replace (S v + S v) with (S (S (2 * v))) by omega.
-        unfold f_nat_Z. assert (Nat.even (S (S (2 * v))) = true).
-        { change (Nat.even (2 + 2 * v) = true).
-          rewrite (Nat.even_add_mul_2 2 v). reflexivity. }
-        rewrite H. replace (S (S (2 * v)) / 2) with (S v).
-        rewrite Heqv. rewrite <- (Pos2Z.opp_pos p).
-        do 2 rewrite Z.opp_eq_mul_m1. f_equal.
-        apply positive_nat_Z.
-        enough (S v = (2 * S v) / 2).
-        * rewrite H0. f_equal. omega.
-        * rewrite Nat.mul_comm. rewrite Nat.div_mul; auto.
+    simpl. specialize (Pos2Nat.is_succ p); intros.
+    destruct H. rewrite H. replace (S x + (S x + 0)) with (S (S (x + x))) by omega.
+    unfold f_nat_Z. destruct (NPeano.Nat.even (S (S (x + x)))) eqn:Ht. 
+    replace (S (S (x + x))) with (2 * (S x)) by omega.        
+    rewrite Nat.mul_comm. rewrite Nat.div_mul.
+    rewrite <- H. rewrite <- (Pos2Z.opp_pos p).
+    do 2 rewrite Z.opp_eq_mul_m1. f_equal. apply positive_nat_Z. omega.
+    simpl in Ht. 
+    assert (T : forall n, NPeano.Nat.even (n + n) = true).
+    {
+      induction n; auto. 
+      replace (S n + S n) with  (S (S (n + n))) by omega. 
+      simpl. auto.
+    }
+    specialize (T x). rewrite Ht in T. inversion T.
   Qed.
+  
     
     
   Theorem th2 : forall c, wins c -> ev c.
