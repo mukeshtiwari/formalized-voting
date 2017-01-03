@@ -11,24 +11,29 @@ Require Import Coq.Arith.Compare_dec.
 Require Import Coq.omega.Omega.
 Require Import Bool.Sumbool.
 Require Import Bool.Bool.
+Require Import Schulze_Dirk_Z.
 Import ListNotations.
+Open Scope Z.
 Section Count.
 
+  
   Notation "'existsT' x .. y , p" :=
     (sigT (fun x => .. (sigT (fun y => p)) ..))
       (at level 200, x binder, right associativity,
        format "'[' 'existsT'  '/  ' x  ..  y ,  '/  ' p ']'")
-                                     : type_scope.
+    : type_scope.
+  (*
   Variable cand : Type.
-  Variable cand_all : list cand.
-  Hypothesis dec_cand : forall n m : cand, {n = m} + {n <> m}.
-  Hypothesis cand_fin : forall c : cand, In c cand_all.
+  Variable cand_all : list cand. *)
+  (* Problem in importing the hypothesis from module Evote so leaving it for the moment *)
+  Hypothesis dec_cand : forall n m : Evote.cand, {n = m} + {n <> m}.
+  Hypothesis cand_fin : forall c : Evote.cand, In c Evote.cand_all. 
 
   (* the following need to be substituted with viable notions *)
   (* of evidence for winning / losing with given margin.      *)
 
-  Variable wins:  cand -> (cand -> cand -> Z) -> Type.
-  Variable loses: cand -> (cand -> cand -> Z) -> Type.
+  Variable wins:  Evote.cand -> (Evote.cand -> Evote.cand -> Z) -> Type.
+  Variable loses: Evote.cand -> (Evote.cand -> Evote.cand -> Z) -> Type.
 
   (* ballots are total preorders on cand, here represented by *)
   (* lists of lists where [[x1, x2], [x3], [x4, x5, x6]] is   *)
@@ -40,7 +45,7 @@ Section Count.
   Definition ballot := list (list cand). *)
 
   (* new definition of ballot *)
-  Definition ballot := cand -> nat.
+  Definition ballot := Evote.cand -> nat.
 
   (* ballots are valid if every candidate is mentioned        *)
   (* precisely once.                                          *)
@@ -49,19 +54,19 @@ Section Count.
     (forall c: cand, In c (concat b)) /\ NoDup (concat b). *)
 
   Definition ballot_valid (p : ballot) : Prop :=
-    forall c : cand, p c > 0.
+    forall c : Evote.cand, (p c > 0)%nat.
 
  
  
   (* the following needs to be instantiated with a definition *)
   (* that ensures that m is the margin function of ballots bs *)
-  Variable is_marg: (cand -> cand -> Z) -> (list ballot) -> Prop.
+  Variable is_marg: (Evote.cand -> Evote.cand -> Z) -> (list ballot) -> Prop.
 
   (* the count proceeds in several stages, represented by the *)
   (* node type: checking ballots, computing margins and       *)
   (* determining winners + evidence.                          *)
   Inductive Node : Type :=
-  | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
+  | state : (list ballot * list ballot)  -> (Evote.cand -> Evote.cand -> Z) -> Node
   | done.
 
   (* state with uncounted and invalid votes so far *)
@@ -73,65 +78,21 @@ Section Count.
   Definition earlier (c d: cand) (b: ballot) : Prop :=
     exists l1 lc l2 ld l3, b = l1++[lc]++l2++[ld]++l3 /\ In c lc /\ In d ld. *)
 
-  Definition earlier (c d : cand) (p : ballot) : Prop :=
-    p c > 0 /\ p d > 0 /\ (p c < p d).
+  Definition earlier (c d : Evote.cand) (p : ballot) : Prop :=
+    (p c > 0)%nat /\ (p d > 0)%nat /\ (p c < p d)%nat.
   
 
   (*
   Definition equal (c d : cand) (b : ballot) : Prop :=
     exists l1 l l2, b = l1 ++ [l] ++ l2 /\ In c l /\ In d l. *)
 
-  Definition equal (c d : cand) (p : ballot) : Prop :=
-    p c > 0 /\ p d > 0 /\ p c = p d. 
+  Definition equal (c d : Evote.cand) (p : ballot) : Prop :=
+    (p c > 0)%nat /\ (p d > 0)%nat /\ (p c = p d)%nat. 
 
-
-
-  (* 
-  Lemma equivalence : forall b : ballot, (forall c : cand, b c > 0) <->
-                                    (forall c : cand, In c cand_all -> b c > 0).
-  Proof.
-    split; intros; firstorder.
-  Qed. 
-
-  Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
-  Proof.
-    pose proof NoDup_dec dec_cand.
-    pose proof incl_dec dec_cand. intros b.
-    unfold ballot_valid.
-    destruct (X (concat b)).
-    destruct (X0 cand_all (concat b)).
-    left. firstorder.
-    right. firstorder.
-    destruct (X0 cand_all (concat b)).
-    right. firstorder.
-    right. firstorder.
-  Qed. *)
-
-  (* 
-  Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
-  Proof.
-    intro.
-    unfold ballot_valid.
-    revert cand_fin.
-    cut ({(forall c : cand, In c cand_all -> b c > 0)} +
-         {~ (forall c : cand, In c cand_all -> b c > 0)}).
-    intros.
-      destruct H; firstorder.
-      induction cand_all.
-    firstorder.
-      destruct IHl.
-    destruct (le_gt_dec (b a) 0).
-      right; intro.
-        specialize (H a (or_introl eq_refl)).
-        omega.
-        left; intros.
-      destruct H; auto; congruence.
-      firstorder.
-  Qed. *)
 
   Theorem in_decidable :
-    forall (b : ballot) (l : list cand),
-      {forall c : cand, In c l -> b c > 0} + {~(forall c : cand, In c l -> b c > 0)}.
+    forall (b : ballot) (l : list Evote.cand),
+      {forall c : Evote.cand, In c l -> (b c > 0)%nat} + {~(forall c : Evote.cand, In c l -> (b c > 0)%nat)}.
   Proof.
     intros b. induction l.
     left. intros. inversion H. 
@@ -143,18 +104,20 @@ Section Count.
 
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
-    intros b. pose proof in_decidable b cand_all.
+    intros b. pose proof in_decidable b Evote.cand_all.
     destruct H; [left | right]; firstorder. 
   Qed.
   
   
-  Definition nty (c d : cand) := 0%Z.
+  Definition nty (c d : Evote.cand) := 0%Z.
 
-  Definition incdec (c d : cand) (t: cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
+  Definition incdec (c d : Evote.cand) (t: Evote.cand -> Evote.cand -> Z)
+             (nt : Evote.cand -> Evote.cand -> Z) : Prop :=
     (nt c d = t c d + 1)%Z /\
     (nt d c = t d c - 1)%Z.
 
-  Definition nochange (c d : cand) (t : cand -> cand -> Z) (nt : cand -> cand -> Z) : Prop :=
+  Definition nochange (c d : Evote.cand) (t : Evote.cand -> Evote.cand -> Z)
+             (nt : Evote.cand -> Evote.cand -> Z) : Prop :=
     nt c d = t c d.
   
   
@@ -162,7 +125,7 @@ Section Count.
   | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
   | cvalid u us m nm inbs :
       Count bs (state (u :: us, inbs) m) -> ballot_valid u -> 
-      (forall c d : cand, (earlier c d u -> incdec c d m nm) /\
+      (forall c d : Evote.cand, (earlier c d u -> incdec c d m nm) /\
                      (equal c d u -> nochange c d m nm)) ->
       Count bs (state (us, inbs) nm)
   | cinvalid u us m inbs :
@@ -172,7 +135,8 @@ Section Count.
                  (forall c, (wins c m) + (loses c m)) -> Count bs done.
 
   
-  Definition incdect (p : ballot) (m : cand -> cand -> Z) : cand -> cand -> Z :=
+  Definition incdect (p : ballot) (m : Evote.cand -> Evote.cand -> Z) :
+    Evote.cand -> Evote.cand -> Z :=
     fun c d =>
       match nat_compare_alt (p c) (p d) with
       | Lt => (m c d + 1)%Z
@@ -181,7 +145,7 @@ Section Count.
       end.
 
        
-  Lemma incdec_proof : forall m (p : ballot) (c d : cand),
+  Lemma incdec_proof : forall m (p : ballot) (c d : Evote.cand),
       (earlier c d p -> incdec c d m (incdect p m)) /\
       (equal c d p -> nochange c d m (incdect p m)).
   Proof.
@@ -213,85 +177,39 @@ Section Count.
     specialize (IHu inbs (incdect a m) X0). destruct IHu as [Hinv [Hm H]].
     exists Hinv, Hm. assumption.
   Qed.
-  
-    
-
     
   Lemma extract_prog :
      forall (bs : list ballot), existsT i m, (Count bs (state ([], i) m)). 
   Proof.
-    intros bs. Check ax.
+    intros bs.
     pose proof (extract_prog_gen bs bs [] nty (ax bs bs nty eq_refl eq_refl)).
     destruct X as [i [m Hc]].
     exists i, m. assumption.
   Qed.
   
+  (* assume the definition for moment *)
+  (* replace all the m with Evote.edge *)
+  Definition c_wins (m : Evote.cand -> Evote.cand -> Z) : Evote.cand -> bool :=
+    fun c => true.
+
+  Lemma L0 : forall (m : Evote.cand -> Evote.cand -> Z) (c : Evote.cand),
+      c_wins m c = true <-> Evote.wins c.
+  Proof. Admitted.
+
+  Check Evote.edge.
+  
+  Fixpoint M (n : nat) (c d : Evote.cand) (m : Evote.cand -> Evote.cand -> Z) : Z:=
+    match n with
+    | O => 0%Z
+    | S n' => hd (0%Z) (map (fun x : Evote.cand => Z.min (m c x) (M n' x d m)) Evote.cand_all)
+    end.
+  
+  
+  
   Lemma wins_loses : forall c m, (wins c m) + (loses c m).
   Proof. Admitted.
 
 
-
-
-
-
-   (* 
-   
-  (* the type Count describes how valid counts are conducted.  *)
-  (* we interpret an element of Count n as evidence of a count *)
-  (* having proceeded to stage n.                              *)
-  Inductive Count (bs: list ballot): Node -> Type :=
-  (*| chk : (forall b, In b bs -> ballot_valid b) -> Count bs checked *) (* added it for the moment *)
-  | inv : forall b, In b bs -> ~ (ballot_valid b) -> Count bs (invalid b)
-  | ax us t : us = bs -> t = nty -> (forall b, In b bs -> ballot_valid b) -> Count bs (state us t)
-  | c1: forall u us m nm, Count bs (state (u :: us) m) ->
-      (forall (c d: cand), (earlier c d u -> inc c d m nm) /\ (equal c d u -> nochange c d n nm)) ->
-      Count bs (state us nm)           
-  | fin: forall m, Count bs (state [] m) -> (forall c: cand, (wins c m) + (loses c m)) -> Count bs done.
-
-
-  
-  (* theorem to be proved: for all ballots, there exists a count *)
-  (* that either ends in fin or inv. *)
-
- 
-  
-  
- 
-
-  Theorem exists_count : forall (bs : list ballot), {b : ballot & Count bs (invalid b)}
-                                               + Count bs (state bs nty).
-  Proof.
-    induction bs. right.
-    apply chk. intros b H. inversion H.
-    pose proof valid_or_invalid_ballot a as Ha.
-    destruct Ha.
-    destruct IHbs. left. destruct s. exists x.
-    apply inv. inversion c. firstorder.
-    unfold not; intros H. inversion c. firstorder.
-    right. apply chk. intros. apply in_inv in H.
-    destruct H. rewrite <- H. assumption.
-    inversion c. specialize (H0 b0 H). assumption.
-    left. exists a. apply inv. firstorder.
-    assumption.
-  Qed.
-
-  Theorem exists_count_invalid_or_done :
-    forall (bs : list ballot), {b : ballot & Count bs (invalid b)} + Count bs done.
-  Proof.
-    induction bs. right.
-    eapply fin. constructor. auto.
-    auto. intros b H. inversion H.
-    
-
-    pose proof valid_or_invalid_ballot a as Ha.
-    destruct Ha. destruct IHbs. left. destruct s.
-    exists x. apply inv. inversion c. firstorder.
-    unfold not; intros H. inversion c. firstorder.
-    right. 
-    
-    left. exists a. apply inv. firstorder.
-    assumption. *)
-  
   
 End Count.
 
