@@ -670,34 +670,56 @@ Module Evote.
   Fixpoint f_nat_Z (n : nat) : Z :=
     match n with
     | 0 => Z0
-    | _ => if even n then  Z.of_nat (div n 2) * (-1) else Z.of_nat ((div (S n) 2))
+    | _ => if even n then  -1 * Z.of_nat (div n 2) else Z.of_nat ((div (S n) 2))
     end.
 
-
-  Check Z.of_nat.
   Eval compute in f_nat_Z (f_Z_nat (-2)).
   
   Lemma identity_Z_nat : forall n, f_nat_Z (f_Z_nat n) = n.
-  Proof. Admitted.
-  (*
-    intros n. destruct n. auto.
-    simpl.  replace (Pos.to_nat p + 0) with (Pos.to_nat p).
-    replace (Pos.to_nat p + Pos.to_nat p - 1) with (2 * Pos.to_nat p - 1).
-    unfold f_nat_Z.
-    replace (2 * Pos.to_nat p - 1) with (S (2 * (Pos.to_nat p - 1))).
-    destruct  (NPeano.Nat.even (S (2 * (Pos.to_nat p - 1)))) eqn : Ht.
-    remember (Pos.to_nat p)  as v.
-    pose proof (even_spec). destruct (H (S (2 * (v - 1)))).
-    specialize (H0 Ht). clear H1. inversion H0. omega.
-    remember (Pos.to_nat p) as v. 
+  Proof.
+    (*
+    intros n. destruct n.
+    auto. simpl.
+    specialize (Pos2Nat.is_succ p); intros.
+    destruct H. rewrite H.
+    replace (S x + (S x + 0) - 1) with (S (x + x)).
+    unfold f_nat_Z. destruct (NPeano.Nat.even (S (x + x))).
+    *)
     
-    
-    Require Import Coq.ZArith.Znat.
-    induction n; auto.
-    simpl. replace (Pos.to_nat p + 0) with (Pos.to_nat p).
-    remember (Pos.to_nat p + Pos.to_nat p - 1) as v.
-    
-    rewrite <- Zabs2Nat.inj_pos.*)
+    (* Thank you Cypi *)
+    intros n. destruct n; simpl.
+    - reflexivity.
+    - remember (Pos.to_nat p) as v.
+      replace (v + 0) with v by auto.
+      destruct v.
+      + pose proof (Pos2Nat.is_pos p).
+        rewrite Heqv in H. apply Nat.lt_irrefl in H. elim H.
+      + simpl. replace (v + S v - 0) with (S (2 * v)) by omega.
+        unfold f_nat_Z. assert (Nat.even (S (2 * v)) = false).
+        { change (Nat.even (1 + 2 * v) = false).
+          rewrite (Nat.even_add_mul_2 1 v). reflexivity. }
+        rewrite H. replace (S (S (2 * v)) / 2) with (S v).
+        rewrite Heqv. apply positive_nat_Z.
+        enough (S v = (2 * S v) / 2).
+        * rewrite H0. f_equal. omega.
+        * rewrite Nat.mul_comm. rewrite Nat.div_mul; auto.
+    - remember (Pos.to_nat p) as v.
+      replace (v + 0) with v by auto.
+      destruct v.
+      + pose proof (Pos2Nat.is_pos p).
+        rewrite Heqv in H. apply Nat.lt_irrefl in H. elim H.
+      + replace (S v + S v) with (S (S (2 * v))) by omega.
+        unfold f_nat_Z. assert (Nat.even (S (S (2 * v))) = true).
+        { change (Nat.even (2 + 2 * v) = true).
+          rewrite (Nat.even_add_mul_2 2 v). reflexivity. }
+        rewrite H. replace (S (S (2 * v)) / 2) with (S v).
+        rewrite Heqv. rewrite <- (Pos2Z.opp_pos p).
+        do 2 rewrite Z.opp_eq_mul_m1. f_equal.
+        apply positive_nat_Z.
+        enough (S v = (2 * S v) / 2).
+        * rewrite H0. f_equal. omega.
+        * rewrite Nat.mul_comm. rewrite Nat.div_mul; auto.
+  Qed.
     
     
   Theorem th2 : forall c, wins c -> ev c.
