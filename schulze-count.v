@@ -189,21 +189,52 @@ Section Count.
   
   (* assume the definition for moment *)
   (* replace all the m with Evote.edge *)
+  (*
   Definition c_wins (m : Evote.cand -> Evote.cand -> Z) : Evote.cand -> bool :=
     fun c => true.
 
-  Lemma L0 : forall (m : Evote.cand -> Evote.cand -> Z) (c : Evote.cand),
-      c_wins m c = true <-> Evote.wins c.
+  Lemma L0 : forall  (c : Evote.cand),
+      c_wins Evote.edge c = true <-> Evote.wins c.
   Proof. Admitted.
 
   Check Evote.edge.
+
   
   Fixpoint M (n : nat) (c d : Evote.cand) (m : Evote.cand -> Evote.cand -> Z) : Z:=
     match n with
     | O => 0%Z
     | S n' => hd (0%Z) (map (fun x : Evote.cand => Z.min (m c x) (M n' x d m)) Evote.cand_all)
     end.
+   *)
+
+  Fixpoint maxlist (l : list Z) : Z :=
+    match l with
+    | [] => 0%Z
+    | [h] => h
+    | h :: t => Z.max h (maxlist t)
+    end.
+
+  Eval compute in (maxlist [-1; -2]).
   
+  Fixpoint M (n : nat) (c d : Evote.cand) : Z :=
+    match n with
+    | O => 0%Z
+    | S n' => maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M n' x d)) Evote.cand_all)
+    end.
+
+  (* induction on n *)
+  Lemma L1 : forall (n : nat) (s : Z) (c d : Evote.cand),
+      M n c d >= s -> Evote.Path s c d.
+  Proof.
+    induction n. simpl. intros.
+    constructor. admit.
+    intros. apply IHn. simpl in H.
+    
+  (* induction on path *)
+  Lemma L2 : forall (s : Z) (c d : Evote.cand),
+      Evote.Path s c d -> exists n, M n c d >= s.
+  Proof. Admitted.
+
   
   
   Lemma wins_loses : forall c m, (wins c m) + (loses c m).
