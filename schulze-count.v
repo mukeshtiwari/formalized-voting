@@ -222,21 +222,30 @@ Section Count.
     | S n' => maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M n' x d)) Evote.cand_all)
     end.
 
-  (* induction on n *)
+  
+  (* induction on n *)  
   Lemma L1 : forall (n : nat) (s : Z) (c d : Evote.cand),
       M n c d >= s -> Evote.Path s c d.
   Proof.
     induction n. simpl. intros.
     constructor. admit.
-    intros. apply IHn. simpl in H.
+    intros. apply IHn.
     
   (* induction on path *)
   Lemma L2 : forall (s : Z) (c d : Evote.cand),
       Evote.Path s c d -> exists n, M n c d >= s.
   Proof. Admitted.
 
-  
-  
+  Lemma L3 : forall (c d : Evote.cand) (n : nat),
+      M n c d <= M (length Evote.cand_all) c d. 
+  Proof. Admitted.
+
+  (* 
+  Lemma dec_cand_exists : existsT (cand_fun  : Evote.cand -> bool),
+                          (forall c, Evote.wins c <-> cand_fun c = true).
+  Proof. Admitted. *)
+    
+    
   Lemma wins_loses : forall c m, (wins c m) + (loses c m).
   Proof. Admitted.
 
