@@ -215,12 +215,16 @@ Section Count.
     end.
 
   Eval compute in (maxlist [-1; -2]).
-  
+
+  (* the function M n maps a pair of candidates c, d to the strength of the strongest path of 
+     length at most (n + 1) *)
   Fixpoint M (n : nat) (c d : Evote.cand) : Z :=
     match n with
-    | O => 0%Z
+    | O => Evote.edge c d 
     | S n' => maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M n' x d)) Evote.cand_all)
     end.
+  
+  
 
   
   (* induction on n *)  
@@ -228,8 +232,16 @@ Section Count.
       M n c d >= s -> Evote.Path s c d.
   Proof.
     induction n. simpl. intros.
-    constructor. admit.
-    intros. apply IHn.
+    constructor. auto.
+
+    intros s c d H. simpl in H.
+    assert (Ht : maxlist (map
+                            (fun x : Evote.cand =>
+                               Z.min (Evote.edge c x) (M n x d)) Evote.cand_all) >= s ->
+                 exists x, (Evote.edge c x >= s /\ M n x d >= s)). admit.
+    pose proof Ht H. destruct H0 as [e [H1 H2]].
+    constructor 2 with (d := e). auto.
+    apply IHn. assumption.
     
   (* induction on path *)
   Lemma L2 : forall (s : Z) (c d : Evote.cand),
