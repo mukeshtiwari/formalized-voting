@@ -227,11 +227,86 @@ Section Count.
   
   
 
+  Lemma list_max : forall A:Type, forall l: list A, forall f: A -> nat,
+          (l = []) + (existsT m:A, (In m l /\ (forall b:A, In b l ->(f b <= f m)%nat))).
+  Proof.
+    intros A l f.
+    induction l as [| l0 ls IHls].
+    (* l = [] *)
+    left. trivial.
+    (* l = l0::ls *)
+    right. destruct IHls as [lsemp | lsnemp ].
+    (* case ls = [] *)
+    exists l0. split. apply (in_eq l0 ls).
+    intros b H.
+    assert (H0: l0 = b \/ In b ls) by apply (in_inv H).
+    destruct H0 as [ eq | ctd].
+    replace l0 with b. trivial.
+    replace ls with ([]: list A) in ctd. contradict ctd.
+    (* case ls <> [] *)
+    destruct lsnemp as [maxls Hmax ]. destruct Hmax as [Hmaxin Hmaxgeq].
+    assert (H: {(f maxls <= (f l0))%nat}  + {((f l0) <= (f maxls))%nat}) by apply (le_ge_dec (f maxls) (f l0)).
+    destruct H as [Hl0 | Hmaxls].
+    (* l0 is maxium *)
+    exists l0. split. apply (in_eq l0 ls). intros b Hin.
+    assert (H: l0 = b \/ In b ls) by apply (in_inv Hin).
+    destruct H as [Heq | Hls ]. replace l0 with b. trivial.
+
+    transitivity (f maxls). apply (Hmaxgeq b Hls). assumption.
+    (* maxls is maximum *)
+    exists maxls. split.
+    apply (in_cons l0 maxls ls Hmaxin).
+    intros b Hin.
+    assert (H: l0 = b \/ In b ls) by apply (in_inv Hin). destruct H as [Heq | Htl].
+    replace b with l0. assumption. apply (Hmaxgeq b Htl).
+  Defined.
   
   Lemma Max_of_nonempty_list :
-    forall (A : Type) (l : list A) (H : l <> nil) (s : Z) (f : A -> Z),
+    forall (A : Type) (l : list A) (H : l <> nil) (H1 : forall x y : A, {x = y} + {x <> y}) (s : Z) (f : A -> Z),
     maxlist (map f l) >= s <-> exists (x:A), In x l /\ f x >= s.
-  Proof. Admitted.
+  Proof.
+    split; intros. generalize dependent l.
+    induction l; intros. specialize (H eq_refl). inversion H.
+
+    (*
+    destruct l eqn: Ht. simpl in H0.
+    exists a. intuition. *)
+
+    
+    
+    pose proof (list_eq_dec H1 l []).
+    destruct H2. exists a. rewrite e. intuition. rewrite e in H0.
+    simpl in H0. auto.
+
+    assert (Hm : {f a >= maxlist (map f l)} + {f a < maxlist (map f l)}) by
+        apply (Z_ge_lt_dec (f a) (maxlist (map f l))).
+    destruct Hm. rewrite map_cons in H0.
+    pose proof (exists_last n).  destruct X as [l1 [x l2]]. 
+    
+    assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
+    admit.
+    pose proof (Z.ge_le _ _ g). pose proof (Z.max_l _ _ H3).
+    rewrite H2 in H0. rewrite H4 in H0. exists a. intuition.
+
+    rewrite map_cons in H0. pose proof (exists_last n). destruct X as [l1 [x l2]].
+    assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
+    admit.
+    rewrite H2 in H0.
+    assert (f a < maxlist (map f l) -> Z.max (f a) (maxlist (map f l)) = maxlist (map f l))
+           by omega.
+      
+    assert (Hm : {f a >= maxlist (map f l)} + {f a < maxlist (map f l)}) by
+        apply (Z_ge_lt_dec (f a) (maxlist (map f l))).
+    destruct Hm. rewrite map_cons in H0. 
+    pose proof (Z.ge_le _ _ g).
+    pose proof (Z.max_l _ _ H2). rewrite <- Ht in H0.
+    remember (map f l) as v. assert (maxlist (f a :: v) = Z.max (f a) (maxlist v)).
+    simpl. rewrite Ht in Heqv. simpl in Heqv. rewrite Heqv.
+    auto. rewrite H4 in H0. rewrite H3 in H0. exists a.
+    intuition.
+
+    rewrite map_cons in H0. 
+    
 
   Lemma Zminmax : forall m n s, Z.min m n >= s <-> m >= s /\ n >= s.
   Proof. Admitted.
@@ -272,6 +347,12 @@ Section Count.
       M n c d <= M (length Evote.cand_all) c d. 
   Proof. Admitted.
 
+  Definition c_wins c :=
+    forallb (fun d => (M (length Evote.cand_all) d c) <=? (M (length Evote.cand_all) c d))
+            Evote.cand_all.
+
+
+  
   (* 
   Lemma dec_cand_exists : existsT (cand_fun  : Evote.cand -> bool),
                           (forall c, Evote.wins c <-> cand_fun c = true).
