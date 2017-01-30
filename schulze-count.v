@@ -27,7 +27,8 @@ Section Count.
   Variable cand_all : list cand. *)
   (* Problem in importing the hypothesis from module Evote so leaving it for the moment *)
   Hypothesis dec_cand : forall n m : Evote.cand, {n = m} + {n <> m}.
-  Hypothesis cand_fin : forall c : Evote.cand, In c Evote.cand_all. 
+  Hypothesis cand_fin : forall c : Evote.cand, In c Evote.cand_all.
+  Hypothesis cand_not_nil : Evote.cand_all <> nil.
 
   (* the following need to be substituted with viable notions *)
   (* of evidence for winning / losing with given margin.      *)
@@ -227,27 +228,46 @@ Section Count.
   
 
   
+  Lemma Max_of_nonempty_list :
+    forall (A : Type) (l : list A) (H : l <> nil) (s : Z) (f : A -> Z),
+    maxlist (map f l) >= s <-> exists (x:A), In x l /\ f x >= s.
+  Proof. Admitted.
+
+  Lemma Zminmax : forall m n s, Z.min m n >= s <-> m >= s /\ n >= s.
+  Proof. Admitted.
+
   (* induction on n *)  
   Lemma L1 : forall (n : nat) (s : Z) (c d : Evote.cand),
       M n c d >= s -> Evote.Path s c d.
   Proof.
     induction n. simpl. intros.
     constructor. auto.
-
     intros s c d H. simpl in H.
-    assert (Ht : maxlist (map
-                            (fun x : Evote.cand =>
-                               Z.min (Evote.edge c x) (M n x d)) Evote.cand_all) >= s ->
-                 exists x, (Evote.edge c x >= s /\ M n x d >= s)). admit.
-    pose proof Ht H. destruct H0 as [e [H1 H2]].
+    pose proof
+         (Max_of_nonempty_list _ Evote.cand_all cand_not_nil s
+                               (fun x : Evote.cand => Z.min (Evote.edge c x) (M n x d))).
+    destruct H0. clear H1. pose proof (H0 H).
+    destruct H1 as [e H1]. destruct H1.
+    pose proof (Zminmax (Evote.edge c e) (M n e d) s). destruct H3.
+    specialize (H3 H2). destruct H3.
     constructor 2 with (d := e). auto.
     apply IHn. assumption.
-    
-  (* induction on path *)
-  Lemma L2 : forall (s : Z) (c d : Evote.cand),
-      Evote.Path s c d -> exists n, M n c d >= s.
-  Proof. Admitted.
+  Qed.
 
+  
+  (* induction on path *)
+  Lemma L2 : forall (s : Z) (c d : Evote.cand),      
+      Evote.Path s c d -> exists n, M n c d >= s.
+  Proof.
+    intros s c d H. induction H.
+    exists O. auto. destruct IHPath.
+    exists (S x). simpl. apply Max_of_nonempty_list.
+    apply cand_not_nil. exists d.
+    split. pose proof (cand_fin d). auto.
+    apply Zminmax. split. auto. auto.
+  Qed.
+
+  
   Lemma L3 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
   Proof. Admitted.
