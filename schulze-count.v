@@ -226,41 +226,6 @@ Section Count.
     end.
   
   
-
-  Lemma list_max : forall A:Type, forall l: list A, forall f: A -> nat,
-          (l = []) + (existsT m:A, (In m l /\ (forall b:A, In b l ->(f b <= f m)%nat))).
-  Proof.
-    intros A l f.
-    induction l as [| l0 ls IHls].
-    (* l = [] *)
-    left. trivial.
-    (* l = l0::ls *)
-    right. destruct IHls as [lsemp | lsnemp ].
-    (* case ls = [] *)
-    exists l0. split. apply (in_eq l0 ls).
-    intros b H.
-    assert (H0: l0 = b \/ In b ls) by apply (in_inv H).
-    destruct H0 as [ eq | ctd].
-    replace l0 with b. trivial.
-    replace ls with ([]: list A) in ctd. contradict ctd.
-    (* case ls <> [] *)
-    destruct lsnemp as [maxls Hmax ]. destruct Hmax as [Hmaxin Hmaxgeq].
-    assert (H: {(f maxls <= (f l0))%nat}  + {((f l0) <= (f maxls))%nat}) by apply (le_ge_dec (f maxls) (f l0)).
-    destruct H as [Hl0 | Hmaxls].
-    (* l0 is maxium *)
-    exists l0. split. apply (in_eq l0 ls). intros b Hin.
-    assert (H: l0 = b \/ In b ls) by apply (in_inv Hin).
-    destruct H as [Heq | Hls ]. replace l0 with b. trivial.
-
-    transitivity (f maxls). apply (Hmaxgeq b Hls). assumption.
-    (* maxls is maximum *)
-    exists maxls. split.
-    apply (in_cons l0 maxls ls Hmaxin).
-    intros b Hin.
-    assert (H: l0 = b \/ In b ls) by apply (in_inv Hin). destruct H as [Heq | Htl].
-    replace b with l0. assumption. apply (Hmaxgeq b Htl).
-  Defined.
-
   Lemma Zmn_lt : forall (m n : Z), m < n -> Z.max m n = n.
   Proof.
     intros m n H.
@@ -367,7 +332,7 @@ Section Count.
     split. pose proof (cand_fin d). auto.
     apply Zminmax. split. auto. auto.
   Qed.
-
+  
   
   Lemma L3 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
