@@ -308,17 +308,7 @@ Section Count.
     
     
       
-    assert (Hm : {f a >= maxlist (map f l)} + {f a < maxlist (map f l)}) by
-        apply (Z_ge_lt_dec (f a) (maxlist (map f l))).
-    destruct Hm. rewrite map_cons in H0. 
-    pose proof (Z.ge_le _ _ g).
-    pose proof (Z.max_l _ _ H2). rewrite <- Ht in H0.
-    remember (map f l) as v. assert (maxlist (f a :: v) = Z.max (f a) (maxlist v)).
-    simpl. rewrite Ht in Heqv. simpl in Heqv. rewrite Heqv.
-    auto. rewrite H4 in H0. rewrite H3 in H0. exists a.
-    intuition.
-
-    rewrite map_cons in H0. 
+   
     
 
   Lemma Zminmax : forall m n s, Z.min m n >= s <-> m >= s /\ n >= s.
