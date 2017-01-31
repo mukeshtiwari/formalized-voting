@@ -325,8 +325,18 @@ Section Count.
     
 
   Lemma Zminmax : forall m n s, Z.min m n >= s <-> m >= s /\ n >= s.
-  Proof. Admitted.
-    
+  Proof.
+    split; intros. unfold Z.min in H.
+    destruct (m ?= n) eqn:Ht.
+    pose proof (proj1 (Z.compare_eq_iff _ _) Ht). intuition.
+    pose proof (proj1 (Z.compare_lt_iff _ _) Ht). intuition.
+    pose proof (proj1 (Z.compare_gt_iff _ _) Ht). intuition.
+
+    destruct H as [H1 H2].
+    unfold Z.min. destruct (m ?= n) eqn:Ht; auto.
+  Qed.
+
+  
   (* induction on n *)  
   Lemma L1 : forall (n : nat) (s : Z) (c d : Evote.cand),
       M n c d >= s -> Evote.Path s c d.
