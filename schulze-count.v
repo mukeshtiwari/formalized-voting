@@ -275,17 +275,10 @@ Section Count.
   Proof.
     split; intros. generalize dependent l.
     induction l; intros. specialize (H eq_refl). inversion H.
-
-    (*
-    destruct l eqn: Ht. simpl in H0.
-    exists a. intuition. *)
-
-    
-    
+  
     pose proof (list_eq_dec H1 l []).
     destruct H2. exists a. rewrite e. intuition. rewrite e in H0.
     simpl in H0. auto.
-
     assert (Hm : {f a >= maxlist (map f l)} + {f a < maxlist (map f l)}) by
         apply (Z_ge_lt_dec (f a) (maxlist (map f l))).
     destruct Hm. rewrite map_cons in H0.
@@ -305,15 +298,35 @@ Section Count.
     }    
     rewrite H2 in H0. pose proof (Zmn_lt _ _ l0). rewrite H3 in H0.
     specialize (IHl n H0). destruct IHl. exists x0. intuition.
-    
-    
-      
+
    
+    destruct H0 as [x [H2 H3]].
+    induction l. specialize (H eq_refl). inversion H.
+    pose proof (list_eq_dec H1 l []). destruct H0.
+    (* empty list *)
+    subst. simpl in *. destruct H2. subst. auto. inversion H0.
+    (* not empty list *)
+    rewrite map_cons. pose proof (exists_last n). destruct X as [l1 [x0 H4]].
+    assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
+    {    
+      destruct l1. simpl in H4. rewrite H4. simpl. auto.
+      rewrite H4. simpl. auto.
+    }    
+    rewrite H0. unfold Z.max. destruct (f a ?= maxlist (map f l)) eqn:Ht.
+    destruct H2. subst. auto. pose proof (proj1 (Z.compare_eq_iff _ _) Ht).
+    specialize (IHl n H2). rewrite H5. auto.
+    destruct H2. subst.
+    pose proof (proj1 (Z.compare_lt_iff _ _) Ht). omega.
+    apply IHl. assumption. assumption.
+    destruct H2. subst. assumption. specialize (IHl n H2).
+    pose proof (proj1 (Z.compare_gt_iff _ _) Ht).  omega.
+  Qed.
+  
     
 
   Lemma Zminmax : forall m n s, Z.min m n >= s <-> m >= s /\ n >= s.
   Proof. Admitted.
-
+    
   (* induction on n *)  
   Lemma L1 : forall (n : nat) (s : Z) (c d : Evote.cand),
       M n c d >= s -> Evote.Path s c d.
@@ -322,7 +335,7 @@ Section Count.
     constructor. auto.
     intros s c d H. simpl in H.
     pose proof
-         (Max_of_nonempty_list _ Evote.cand_all cand_not_nil s
+         (Max_of_nonempty_list _ Evote.cand_all cand_not_nil dec_cand s
                                (fun x : Evote.cand => Z.min (Evote.edge c x) (M n x d))).
     destruct H0. clear H1. pose proof (H0 H).
     destruct H1 as [e H1]. destruct H1.
@@ -340,7 +353,7 @@ Section Count.
     intros s c d H. induction H.
     exists O. auto. destruct IHPath.
     exists (S x). simpl. apply Max_of_nonempty_list.
-    apply cand_not_nil. exists d.
+    apply cand_not_nil. apply dec_cand. exists d.
     split. pose proof (cand_fin d). auto.
     apply Zminmax. split. auto. auto.
   Qed.
