@@ -342,8 +342,45 @@ Section Count.
     forallb (fun d => (M (length Evote.cand_all) d c) <=? (M (length Evote.cand_all) c d))
             Evote.cand_all.
 
+  Lemma L4 (c : Evote.cand) :
+    c_wins c = true <-> forall d, M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d. 
+  Proof.
+    split; intros.
+    unfold c_wins in H.
+    pose proof
+         (proj1 (forallb_forall
+                   (fun d : Evote.cand => M (length Evote.cand_all) d c <=?
+                                       M (length Evote.cand_all) c d) Evote.cand_all) H).
+    pose proof (H0 d (cand_fin d)). simpl in H1.
+    apply Zle_bool_imp_le. assumption.
+
+    unfold c_wins. apply forallb_forall. intros x Hin.
+    pose proof H x. apply Zle_imp_le_bool. assumption.
+  Qed.
+
+  (* there is atleast one candidate d who beats c *)
+  Definition c_loses c :=
+    existsb (fun d => M (length Evote.cand_all) c d <=? M (length Evote.cand_all) d c)
+            Evote.cand_all.
+
+  Lemma L5 (c : Evote.cand) :
+    c_loses c = true <-> exists d, M (length Evote.cand_all) c d <= M (length Evote.cand_all) d c.
+  Proof.
+    split; intros. unfold c_loses in H.
+    Check existsb_exists.
+    pose proof (proj1 (existsb_exists
+                         (fun d : Evote.cand => M (length Evote.cand_all) c d <=?
+                                             M (length Evote.cand_all) d c) Evote.cand_all) H).
+    destruct H0 as [x [H1 H2]]. exists x. apply Zle_bool_imp_le. assumption.
+
+    destruct H. unfold c_loses. apply existsb_exists. exists x.
+    split. specialize (cand_fin x). assumption.
+    apply Zle_imp_le_bool. assumption.
+  Qed.
+  
 
   
+    
   (* 
   Lemma dec_cand_exists : existsT (cand_fun  : Evote.cand -> bool),
                           (forall c, Evote.wins c <-> cand_fun c = true).
