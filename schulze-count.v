@@ -224,8 +224,44 @@ Section Count.
     | O => Evote.edge c d 
     | S n' => maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M n' x d)) Evote.cand_all)
     end.
+
+  (*
+  Theorem N : forall (n : nat) (c d : Evote.cand), n <> O -> Z.
+    refine (fix MM (n : nat) (c d : Evote.cand) (H: n<>O) := _).
+    destruct n as [|[|n'']].
+    congruence.
+    refine (Evote.edge c d).
+    refine (maxlist
+              (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M (S n'') x d)) Evote.cand_all)).
+  Defined.
+
+   Program Fixpoint N (n : nat) (c d : Evote.cand) (H: n <> O) {struct n}: Z
+    :=
+      match n with
+          | O => _
+          | S n' =>
+            match n' with
+            | O => Evote.edge c d
+            | S n'' =>
+              maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (N n' x d _)) Evote.cand_all)
+            end
+      end.
+
+   Print N. *)
+
+   Program Fixpoint N (n : nat) (c d : Evote.cand) (H: n <> O) {struct n}: Z
+    :=
+      match n with
+          | O => _
+          | S O =>  Evote.edge c d
+          | S (S n') =>
+              maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (N (S n') x d _)) Evote.cand_all)
+                      
+      end.
+
   
   
+
   Lemma Zmn_lt : forall (m n : Z), m < n -> Z.max m n = n.
   Proof.
     intros m n H.
@@ -263,7 +299,6 @@ Section Count.
     }    
     rewrite H2 in H0. pose proof (Zmn_lt _ _ l0). rewrite H3 in H0.
     specialize (IHl n H0). destruct IHl. exists x0. intuition.
-
    
     destruct H0 as [x [H2 H3]].
     induction l. specialize (H eq_refl). inversion H.
@@ -333,10 +368,15 @@ Section Count.
     apply Zminmax. split. auto. auto.
   Qed.
   
-  
+    
   Lemma L3 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
-  Proof. Admitted.
+  Proof.
+    intros c d n. remember (length Evote.cand_all) as v.
+    Admitted.
+
+ 
+    
 
   Definition c_wins c :=
     forallb (fun d => (M (length Evote.cand_all) d c) <=? (M (length Evote.cand_all) c d))
@@ -386,14 +426,18 @@ Section Count.
                           (forall c, Evote.wins c <-> cand_fun c = true).
   Proof. Admitted. *)
     
-    
-  Lemma wins_loses : forall c m, (wins c m) + (loses c m).
+  Lemma wins_loses : forall c, (wins c Evote.edge) + (loses c Evote.edge).
   Proof. Admitted.
+
+  Test Default Goal Selector.
+  
 
 
   
 End Count.
 
+Definition wins (c : Evote.cand) := forall d, (Evote.PathT (Evote.edge c d) c d).
+Definition loses (a : cand) (m : cand -> cand -> Z) := nat.
 
 Inductive cand : Type :=
 | a : cand
