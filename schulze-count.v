@@ -249,19 +249,7 @@ Section Count.
 
    Print N. *)
 
-   Program Fixpoint N (n : nat) (c d : Evote.cand) (H: n <> O) {struct n}: Z
-    :=
-      match n with
-          | O => _
-          | S O =>  Evote.edge c d
-          | S (S n') =>
-              maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (N (S n') x d _)) Evote.cand_all)
-                      
-      end.
-
   
-  
-
   Lemma Zmn_lt : forall (m n : Z), m < n -> Z.max m n = n.
   Proof.
     intros m n H.
