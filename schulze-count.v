@@ -426,6 +426,18 @@ Section Count.
     exists a, (l0 :: l11), l22, l33.  simpl. rewrite H10 in H3.
     assumption.
   Qed.
+
+  Lemma Zmaxlemma : forall m n s, Z.max m n >= s <-> m >= s \/ n >= s.
+  Proof.
+    split; intros. unfold Z.max in H. destruct (m ?= n) eqn : Ht.
+    left. auto. right. auto. left. auto.
+
+    destruct H. unfold Z.max. destruct (m ?= n) eqn: Ht.
+    auto. pose proof (proj1 (Z.compare_lt_iff _ _) Ht). omega. omega.
+    unfold Z.max. destruct (m ?= n) eqn:Ht.
+    pose proof (proj1 (Z.compare_eq_iff _ _) Ht). omega.
+    omega. pose proof (proj1 (Z.compare_gt_iff _ _) Ht). omega.
+  Qed.
   
   (* induction on n *)  
   Lemma L1 : forall (n : nat) (s : Z) (c d : Evote.cand),
@@ -435,12 +447,19 @@ Section Count.
     constructor. auto.
     intros s c d H. simpl in H.
     pose proof
+         (proj1
+            (Zmaxlemma
+               (M n c d)
+               (maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x)
+                                                       (M n x d)) Evote.cand_all)) s) H).
+    destruct H0. pose proof (IHn _ _ _ H0). assumption.
+    pose proof
          (Max_of_nonempty_list _ Evote.cand_all cand_not_nil dec_cand s
                                (fun x : Evote.cand => Z.min (Evote.edge c x) (M n x d))).
-    destruct H0. clear H1. pose proof (H0 H).
-    destruct H1 as [e H1]. destruct H1.
-    pose proof (Zminmax (Evote.edge c e) (M n e d) s). destruct H3.
-    specialize (H3 H2). destruct H3.
+    destruct H1.  clear H2. pose proof (H1 H0).
+    destruct H2 as [e H2]. destruct H2.
+    pose proof (Zminmax (Evote.edge c e) (M n e d) s). destruct H4.
+    specialize (H4 H3). destruct H4.
     constructor 2 with (d := e). auto.
     apply IHn. assumption.
   Qed.
@@ -452,7 +471,8 @@ Section Count.
   Proof.
     intros s c d H. induction H.
     exists O. auto. destruct IHPath.
-    exists (S x). simpl. apply Max_of_nonempty_list.
+    exists (S x). simpl. apply Zmaxlemma. right.
+    apply Max_of_nonempty_list.
     apply cand_not_nil. apply dec_cand. exists d.
     split. pose proof (cand_fin d). auto.
     apply Zminmax. split. auto. auto.
@@ -467,6 +487,7 @@ Section Count.
     intros c d n. remember (M n c d) as s.
     SearchAbout ( _ >= _ -> _ <= _).
     apply Z.ge_le. apply L2.
+
     
   Definition c_wins c :=
     forallb (fun d => (M (length Evote.cand_all) d c) <=? (M (length Evote.cand_all) c d))
