@@ -369,6 +369,9 @@ Section Count.
       (length l >= S n)%nat -> exists a ls, l = a :: ls.
   Proof. Admitted.
 
+  Lemma in_notin_exist : forall (A : Type) (a x : A) (l : list A),
+      In a l -> ~ In x l -> x <> a.
+  Admitted.
       
   Definition covers (A : Type) (c l : list A) := forall x : A, In x l -> In x c. 
 
@@ -382,12 +385,39 @@ Section Count.
     destruct H4 as [a [ls H4]]. rewrite H4 in H2. specialize (H2 a (in_eq a ls)). inversion H2.
 
     rewrite H in H0. pose proof (exists_list _ _ _ H0).
-    destruct H3 as [a [ls H3]].
-    pose proof (in_dec H1 a ls). destruct H4.
-    pose proof (in_split a ls i). destruct H4 as [l1 [l2 H4]].
-    rewrite H4 in H3. exists a, [], l1, l2. simpl. auto.
-    unfold covers in H2.  
+    destruct H3 as [l0 [ls H3]].
+    pose proof (in_dec H1 l0 ls). destruct H4.
+    pose proof (in_split l0 ls i). destruct H4 as [l1 [l2 H4]].
+    rewrite H4 in H3. exists l0, [], l1, l2. simpl. auto.
+    unfold covers in H2.
+    rewrite H3 in H2.
+    pose proof (H2 l0 (in_eq l0 ls)).
+    pose proof (in_split l0 c H4). destruct H5 as [l1 [l2 H5]].
+    rewrite H5 in H. rewrite app_length in H. simpl in H.
+    assert (Ht : (length l1 + S (length l2))%nat = (S (length l1 + length l2))%nat) by omega.
+    rewrite Ht in H. clear Ht. inversion H. clear H.
+    rewrite <- app_length in H7.
+    assert ((length ls > length (l1 ++ l2))%nat).
+    { rewrite H7. rewrite H3 in H0. simpl in H0. omega. }
+      
+    specialize (IHn (l1 ++ l2) H1 H7 ls H).
     
+    assert (covers A (l1 ++ l2) ls).
+    {
+      unfold covers. intros x Hin.
+      specialize (in_notin_exist _ x l0 ls Hin n0); intros.
+      specialize (H2 x (or_intror Hin)).
+      rewrite H5 in H2.
+      pose proof (in_app_or l1 (l0 :: l2) x H2). destruct H8.
+      apply in_or_app. left. assumption.
+      simpl in H8. destruct H8. contradiction.
+      apply in_or_app. right. assumption.
+    }
+    specialize (IHn H6). destruct IHn as [a [l11 [l22 [l33 H10]]]].
+    exists a, (l0 :: l11), l22, l33.  simpl. rewrite H10 in H3.
+    assumption.
+  Qed.
+  
   (* induction on n *)  
   Lemma L1 : forall (n : nat) (s : Z) (c d : Evote.cand),
       M n c d >= s -> Evote.Path s c d.
