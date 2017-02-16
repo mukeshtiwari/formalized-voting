@@ -367,12 +367,21 @@ Section Count.
 
   Lemma exists_list : forall (A : Type) (l : list A) (n : nat),
       (length l >= S n)%nat -> exists a ls, l = a :: ls.
-  Proof. Admitted.
-
+  Proof.
+    intros A l. destruct l eqn: Ht; intros; simpl in H. inversion H.
+    exists a, l0. reflexivity.
+  Qed.
+  
   Lemma in_notin_exist : forall (A : Type) (a x : A) (l : list A),
       In a l -> ~ In x l -> x <> a.
-  Admitted.
-      
+  Proof.
+    intros A a x l H1 H2.
+    induction l. inversion H1.
+    specialize (proj1 (not_in_cons x a0 l) H2); intros.
+    simpl in H1. destruct H as [H3 H4]. destruct H1.
+    subst.  assumption. apply IHl. assumption. assumption.
+  Qed.
+  
   Definition covers (A : Type) (c l : list A) := forall x : A, In x l -> In x c. 
 
   Lemma list_finite_elem : forall (A : Type) (n : nat) (c : list A) (H1 : forall x y : A, {x = y} + {x <> y}),
