@@ -339,28 +339,19 @@ Section Count.
       if dec_cand c d then nodes_in_path k d e H2 else c :: nodes_in_path k d e H2
     end.
 
-  Lemma path_equality : forall k c d p,
-      (S (length (path_edge k c d p)) >= length (nodes_in_path k c d p))%nat. 
-  Proof.
-    intros k c d p. induction p. simpl in *. destruct (dec_cand c d); simpl; omega.
-
-    simpl in *. destruct (dec_cand c d) eqn:Ht. omega.
-    simpl in *. omega.
-  Qed.
-
   Lemma path_dup_edge : forall k c d p,
       (length (path_edge k c d p) >= length (nodes_in_path k c d p))%nat ->
-      exists e k', In (e, e, k') (path_edge k c d p).
+      exists e k', In (e, e, k') (path_edge k c d p) /\ k' >= k.
   Proof.
     intros k c d p H. induction p. simpl in *.
-    destruct (dec_cand c d). exists c, k. left. subst. auto.
+    destruct (dec_cand c d). exists c, k. split. left. subst. auto. omega.
     simpl in H. omega.
-    simpl in *. destruct (dec_cand c d) eqn:Ht. exists c, k. left. subst. auto.
+    simpl in *. destruct (dec_cand c d) eqn:Ht. exists c, k. split. left. subst. auto. omega.
     simpl in *.
     assert (forall (x y : nat), (S x >= S y)%nat -> (x >= y)%nat).
     { intros. omega. }
-    specialize (H0 _ _ H). specialize (IHp H0). destruct IHp as [x [k' IHp]]. exists x, k'. right.
-    assumption.
+    specialize (H0 _ _ H). specialize (IHp H0). destruct IHp as [x [k' IHp]]. exists x, k'. split. right.
+    destruct IHp as [H1 H2]. assumption. destruct IHp as [H1 H2]. assumption.
   Qed.
 
   (* end of useless things *)
@@ -479,15 +470,12 @@ Section Count.
   Qed.
 
   
-
+  
     
   Lemma L3 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
   Proof.
-    intros c d n. remember (M n c d) as s.
-    SearchAbout ( _ >= _ -> _ <= _).
-    apply Z.ge_le. apply L2.
-
+    
     
   Definition c_wins c :=
     forallb (fun d => (M (length Evote.cand_all) d c) <=? (M (length Evote.cand_all) c d))
