@@ -352,8 +352,8 @@ Section Count.
     { intros. omega. }
     specialize (H0 _ _ H). specialize (IHp H0). destruct IHp as [x [k' IHp]]. exists x, k'. split. right.
     destruct IHp as [H1 H2]. assumption. destruct IHp as [H1 H2]. assumption.
-  Qed.
-
+  Qed.   
+    
   (* end of useless things *)
 
   Lemma exists_list : forall (A : Type) (l : list A) (n : nat),
@@ -469,8 +469,11 @@ Section Count.
     apply Zminmax. split. auto. auto.
   Qed.
 
-  
-  
+  Lemma L3 : forall n k c d, M (k + n - 1) c d = M (n - 1) c d.
+  Proof.
+    intros n k c d. induction k. reflexivity.
+    simpl in *. assert ((k + n - O = k + n)%nat) by omega.
+    rewrite H. clear H. 
     
   Lemma L3 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
