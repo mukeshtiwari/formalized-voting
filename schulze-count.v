@@ -12,6 +12,7 @@ Require Import Coq.omega.Omega.
 Require Import Bool.Sumbool.
 Require Import Bool.Bool.
 Require Import Schulze_Dirk_Z.
+Require Import Arith Wf.
 Import ListNotations.
 Open Scope Z.
 Section Count.
@@ -469,11 +470,21 @@ Section Count.
     apply Zminmax. split. auto. auto.
   Qed.
 
-  Lemma L3 : forall n k c d, M (k + n - 1) c d = M (n - 1) c d.
+  Theorem strong_induction:
+    forall P : nat -> Prop,
+      (forall n : nat, (forall k : nat, (k < n -> P k)%nat) -> P n) ->
+      forall n : nat, P n.
+  Proof. Admitted.
+    
+  
+  Lemma L3 : forall k n c d, M (k + n - 1) c d = M (n - 1) c d.
   Proof.
-    intros n k c d. induction k. reflexivity.
-    simpl in *. assert ((k + n - O = k + n)%nat) by omega.
-    rewrite H. clear H. 
+    induction k using (well_founded_induction lt_wf).
+    
+    intros n c d. simpl. assert (k + n - 0 = k + n)%nat by omega.
+    rewrite H. clear H.
+
+    
     
   Lemma L3 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
