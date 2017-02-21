@@ -477,7 +477,39 @@ Section Count.
     apply Z.ge_le. apply Zmaxlemma with (m := M m c d). 
     left. omega.
   Qed.
-  
+
+  Fixpoint str c l d :=
+    match l with
+    | [] => Evote.edge c d
+    | (x :: xs) => Z.min (Evote.edge c x)  (str x xs d)
+    end.
+
+    
+  Lemma path_length : forall k c d s,
+      M k c d >= s <-> exists (l : list Evote.cand), (length l <= k)%nat /\ str c l d >= s. 
+  Proof.
+    induction k. intros c d s. split. intros H.
+    exists []. simpl in *. omega.
+    intros H. destruct H as [l [H1 H2]].
+    assert ((length l <= 0)%nat -> l = []).
+    { destruct l. simpl. intros; auto.
+      simpl. intros. inversion H.
+    }
+    specialize (H H1). subst. simpl in *. auto.
+    intros c d s. split. intros H. simpl in *.
+    pose proof (proj1 (Zmaxlemma (M k c d) _ s) H) as H1. clear H.
+    destruct H1 as [H1 | H1].
+    pose proof (proj1 (IHk c d s) H1).
+    destruct H as [l [H2 H3]]. exists l. omega.
+    pose proof
+         (proj1 (Max_of_nonempty_list _ Evote.cand_all cand_not_nil dec_cand s
+                                      (fun x : Evote.cand => Z.min (Evote.edge c x) (M k x d))) H1).
+    destruct H as [x [H2 H3]]. pose proof (proj1 (Zminmax _ _ s) H3). clear H3.
+    destruct H as [H H3].
+    
+
+
+    
   (* We can do the strong induction using well_founded_induction *)
 
   
