@@ -497,6 +497,15 @@ Section Count.
   Defined.
 
   (* End of Dirk's code *)
+
+  Lemma monotone_M : forall (n m : nat) c d, (n <= m)%nat  -> M n c d <= M m c d.
+  Proof.
+    intros n m c d H. induction H; simpl; try omega.
+    apply Z.ge_le. apply Zmaxlemma with (m := M m c d). 
+    left. omega.
+  Qed.
+
+  
   (* We can do the strong induction using well_founded_induction *)
   
   Lemma L3 : forall k n c d, M (k + n - 1) c d = M (n - 1) c d.
