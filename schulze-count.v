@@ -470,19 +470,39 @@ Section Count.
     apply Zminmax. split. auto. auto.
   Qed.
 
-  Theorem strong_induction:
-    forall P : nat -> Prop,
-      (forall n : nat, (forall k : nat, (k < n -> P k)%nat) -> P n) ->
-      forall n : nat, P n.
-  Proof. Admitted.
-    
+  (* Dirk's code of strong induction *)
+
+  Lemma str_aux: forall p:nat -> Type, 
+      (forall n : nat, (forall k : nat, (k < n -> p k)%nat) -> p n) ->
+      forall n : nat, forall k:nat, (k <= n)%nat -> p k.
+  Proof.
+    intros p H. induction n as [ | n IHn ].
+    intro k. intro leq0.
+    assert (k = 0)%nat. omega. replace k with 0%nat. apply (H 0)%nat.
+    intro k0. intro ass. contradict ass. auto with arith.
+    (* case S n *)
+    intros k ass.
+    apply (H k). intros k0 ass2.
+    apply (IHn k0).
+    omega.
+  Defined.
+
+  Theorem str_ind:forall p : nat -> Type,(forall n : nat, (forall k : nat, (k < n -> p k)%nat) -> p n) ->forall n : nat, p n.
+  Proof.
+    intros p H n.
+    assert (H0: forall k:nat, (k <= n)%nat -> p k).
+    apply (str_aux p H).
+    apply (H0 n).
+    auto.
+  Defined.
+
+  (* End of Dirk's code *)
+  (* We can do the strong induction using well_founded_induction *)
   
   Lemma L3 : forall k n c d, M (k + n - 1) c d = M (n - 1) c d.
   Proof.
     induction k using (well_founded_induction lt_wf).
     
-    intros n c d. simpl. assert (k + n - 0 = k + n)%nat by omega.
-    rewrite H. clear H.
 
     
     
