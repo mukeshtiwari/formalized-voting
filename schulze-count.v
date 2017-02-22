@@ -487,47 +487,89 @@ Section Count.
     
   Lemma path_length : forall k c d s,
       M k c d >= s <-> exists (l : list Evote.cand), (length l <= k)%nat /\ str c l d >= s. 
-  Proof.
-    induction k. intros c d s. split. intros H.
-    exists []. simpl in *. omega.
-    intros H. destruct H as [l [H1 H2]].
-    assert ((length l <= 0)%nat -> l = []).
-    { destruct l. simpl. intros; auto.
-      simpl. intros. inversion H.
-    }
-    specialize (H H1). subst. simpl in *. auto.
-    intros c d s. split. intros H. simpl in *.
-    pose proof (proj1 (Zmaxlemma (M k c d) _ s) H) as H1. clear H.
-    destruct H1 as [H1 | H1].
-    pose proof (proj1 (IHk c d s) H1).
-    destruct H as [l [H2 H3]]. exists l. omega.
-    pose proof
-         (proj1 (Max_of_nonempty_list _ Evote.cand_all cand_not_nil dec_cand s
-                                      (fun x : Evote.cand => Z.min (Evote.edge c x) (M k x d))) H1).
-    destruct H as [x [H2 H3]]. pose proof (proj1 (Zminmax _ _ s) H3). clear H3.
-    destruct H as [H H3].
-    
+  Proof. Admitted.
 
 
     
   (* We can do the strong induction using well_founded_induction *)
 
-  
-  
-  Lemma L3 : forall k n c d, M (k + n - 1) c d <= M (n - 1) c d.
+  Lemma str_lemma : forall c d a l l1 l2 l3 s, l = l1 ++ a :: l2 ++ a :: l3 ->
+    str c l d >= s -> str c (l1 ++ l2 ++ l3) d >= s.
+  Proof. Admitted.
+    
+  Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = n)%nat),
+      M (k + n) c d <= M n c d.
   Proof.
-    induction k using (well_founded_induction lt_wf). intros n c d.
+    induction k using (well_founded_induction lt_wf). intros n c d Hn.
+    remember (M (k + n) c d) as s.
+    pose proof (Z.eq_le_incl _ _ Heqs). clear Heqs. apply Z.le_ge in H0.
+    pose proof (proj1 (path_length _ _ _ _) H0).  destruct H1 as [l [H1 H2]].
+    assert ((length l <= n)%nat \/ (length l > n)%nat) by omega.
+    destruct H3 as [H3 | H3].
+    pose proof (path_length n c d s). destruct H4.
+    assert ((exists l : list Evote.cand, (length l <= n)%nat /\ str c l d >= s)).
+    exists l. intuition.
+    specialize (H5 H6). omega.
+
+    rewrite <- Hn in H3.
+    pose proof (list_finite_elem _ n Evote.cand_all dec_cand Hn l H3).
+    assert (covers Evote.cand Evote.cand_all l).
+    {
+      unfold covers. intros x Hin. pose proof (cand_fin x). assumption.
+    }
+    specialize (H4 H5). destruct H4 as [a [l1 [l2 [l3 H6]]]].
+    remember (length (l1 ++ l2 ++ l3)) as l'.
+    assert ((l' <= n)%nat \/ (l' > n)%nat) by omega.
+    destruct H4.
+    pose proof (str_lemma c d a l l1 l2 l3 s H6 H2).
+    pose proof (path_length n c d s).  destruct H8.
+    assert (exists l : list Evote.cand, (length l <= n)%nat /\ str c l d >= s).
+    {
+      exists (l1 ++ l2 ++ l3). intuition.
+    }
+    specialize (H9 H10). omega.
+    Admitted.
+    
+      
+  Lemma L33 : forall k n c d (Hk: (k >= 1)%nat) (Hn: (length Evote.cand_all = n)%nat),
+      M (k + n - 1) c d <= M (n - 1) c d.
+  Proof.
+    induction k using (well_founded_induction lt_wf). intros n c d Hk Hn.
     remember (M (k + n - 1) c d) as s.
-    pose proof (Z.eq_le_incl _ _ Heqs). apply Z.le_ge in H0.
-    pose proof (L1 _ _ _ _ H0).
+    pose proof (Z.eq_le_incl _ _ Heqs). clear Heqs. apply Z.le_ge in H0.
+    pose proof (proj1 (path_length _ _ _ _) H0).  destruct H1 as [l [H1 H2]].
+    assert ((length l < n)%nat \/ (length l >= n)%nat) by omega.
+    destruct H3 as [H3 | H3]. assert ((length l < n)%nat -> (length l <= (n - 1))%nat) by omega.
+    specialize (H4 H3).
+    pose proof (path_length (n - 1) c d s). destruct H5.
+    assert ((exists l : list Evote.cand, (length l <= n - 1)%nat /\ str c l d >= s)).
+    exists l. intuition.
+    specialize (H6 H7). omega.
+
+    pose proof (list_finite_elem _ n Evote.cand_all dec_cand Hn l).
+    Admitted.
     
     
     
-  Lemma L3 : forall (c d : Evote.cand) (n : nat),
+    
+  Lemma L4 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
   Proof.
+    intros c d n. assert ((n <= length Evote.cand_all)%nat \/ (n >= length Evote.cand_all)%nat) by omega.
+    destruct H. apply monotone_M. assumption.
+    remember (length Evote.cand_all) as v.
+    assert ((n >= v)%nat -> exists p, (n = p + v)%nat).
+    {
+      intros. induction H. exists 0%nat. omega.
+      assert ((v <= m)%nat -> (m >= v)%nat) by omega.
+      specialize (H1 H). specialize (IHle H1). destruct IHle as [p H2].
+      exists (S p). omega.
+    }
     
-    
+    specialize (H0 H). destruct H0 as [p H0].
+    subst. apply L3. auto.
+  Qed.
+  
   Definition c_wins c :=
     forallb (fun d => (M (length Evote.cand_all) d c) <=? (M (length Evote.cand_all) c d))
             Evote.cand_all.
