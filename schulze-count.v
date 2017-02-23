@@ -555,18 +555,28 @@ Section Count.
   Qed.
   
     
-  Lemma str_lemma : forall c d a l l1 l2 l3 s, l = l1 ++ a :: l2 ++ a :: l3 ->
+  Lemma str_lemma_1 : forall c d a l l1 l2 l3 s, l = l1 ++ a :: l2 ++ a :: l3 ->
     str c l d >= s -> str c (l1 ++ a :: l3) d >= s.
   Proof.
    intros. subst. apply str_aux in H0. destruct H0.
    apply str_aux in H0. destruct H0.
    pose proof (proj2 (str_aux c d a l1 l3 s) (conj H H1)). auto.
   Qed.
+
+  Lemma str_lemma_2 : forall c d a l l1 l2 l3 s,
+      l = l1 ++ a :: l2 ++ a :: l3 -> str c (l1 ++ a :: l3) d >= s -> str a l2 a >= s ->
+      str c (l1 ++ a :: l2 ++ a :: l3) d >= s.
+  Proof.
+    intros. apply str_aux in H0. destruct H0.
+    apply str_aux. split. auto.
+    apply str_aux. auto.
+  Qed.
+
   
-   
   Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat),
       M (k + n) c d <= M n c d.
   Proof.
+    
     induction k using (well_founded_induction lt_wf). intros n c d Hn.
     remember (M (k + n) c d) as s.
     pose proof (Z.eq_le_incl _ _ Heqs). clear Heqs. apply Z.le_ge in H0.
@@ -576,8 +586,8 @@ Section Count.
     pose proof (path_length (S n) c d s). destruct H4.
     assert ((exists l : list Evote.cand, (length l <= S n)%nat /\ str c l d >= s)).
     exists l. intuition.
-    specialize (H5 H6). pose proof  (monotone_M n (S n)).
-    Admitted.
+    specialize (H5 H6). 
+    
     
     
     
@@ -607,9 +617,9 @@ Section Count.
   Lemma L4 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
   Proof.
-    intros c d n. assert ((n <= length Evote.cand_all)%nat \/ (n >= length Evote.cand_all)%nat) by omega.
+    intros c d n. assert ((n <= (length Evote.cand_all))%nat \/ (n >= (length Evote.cand_all))%nat) by omega.
     destruct H. apply monotone_M. assumption.
-    remember (length Evote.cand_all) as v.
+    remember (S (length Evote.cand_all)) as v.
     assert ((n >= v)%nat -> exists p, (n = p + v)%nat).
     {
       intros. induction H. exists 0%nat. omega.
