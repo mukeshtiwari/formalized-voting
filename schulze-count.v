@@ -527,13 +527,14 @@ Section Count.
 
     (* otherway *)
     intros. destruct H as [l [H1 H2]].
-    specialize (path_len _ _ _ _ _ H1 H2). auto.
+    pose proof (path_len k c d s l H1 H2). omega.    
   Qed.
   
 
   Lemma str_lemma : forall c d a l l1 l2 l3 s, l = l1 ++ a :: l2 ++ a :: l3 ->
     str c l d >= s -> str c (l1 ++ a :: l3) d >= s.
-  Proof. Admitted.
+  Proof.
+    
     
   Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat),
       M (k + n) c d <= M n c d.
