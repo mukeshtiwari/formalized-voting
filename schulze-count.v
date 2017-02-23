@@ -484,7 +484,26 @@ Section Count.
     | (x :: xs) => Z.min (Evote.edge c x)  (str x xs d)
     end.
 
-    
+
+  Lemma path_len : forall k c d s l,
+      (length l <= k)%nat -> str c l d >= s -> M k c d >= s.
+  Proof.
+    induction k. intros. assert ((length l <= 0)%nat -> l = []).
+    {
+      destruct l. intros. reflexivity.
+      simpl in *. inversion H.
+    }
+    specialize (H1 H). subst. simpl in *. auto.
+    intros. simpl in *.
+    destruct l. simpl in *. apply Zmaxlemma.
+    left. apply IHk with []. simpl. omega. simpl. auto.
+    simpl in *. apply Zminmax in H0. destruct H0.
+    apply Zmaxlemma. right. apply Max_of_nonempty_list.
+    apply cand_not_nil. apply dec_cand. exists c0. split. specialize (cand_fin c0). assumption.
+    apply Zminmax. split.
+    omega. apply IHk with l. omega. omega.
+  Qed.
+  
   Lemma path_length : forall k c d s,
       M k c d >= s <-> exists (l : list Evote.cand), (length l <= k)%nat /\ str c l d >= s. 
   Proof.  
@@ -506,7 +525,11 @@ Section Count.
     exists (e :: l). simpl. split. omega.
     apply Zminmax. intuition.
 
-    
+    (* otherway *)
+    intros. destruct H as [l [H1 H2]].
+    specialize (path_len _ _ _ _ _ H1 H2). auto.
+  Qed.
+  
 
   Lemma str_lemma : forall c d a l l1 l2 l3 s, l = l1 ++ a :: l2 ++ a :: l3 ->
     str c l d >= s -> str c (l1 ++ a :: l3) d >= s.
