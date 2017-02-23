@@ -531,11 +531,35 @@ Section Count.
   Qed.
   
 
+  Lemma str_aux : forall c d a l1 l2 s,
+      str c (l1 ++ a :: l2) d >= s <-> str c l1 a >= s /\ str a l2 d >= s.
+  Proof.
+    split. generalize dependent s. generalize dependent l2.
+    generalize dependent a. generalize dependent d. generalize dependent c.
+    induction l1; simpl; intros.
+    apply Zminmax in H. auto. apply Zminmax in H. destruct H.
+    assert ((Evote.edge c a) >= s /\ (str a l1 a0) >= s /\ str a0 l2 d >= s ->
+            Z.min (Evote.edge c a) (str a l1 a0) >= s /\ str a0 l2 d >= s).
+    {
+      intros. destruct H1 as [H1 [H2 H3]]. split. apply Zminmax. auto. auto.
+    }
+    apply H1. split. assumption.
+    apply IHl1. assumption.
+
+    
+            
+    
+    
+    
   Lemma str_lemma : forall c d a l l1 l2 l3 s, l = l1 ++ a :: l2 ++ a :: l3 ->
     str c l d >= s -> str c (l1 ++ a :: l3) d >= s.
   Proof.
-    
-    
+   intros. subst. apply str_aux in H0. destruct H0.
+   apply str_aux in H0. destruct H0.
+   pose proof (proj2 (str_aux c d a l1 l3 s) (conj H H1)). auto.
+  Qed.
+  
+   
   Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat),
       M (k + n) c d <= M n c d.
   Proof.
