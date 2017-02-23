@@ -546,10 +546,14 @@ Section Count.
     apply H1. split. assumption.
     apply IHl1. assumption.
 
-    
-            
-    
-    
+    (* other part *)
+    generalize dependent s. generalize dependent l2.
+    generalize dependent a. generalize dependent d. generalize dependent c.
+    induction l1; simpl; intros. apply Zminmax. auto.
+    apply Zminmax. destruct H. apply Zminmax in H. destruct H.
+    split. auto. apply IHl1. auto.
+  Qed.
+  
     
   Lemma str_lemma : forall c d a l l1 l2 l3 s, l = l1 ++ a :: l2 ++ a :: l3 ->
     str c l d >= s -> str c (l1 ++ a :: l3) d >= s.
