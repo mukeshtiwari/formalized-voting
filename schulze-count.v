@@ -573,7 +573,7 @@ Section Count.
   Qed.
 
  
-    
+    (*
   Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat),
       M (k + n) c d <= M n  c d.
   Proof.
@@ -591,8 +591,43 @@ Section Count.
     simpl in H5. apply Zmaxlemma in H5. destruct H5.
     omega. apply Max_of_nonempty_list in H5. destruct H5 as [e [H7 H8]].
     apply Zminmax in H8. destruct H8.
-        
-   
+     *)
+  
+  Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat) (Hk : (k >= 1)%nat),
+      M (k + n + 1) c d <= M (S n)  c d.
+  Proof.
+    induction k using (well_founded_induction lt_wf). intros n c d Hn Hk.
+    remember (M (k + n + 1) c d) as s.
+    pose proof (Z.eq_le_incl _ _ Heqs). clear Heqs. apply Z.le_ge in H0.
+    pose proof (proj1 (path_length _ _ _ _) H0).  destruct H1 as [l [H1 H2]].
+    (* number of candidates <= length Evote.cand_all \/ > length Evote.cand_all *)
+    assert ((length l <= S n)%nat \/ (length l > S n)%nat) by omega.
+    destruct H3 as [H3 | H3].
+    pose proof (path_length (S n) c d s). destruct H4.
+    assert ((exists l : list Evote.cand, (length l <= S n)%nat /\ str c l d >= s)).
+    exists l. intuition. specialize (H5 H6). omega.
+
+    (* length l > length Evote.cand_all and there are candidates. Remove the duplicate
+       candidate *)
+    rewrite <- Hn in H3. assert (covers Evote.cand Evote.cand_all l).
+    {
+      unfold covers. intros. pose proof (cand_fin x). assumption.
+    }
+    pose proof (list_finite_elem _ (S n) Evote.cand_all dec_cand Hn l H3 H4).
+    destruct H5 as [a [l1 [l2 [l3 H5]]]].
+    pose proof (str_lemma_1 _ _ _ _ _ _ _ _ H5 H2).
+    remember (l1 ++ a :: l3) as l0.
+    assert ((length l0 <= S n)%nat \/ (length l0 > S n)%nat) by omega.
+    destruct H7.
+    pose proof (path_length (S n) c d s). destruct H8.
+    assert ((exists l : list Evote.cand, (length l <= S n)%nat /\ str c l d >= s)).
+    exists l0. intuition. specialize (H9 H10). omega.
+    
+    
+    
+      
+    
+    
     
     
   Lemma L4 : forall (c d : Evote.cand) (n : nat),
