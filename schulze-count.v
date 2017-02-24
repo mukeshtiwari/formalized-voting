@@ -572,46 +572,27 @@ Section Count.
     apply str_aux. auto.
   Qed.
 
-  
+ 
+    
   Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat),
-      M (k + n) c d <= M n c d.
+      M (k + n) c d <= M n  c d.
   Proof.
     
     induction k using (well_founded_induction lt_wf). intros n c d Hn.
     remember (M (k + n) c d) as s.
     pose proof (Z.eq_le_incl _ _ Heqs). clear Heqs. apply Z.le_ge in H0.
     pose proof (proj1 (path_length _ _ _ _) H0).  destruct H1 as [l [H1 H2]].
+    (* number of candidates <= length Evote.cand_all \/ > length Evote.cand_all *)
     assert ((length l <= S n)%nat \/ (length l > S n)%nat) by omega.
     destruct H3 as [H3 | H3].
     pose proof (path_length (S n) c d s). destruct H4.
     assert ((exists l : list Evote.cand, (length l <= S n)%nat /\ str c l d >= s)).
-    exists l. intuition.
-    specialize (H5 H6). 
-    
-    
-    
-    
-    
-      (*
-  Lemma L33 : forall k n c d (Hk: (k >= 1)%nat) (Hn: (length Evote.cand_all = n)%nat),
-      M (k + n - 1) c d <= M (n - 1) c d.
-  Proof.
-    induction k using (well_founded_induction lt_wf). intros n c d Hk Hn.
-    remember (M (k + n - 1) c d) as s.
-    pose proof (Z.eq_le_incl _ _ Heqs). clear Heqs. apply Z.le_ge in H0.
-    pose proof (proj1 (path_length _ _ _ _) H0).  destruct H1 as [l [H1 H2]].
-    assert ((length l < n)%nat \/ (length l >= n)%nat) by omega.
-    destruct H3 as [H3 | H3]. assert ((length l < n)%nat -> (length l <= (n - 1))%nat) by omega.
-    specialize (H4 H3).
-    pose proof (path_length (n - 1) c d s). destruct H5.
-    assert ((exists l : list Evote.cand, (length l <= n - 1)%nat /\ str c l d >= s)).
-    exists l. intuition.
-    specialize (H6 H7). omega.
-
-    pose proof (list_finite_elem _ n Evote.cand_all dec_cand Hn l).
-    Admitted.
-    *)
-    
+    exists l. intuition. specialize (H5 H6).
+    simpl in H5. apply Zmaxlemma in H5. destruct H5.
+    omega. apply Max_of_nonempty_list in H5. destruct H5 as [e [H7 H8]].
+    apply Zminmax in H8. destruct H8.
+        
+   
     
     
   Lemma L4 : forall (c d : Evote.cand) (n : nat),
