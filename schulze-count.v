@@ -573,7 +573,8 @@ Section Count.
   Qed.
 
  
-    (*
+
+  (*
   Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat),
       M (k + n) c d <= M n  c d.
   Proof.
@@ -591,21 +592,26 @@ Section Count.
     simpl in H5. apply Zmaxlemma in H5. destruct H5.
     omega. apply Max_of_nonempty_list in H5. destruct H5 as [e [H7 H8]].
     apply Zminmax in H8. destruct H8.
-     *)
+    Admitted.
+    *) 
+
+  Lemma list_and_num : forall (A : Type) (n : nat) (l : list A),
+      (length l > n)%nat -> exists p, (length l = p + n)%nat.
+  Admitted.
   
-  Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat) (Hk : (k >= 1)%nat),
-      M (k + n + 1) c d <= M (S n)  c d.
+  Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = n)%nat),
+      M (k + n) c d <= M n  c d.
   Proof.
-    induction k using (well_founded_induction lt_wf). intros n c d Hn Hk.
-    remember (M (k + n + 1) c d) as s.
-    pose proof (Z.eq_le_incl _ _ Heqs). clear Heqs. apply Z.le_ge in H0.
-    pose proof (proj1 (path_length _ _ _ _) H0).  destruct H1 as [l [H1 H2]].
+    induction k using (well_founded_induction lt_wf). intros n c d Hn.
+    remember (M (k + n) c d) as s.
+    pose proof (Z.eq_le_incl _ _ Heqs). apply Z.le_ge in H0.
+    pose proof (proj1 (path_length _ _ _ _) H0). destruct H1 as [l [H1 H2]].
     (* number of candidates <= length Evote.cand_all \/ > length Evote.cand_all *)
-    assert ((length l <= S n)%nat \/ (length l > S n)%nat) by omega.
+    assert ((length l <= n)%nat \/ (length l > n)%nat) by omega.
     destruct H3 as [H3 | H3].
-    pose proof (path_length (S n) c d s). destruct H4.
-    assert ((exists l : list Evote.cand, (length l <= S n)%nat /\ str c l d >= s)).
-    exists l. intuition. specialize (H5 H6). omega.
+    pose proof (proj2 (path_length n c d s)
+                      (ex_intro (fun l => (length l <= n)%nat /\ str c l d >= s) l (conj H3 H2))).
+    omega.
 
     (* length l > length Evote.cand_all and there are candidates. Remove the duplicate
        candidate *)
@@ -613,46 +619,67 @@ Section Count.
     {
       unfold covers. intros. pose proof (cand_fin x). assumption.
     }
-    pose proof (list_finite_elem _ (S n) Evote.cand_all dec_cand Hn l H3 H4).
+    pose proof (list_finite_elem _ n Evote.cand_all dec_cand Hn l H3 H4).
     destruct H5 as [a [l1 [l2 [l3 H5]]]].
     pose proof (str_lemma_1 _ _ _ _ _ _ _ _ H5 H2).
     remember (l1 ++ a :: l3) as l0.
-    assert ((length l0 <= S n)%nat \/ (length l0 > S n)%nat) by omega.
+    assert ((length l0 <= n)%nat \/ (length l0 > n)%nat) by omega.
     destruct H7.
-    pose proof (path_length (S n) c d s). destruct H8.
-    assert ((exists l : list Evote.cand, (length l <= S n)%nat /\ str c l d >= s)).
-    exists l0. intuition. specialize (H9 H10). omega.
+    pose proof (path_length n c d s). destruct H8.
+    assert ((exists l : list Evote.cand, (length l <= n)%nat /\ str c l d >= s)).
+    exists l0. intuition. specialize (H9 H10).  omega.   
     
-    
-    
+    rewrite Hn in H3.
+    specialize (list_and_num _ _ _ H3); intros. destruct H8 as [p H8].
+    specialize (list_and_num _ _ _ H7); intros. destruct H9 as [k' H9].
+    assert ((length l0 < length l)%nat).
+    {
+      rewrite Heql0, H5.
+      rewrite app_length. rewrite app_length.
+      simpl. rewrite app_length. simpl.
+      omega.
+    }    
+    rewrite H9 in H10. rewrite H8 in H10.
+    assert (((k' + n) < (p + n))%nat -> (k' < p)%nat) by omega.
+    specialize (H11 H10). assert (k' < k)%nat by omega.
+    specialize (H k' H12 n c d Hn).
+    pose proof (path_length (length l0) c d (str c l0 d)).
+    destruct H13.
+    assert ((exists l : list Evote.cand, (length l <= length l0)%nat /\ str c l d >= str c l0 d)).
+    {
+      exists l0. omega.
+    }
+    specialize (H14 H15). clear H13. rewrite <- H9 in H. omega.
+  Qed.
+  
+  
       
-    
-    
-    
     
   Lemma L4 : forall (c d : Evote.cand) (n : nat),
       M n c d <= M (length Evote.cand_all) c d. 
   Proof.
-    intros c d n. assert ((n <= (length Evote.cand_all))%nat \/ (n >= (length Evote.cand_all))%nat) by omega.
+    intros c d n. assert ((n <= (length Evote.cand_all))%nat \/
+                          (n >= (length Evote.cand_all))%nat) by omega.
     destruct H. apply monotone_M. assumption.
-    remember (S (length Evote.cand_all)) as v.
+    remember ((length Evote.cand_all)) as v.
     assert ((n >= v)%nat -> exists p, (n = p + v)%nat).
     {
-      intros. induction H. exists 0%nat. omega.
+      intros. induction H. exists O%nat. omega.
       assert ((v <= m)%nat -> (m >= v)%nat) by omega.
       specialize (H1 H). specialize (IHle H1). destruct IHle as [p H2].
       exists (S p). omega.
     }
-    
+      
     specialize (H0 H). destruct H0 as [p H0].
     subst. apply L3. auto.
   Qed.
+  
   
   Definition c_wins c :=
     forallb (fun d => (M (length Evote.cand_all) d c) <=? (M (length Evote.cand_all) c d))
             Evote.cand_all.
 
-  Lemma L4 (c : Evote.cand) :
+  Lemma L5 (c : Evote.cand) :
     c_wins c = true <-> forall d, M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d. 
   Proof.
     split; intros.
@@ -673,7 +700,7 @@ Section Count.
     existsb (fun d => M (length Evote.cand_all) c d <=? M (length Evote.cand_all) d c)
             Evote.cand_all.
 
-  Lemma L5 (c : Evote.cand) :
+  Lemma L6 (c : Evote.cand) :
     c_loses c = true <-> exists d, M (length Evote.cand_all) c d <= M (length Evote.cand_all) d c.
   Proof.
     split; intros. unfold c_loses in H.
