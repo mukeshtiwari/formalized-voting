@@ -597,7 +597,12 @@ Section Count.
 
   Lemma list_and_num : forall (A : Type) (n : nat) (l : list A),
       (length l > n)%nat -> exists p, (length l = p + n)%nat.
-  Admitted.
+  Proof.
+    intros A n l H. induction l. inversion H.
+    simpl in *. apply gt_S in H. destruct H. specialize (IHl H). destruct IHl as [p IHl].
+    exists (S p). omega. exists 1%nat. omega.
+  Qed.
+
   
   Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = n)%nat),
       M (k + n) c d <= M n  c d.
