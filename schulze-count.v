@@ -224,7 +224,8 @@ Section Count.
     match n with
     | O => Evote.edge c d 
     | S n' =>
-      Z.max (M n' c d)  (maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M n' x d)) Evote.cand_all))
+      Z.max (M n' c d)
+            (maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M n' x d)) Evote.cand_all))
     end.
 
   (*
@@ -438,12 +439,7 @@ Section Count.
     induction n. simpl. intros.
     constructor. auto.
     intros s c d H. simpl in H.
-    pose proof
-         (proj1
-            (Zmaxlemma
-               (M n c d)
-               (maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x)
-                                                       (M n x d)) Evote.cand_all)) s) H).
+    pose proof (proj1 (Zmaxlemma (M n c d) _  s) H).
     destruct H0. pose proof (IHn _ _ _ H0). assumption.
     pose proof
          (Max_of_nonempty_list _ Evote.cand_all cand_not_nil dec_cand s
@@ -709,7 +705,6 @@ Section Count.
     c_loses c = true <-> exists d, M (length Evote.cand_all) c d <= M (length Evote.cand_all) d c.
   Proof.
     split; intros. unfold c_loses in H.
-    Check existsb_exists.
     pose proof (proj1 (existsb_exists
                          (fun d : Evote.cand => M (length Evote.cand_all) c d <=?
                                              M (length Evote.cand_all) d c) Evote.cand_all) H).
