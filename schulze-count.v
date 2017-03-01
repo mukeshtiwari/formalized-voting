@@ -327,36 +327,6 @@ Section Count.
     unfold Z.min. destruct (m ?= n) eqn:Ht; auto.
   Qed.
 
-  (* for the moment I am not sure if it is useful or not *)
-  Fixpoint path_edge (k : Z) (c d : Evote.cand) (p : Evote.PathT k c d) :=
-    match p with
-    | Evote.unitT _ c d H  => [(c, d, k)]
-    | Evote.consT _ c d e H1 H2 => (c, d, k) :: path_edge k d e H2 
-    end.
-
-  Fixpoint nodes_in_path (k : Z) (c d : Evote.cand) (p : Evote.PathT k c d) : list Evote.cand :=
-    match p with
-    | Evote.unitT _ c d H => if dec_cand c d then [c] else [c; d]
-    | Evote.consT _ c d e H1 H2 =>
-      if dec_cand c d then nodes_in_path k d e H2 else c :: nodes_in_path k d e H2
-    end.
-
-  Lemma path_dup_edge : forall k c d p,
-      (length (path_edge k c d p) >= length (nodes_in_path k c d p))%nat ->
-      exists e k', In (e, e, k') (path_edge k c d p) /\ k' >= k.
-  Proof.
-    intros k c d p H. induction p. simpl in *.
-    destruct (dec_cand c d). exists c, k. split. left. subst. auto. omega.
-    simpl in H. omega.
-    simpl in *. destruct (dec_cand c d) eqn:Ht. exists c, k. split. left. subst. auto. omega.
-    simpl in *.
-    assert (forall (x y : nat), (S x >= S y)%nat -> (x >= y)%nat).
-    { intros. omega. }
-    specialize (H0 _ _ H). specialize (IHp H0). destruct IHp as [x [k' IHp]]. exists x, k'. split. right.
-    destruct IHp as [H1 H2]. assumption. destruct IHp as [H1 H2]. assumption.
-  Qed.   
-    
-  (* end of useless things *)
 
   Lemma exists_list : forall (A : Type) (l : list A) (n : nat),
       (length l >= S n)%nat -> exists a ls, l = a :: ls.
@@ -568,28 +538,6 @@ Section Count.
     apply str_aux. auto.
   Qed.
 
- 
-
-  (*
-  Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = S n)%nat),
-      M (k + n) c d <= M n  c d.
-  Proof.
-    
-    induction k using (well_founded_induction lt_wf). intros n c d Hn.
-    remember (M (k + n) c d) as s.
-    pose proof (Z.eq_le_incl _ _ Heqs). clear Heqs. apply Z.le_ge in H0.
-    pose proof (proj1 (path_length _ _ _ _) H0).  destruct H1 as [l [H1 H2]].
-    (* number of candidates <= length Evote.cand_all \/ > length Evote.cand_all *)
-    assert ((length l <= S n)%nat \/ (length l > S n)%nat) by omega.
-    destruct H3 as [H3 | H3].
-    pose proof (path_length (S n) c d s). destruct H4.
-    assert ((exists l : list Evote.cand, (length l <= S n)%nat /\ str c l d >= s)).
-    exists l. intuition. specialize (H5 H6).
-    simpl in H5. apply Zmaxlemma in H5. destruct H5.
-    omega. apply Max_of_nonempty_list in H5. destruct H5 as [e [H7 H8]].
-    apply Zminmax in H8. destruct H8.
-    Admitted.
-    *) 
 
   Lemma list_and_num : forall (A : Type) (n : nat) (l : list A),
       (length l > n)%nat -> exists p, (length l = p + n)%nat.
@@ -722,7 +670,7 @@ Section Count.
          + right. unfold c_wins, c_loses in *. apply existsb_exists.
            apply Evote.forallb_false in Ht.
            destruct Ht as [x [H1 H2]]. exists x. split. assumption.
-           apply Z.leb_gt in H2. apply Z.leb_le. omega.         
+           apply Z.leb_gt in H2. apply Z.leb_le. omega.
   Qed.
   
 
@@ -731,9 +679,10 @@ Section Count.
   Lemma dec_cand_exists : existsT (cand_fun  : Evote.cand -> bool),
                           (forall c, Evote.wins c <-> cand_fun c = true).
   Proof. Admitted. *)
-    
+
   Lemma wins_loses : forall c, (wins c Evote.edge) + (loses c Evote.edge).
-  Proof. Admitted.
+  Proof.
+    
 
   
 End Count.
