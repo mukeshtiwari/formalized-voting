@@ -717,11 +717,12 @@ Section Count.
   
 
   Lemma L7 : forall c, {c_wins c = true} + {c_loses c = true}.
-  Proof. intros c. destruct (c_wins c) eqn:Ht. left; reflexivity.
-         right. unfold c_loses. apply existsb_exists.
-         unfold c_wins in Ht. apply Evote.forallb_false in Ht.
-         destruct Ht as [x [H1 H2]]. exists x. split. assumption.
-         apply Z.leb_gt in H2. apply Z.leb_le. omega.
+  Proof. intros c. destruct (c_wins c) eqn:Ht.
+         + left; reflexivity.
+         + right. unfold c_wins, c_loses in *. apply existsb_exists.
+           apply Evote.forallb_false in Ht.
+           destruct Ht as [x [H1 H2]]. exists x. split. assumption.
+           apply Z.leb_gt in H2. apply Z.leb_le. omega.         
   Qed.
   
 
