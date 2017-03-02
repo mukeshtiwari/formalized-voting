@@ -709,6 +709,11 @@ Section Count.
     intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
     apply Z.ge_le in H0. pose proof (L4 d c n). omega.
 
+    right. unfold c_loses, loses in *. apply Evote.existsb_exists_type in e.
+    destruct e as [x [H1 H2]]. apply Zle_bool_imp_le in H2. apply Z.le_ge in H2.
+    remember (M (length Evote.cand_all) c x) as s. apply L1 in H2.
+    exists s, x. split.
+
     
     
   Qed.
