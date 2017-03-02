@@ -34,9 +34,28 @@ Section Count.
   (* the following need to be substituted with viable notions *)
   (* of evidence for winning / losing with given margin.      *)
 
+  (* 
   Variable wins:  Evote.cand -> (Evote.cand -> Evote.cand -> Z) -> Type.
   Variable loses: Evote.cand -> (Evote.cand -> Evote.cand -> Z) -> Type.
+   *)
 
+
+  (* forall d, exists k, Path k c d /\ (forall l, Path l d c -> l <= k) *)
+  Definition wins c (m : Evote.cand -> Evote.cand -> Z) :=
+    forall d : Evote.cand, existsT (k : Z),
+    ((Evote.PathT k c d) *
+     (existsT (f : (Evote.cand * Evote.cand) -> bool),
+      f (d, c) = true /\ Evote.coclosed (k + 1) f))%type.
+
+  (* exists k d, Path k d c /\ (forall l, Path l c d -> l < k) *)
+  Definition loses c (m : Evote.cand -> Evote.cand -> Z) :=
+    existsT (k : Z) (d : Evote.cand),
+    ((Evote.PathT k d c) *
+     (existsT (f : (Evote.cand * Evote.cand) -> bool),
+      f (c, d) = true /\ Evote.coclosed k f))%type.
+  
+  
+  
   (* ballots are total preorders on cand, here represented by *)
   (* lists of lists where [[x1, x2], [x3], [x4, x5, x6]] is   *)
   (* interpreted as the ordering x1 = x2 > x3 > x4 = x5 = x6  *)
@@ -672,17 +691,26 @@ Section Count.
            destruct Ht as [x [H1 H2]]. exists x. split. assumption.
            apply Z.leb_gt in H2. apply Z.leb_le. omega.
   Qed.
-  
-
-         
+    
+ 
   (* 
   Lemma dec_cand_exists : existsT (cand_fun  : Evote.cand -> bool),
                           (forall c, Evote.wins c <-> cand_fun c = true).
   Proof. Admitted. *)
 
   Lemma wins_loses : forall c, (wins c Evote.edge) + (loses c Evote.edge).
-  Proof.
-    
+  Proof. 
+    intros c. pose proof (L7 c). destruct H. left.
+    apply Evote.th2. unfold Evote.wins, c_wins in *. intros d.
+    pose proof (proj1 (forallb_forall _ Evote.cand_all) e d (cand_fin d)).
+    simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H.
+    remember (M (length Evote.cand_all) d c) as s. apply L1 in H. 
+    exists s. split. assumption.
+    intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
+    apply Z.ge_le in H0. pose proof (L4 d c n). omega.
 
+    
+    
+  Qed.
   
 End Count.
