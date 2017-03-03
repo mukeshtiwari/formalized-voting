@@ -740,8 +740,19 @@ Section Count.
     apply cand_not_nil. apply dec_cand. apply IHn. assumption.
   Qed.
   
-    
-    
+  Lemma L11 : forall (A : Type) (f : A -> bool) (l : list A),
+      forallb f l = false -> existsT x, In x l /\ f x = false.
+  Proof.
+    intros A f. induction l. simpl. intros. inversion H.
+    simpl. intros. destruct (f a) eqn:H1. destruct (forallb f l) eqn:H2.
+    inversion H. specialize (IHl eq_refl). clear H.
+    destruct IHl as [x [H3 H4]].
+    exists x. split. right. auto. assumption.
+    destruct (forallb f l) eqn:H2. exists a. split. left. auto. assumption.
+    clear H. specialize (IHl eq_refl). destruct IHl as [x [H3 H4]].
+    exists x. split. right. assumption. assumption.
+  Qed.
+  
   Lemma wins_loses : forall c, (wins c Evote.edge) + (loses c Evote.edge).
   Proof. 
     intros c. pose proof (L7 c). destruct H. left.
@@ -753,7 +764,10 @@ Section Count.
     intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
     apply Z.ge_le in H0. pose proof (L4 d c n). omega.
 
-   
+    right. unfold loses, c_wins in *. apply L11 in e. destruct e as [d [H1 H2]].
+    apply Z.leb_gt in H2. exists (M (length Evote.cand_all) c d), d.
+    split. apply L10 with (length Evote.cand_all). omega.
+    
     
   
 End Count.
