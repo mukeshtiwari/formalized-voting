@@ -765,7 +765,9 @@ Section Count.
     pose proof (L4 d c n). omega.
     unfold Evote.coclosed.
     Require Import fp_finite_Dirk.
-    exists (Fixpoints.greatest_fixed_point _ _ (Evote.all_pairs_universal Evote.cand_all cand_fin)  (Evote.W k) (Evote.monotone_operator_w k)). split. apply Evote.path_gfp. unfold not. intros.
+    exists (Fixpoints.greatest_fixed_point _ _ (Evote.all_pairs_universal Evote.cand_all cand_fin)
+                                      (Evote.W k) (Evote.monotone_operator_w k)).
+    split. apply Evote.path_gfp. unfold not. intros.
     pose proof (H0 k H1). omega.
 
     intros. destruct x.
@@ -793,12 +795,6 @@ Section Count.
 
     intros l H. apply L2 in H. destruct H as [n H].
     pose proof (L4 c d n). omega.
-  
-    (*
-    right. unfold loses, c_wins in *. apply L11 in e. destruct e as [d [H1 H2]].
-    apply Z.leb_gt in H2. exists (M (length Evote.cand_all) c d), d.
-    split. apply L10 with (length Evote.cand_all). omega.
-     *)
   Qed.
   
     
