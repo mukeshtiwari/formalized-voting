@@ -752,7 +752,28 @@ Section Count.
     clear H. specialize (IHl eq_refl). destruct IHl as [x [H3 H4]].
     exists x. split. right. assumption. assumption.
   Qed.
+
+  Lemma L12 : forall c d k,
+      Evote.Path k d c /\ (forall l, Evote.Path l c d -> l < k) ->
+      existsT (k : Z) (d : Evote.cand), ((Evote.PathT k d c) *
+     (existsT (f : (Evote.cand * Evote.cand) -> bool),
+      f (c, d) = true /\ Evote.coclosed k f))%type.
+  Proof.
+    intros c d k H. destruct H. exists k, d.
+    split. apply L10 with (length Evote.cand_all).
+    apply L2 in H. destruct H as [n H].
+    pose proof (L4 d c n). omega.
+    unfold Evote.coclosed.
+    Require Import fp_finite_Dirk.
+    exists (Fixpoints.greatest_fixed_point _ _ (Evote.all_pairs_universal Evote.cand_all cand_fin)  (Evote.W k) (Evote.monotone_operator_w k)). split. apply Evote.path_gfp. unfold not. intros.
+    pose proof (H0 k H1). omega.
+
+    intros. destruct x.
+    apply Fixpoints.fixed_point_is_coclosed.  apply Fixpoints.greatest_fixed_point_is_fixed_point.
+    auto.
+  Qed.
   
+    
   Lemma wins_loses : forall c, (wins c Evote.edge) + (loses c Evote.edge).
   Proof. 
     intros c. pose proof (L7 c). destruct H. left.
@@ -764,10 +785,22 @@ Section Count.
     intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
     apply Z.ge_le in H0. pose proof (L4 d c n). omega.
 
+
+    right. unfold loses, c_wins in *. apply L11 in e. destruct e as [d [H1 H2]].
+    apply Z.leb_gt in H2. apply L12 with (d := d) (k := M (length Evote.cand_all) d c).
+    split. remember (M (length Evote.cand_all) d c) as s. apply L1 with (length Evote.cand_all).
+    omega.
+
+    intros l H. apply L2 in H. destruct H as [n H].
+    pose proof (L4 c d n). omega.
+  
+    (*
     right. unfold loses, c_wins in *. apply L11 in e. destruct e as [d [H1 H2]].
     apply Z.leb_gt in H2. exists (M (length Evote.cand_all) c d), d.
     split. apply L10 with (length Evote.cand_all). omega.
-    
+     *)
+  Qed.
+  
     
   
 End Count.
