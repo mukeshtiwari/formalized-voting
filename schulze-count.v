@@ -663,27 +663,6 @@ Section Count.
     pose proof H x. apply Zle_imp_le_bool. assumption.
   Qed.
 
-  (* there is atleast one candidate d who beats c *)
-  (*
-  Definition c_loses c :=
-    existsb (fun d => M (length Evote.cand_all) c d <=? M (length Evote.cand_all) d c)
-            Evote.cand_all.
-
-  Lemma L66 (c : Evote.cand) :
-    c_loses c = true <-> exists d, M (length Evote.cand_all) c d <= M (length Evote.cand_all) d c.
-  Proof.
-    split; intros. unfold c_loses.
-    pose proof (proj1 (existsb_exists
-                         (fun d : Evote.cand => M (length Evote.cand_all) c d <=?
-                                             M (length Evote.cand_all) d c) Evote.cand_all) H).
-    destruct H0 as [x [H1 H2]]. exists x. apply Zle_bool_imp_le. assumption.
-
-    destruct H. unfold c_loses. apply existsb_exists. exists x.
-    split. specialize (cand_fin x). assumption.
-    apply Zle_imp_le_bool. assumption.
-  Qed.
-   *)
-
   Lemma L6 (c : Evote.cand) :
     c_wins c = false <-> exists d, M (length Evote.cand_all) c d < M (length Evote.cand_all) d c.
   Proof.
@@ -696,27 +675,12 @@ Section Count.
     apply Z.leb_gt. omega.
   Qed.
 
-  (*
-  Lemma L77 : forall c, {c_wins c = true} + {c_loses c = true}.
-  Proof. intros c. destruct (c_wins c) eqn:Ht.
-         + left. reflexivity.
-         + right. unfold c_wins, c_loses in *. apply existsb_exists.
-           apply Evote.forallb_false in Ht.
-           destruct Ht as [x [H1 H2]]. exists x. split. assumption.
-           apply Z.leb_gt in H2. apply Z.leb_le. omega.
-  Qed.
-   *)
 
   Lemma L7 : forall c, {c_wins c = true} + {c_wins c = false}.
   Proof.
     intros c. destruct (c_wins c) eqn:Ht. left. reflexivity.
     right. reflexivity.
   Qed.
-  
-    (* 
-  Lemma dec_cand_exists : existsT (cand_fun  : Evote.cand -> bool),
-                          (forall c, Evote.wins c <-> cand_fun c = true).
-  Proof. Admitted. *)
 
   Lemma wins_loses : forall c, (wins c Evote.edge) + (loses c Evote.edge).
   Proof. 
@@ -728,14 +692,7 @@ Section Count.
     exists s. split. assumption.
     intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
     apply Z.ge_le in H0. pose proof (L4 d c n). omega.
-    
-    right. unfold c_loses, loses in *.  apply Evote.existsb_exists_type in e.
-    destruct e as [x [H1 H2]]. apply Zle_bool_imp_le in H2. apply Z.le_ge in H2.
-    remember (M (length Evote.cand_all) c x) as s. apply L1 in H2.
-    exists s, x. split.
 
-    
-    
-  Qed.
+   
   
 End Count.
