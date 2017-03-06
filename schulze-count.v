@@ -833,19 +833,23 @@ Section Count.
     (* pose proof (Z.eq_le_incl _ _ Heqs). apply Z.le_ge in H0. *)
     exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <=? s). simpl in *. split.
     apply Z.leb_le. omega.
-
-    unfold Evote.coclosed. intros. destruct x. simpl in *.
+  
+    unfold Evote.coclosed. intros. destruct x as (x, z). simpl in *.
     apply Z.leb_le in H0. unfold Evote.W. apply andb_true_iff. split.
     unfold Evote.el. simpl. apply Z.ltb_lt.
-    assert (Evote.edge c0 c1 <= s -> Evote.edge c0 c1 < s + 1) by omega.
+    assert (Evote.edge x z <= s -> Evote.edge x z < s + 1) by omega.
     apply H1. clear H1. clear Heqs.
     induction (length Evote.cand_all). simpl in *. auto.
     simpl in H0. apply Z.max_lub_iff in H0.
     destruct H0. specialize (IHn H0). auto.
     
-    unfold Evote.mp. apply forallb_forall. intros. unfold Evote.mpf. simpl in *.
+    unfold Evote.mp. apply forallb_forall. intros y Hy.  unfold Evote.mpf. simpl in *.
     apply orb_true_iff. unfold Evote.el. simpl.
-    
+    assert (Evote.edge x y <= s \/ Evote.edge x y >= s + 1) by omega.
+    destruct H1. left. apply Z.ltb_lt. omega.
+    right. apply Z.leb_le.
+    assert (M (length Evote.cand_all) y z <= s \/ M (length Evote.cand_all) y z >= s + 1) by omega.
+    destruct H2. auto.
     
     
 End Count.
