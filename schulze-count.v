@@ -797,6 +797,55 @@ Section Count.
     pose proof (L4 c d n). omega.
   Qed.
   
-    
+  (* project finished *)
+  (* Try to connect Prop level with Matrix *)
   
+  Lemma L13 (c : Evote.cand) : forall d k,
+        Evote.Path k c d /\ (forall l, Evote.Path l d c -> l <= k) ->
+        M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d.
+  Proof.
+    intros d k [H1 H2].
+    remember (M (length Evote.cand_all) d c) as s.
+    apply Z.eq_le_incl in Heqs.
+    apply Z.le_ge in Heqs.
+    pose proof (L1 _ _ _ _ Heqs). specialize (H2 s H).
+    apply L2 in H1. destruct H1 as [n H1].
+    pose proof (L4 c d n). omega.
+  Qed.
+
+  Lemma L14 (c : Evote.cand) :
+    (forall d, exists k, Evote.Path k c d /\ (forall l, Evote.Path l d c -> l <= k)) ->
+    forall d, M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d.
+  Proof.
+    intros. specialize (H d). destruct H as [k [H1 H2]]. apply L13 with k.
+    intuition.
+  Qed.
+  
+  Lemma L15 (c : Evote.cand) : (forall d,
+      M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d) ->
+      forall d : Evote.cand, existsT (k : Z),
+    ((Evote.PathT k c d) *
+     (existsT (f : (Evote.cand * Evote.cand) -> bool),
+      f (d, c) = true /\ Evote.coclosed (k + 1) f))%type.
+  Proof.
+    intros. specialize (H d). remember (M (length Evote.cand_all) d c) as s.
+    exists s. apply Z.le_ge in H. apply L10 in H. split. auto.
+    (* pose proof (Z.eq_le_incl _ _ Heqs). apply Z.le_ge in H0. *)
+    exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <=? s). simpl in *. split.
+    apply Z.leb_le. omega.
+
+    unfold Evote.coclosed. intros. destruct x. simpl in *.
+    apply Z.leb_le in H0. unfold Evote.W. apply andb_true_iff. split.
+    unfold Evote.el. simpl. apply Z.ltb_lt.
+    assert (Evote.edge c0 c1 <= s -> Evote.edge c0 c1 < s + 1) by omega.
+    apply H1. clear H1. clear Heqs.
+    induction (length Evote.cand_all). simpl in *. auto.
+    simpl in H0. apply Z.max_lub_iff in H0.
+    destruct H0. specialize (IHn H0). auto.
+    
+    unfold Evote.mp. apply forallb_forall. intros. unfold Evote.mpf. simpl in *.
+    apply orb_true_iff. unfold Evote.el. simpl.
+    
+    
+    
 End Count.
