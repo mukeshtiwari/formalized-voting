@@ -850,6 +850,10 @@ Section Count.
     right. apply Z.leb_le.
     assert (M (length Evote.cand_all) y z <= s \/ M (length Evote.cand_all) y z >= s + 1) by omega.
     destruct H2. auto.
-    
+    apply L1 in H2. pose proof (Evote.cons _ _ _ _ H1 H2).
+    apply L2 in H3. destruct H3 as [n H3].
+    pose proof (L4 x z n). omega.
+  Qed.
+  
     
 End Count.
