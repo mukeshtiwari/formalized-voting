@@ -830,7 +830,6 @@ Section Count.
   Proof.
     intros. specialize (H d). remember (M (length Evote.cand_all) d c) as s.
     exists s. apply Z.le_ge in H. apply L10 in H. split. auto.
-    (* pose proof (Z.eq_le_incl _ _ Heqs). apply Z.le_ge in H0. *)
     exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <=? s). simpl in *. split.
     apply Z.leb_le. omega.
   
@@ -854,6 +853,28 @@ Section Count.
     apply L2 in H3. destruct H3 as [n H3].
     pose proof (L4 x z n). omega.
   Qed.
+
+
+  (* losing using M function *)
+  Lemma L16 (c : Evote.cand) :
+    ( exists k d, Evote.Path k d c /\ (forall l, Evote.Path l c d -> l < k)) ->
+    (exists d, M (length Evote.cand_all) c d < M (length Evote.cand_all) d c).
+  Proof.
+    intros. destruct H as [k [d [H1 H2]]].
+    exists d. remember (M (length Evote.cand_all) c d)  as s.
+    pose proof (Z.eq_le_incl _ _ Heqs) as H3.
+    apply Z.le_ge in H3. apply L1 in H3. specialize (H2 s H3).
+    apply L2 in H1. destruct H1 as [n H1].
+    pose proof (L4 d c n). omega.
+  Qed.
+
+  Lemma L17 (c : Evote.cand) :
+    (exists d, M (length Evote.cand_all) c d < M (length Evote.cand_all) d c) ->
+    (existsT (k : Z) (d : Evote.cand),
+     ((Evote.PathT k d c) *
+      (existsT (f : (Evote.cand * Evote.cand) -> bool),
+       f (c, d) = true /\ Evote.coclosed k f))%type).
+  Proof.
+    intros. destruct H as [d H].
   
-    
 End Count.
