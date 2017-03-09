@@ -787,7 +787,7 @@ Section Count.
     intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
     apply Z.ge_le in H0. pose proof (L4 d c n). omega.
 
-
+    
     right. unfold loses, c_wins in *. apply L11 in e. destruct e as [d [H1 H2]].
     apply Z.leb_gt in H2. apply L12 with (d := d) (k := M (length Evote.cand_all) d c).
     split. remember (M (length Evote.cand_all) d c) as s. apply L1 with (length Evote.cand_all).
@@ -857,7 +857,7 @@ Section Count.
 
   (* losing using M function *)
   Lemma L16 (c : Evote.cand) :
-    ( exists k d, Evote.Path k d c /\ (forall l, Evote.Path l c d -> l < k)) ->
+    (exists k d, Evote.Path k d c /\ (forall l, Evote.Path l c d -> l < k)) ->
     (exists d, M (length Evote.cand_all) c d < M (length Evote.cand_all) d c).
   Proof.
     intros. destruct H as [k [d [H1 H2]]].
@@ -868,13 +868,74 @@ Section Count.
     pose proof (L4 d c n). omega.
   Qed.
 
-  Lemma L17 (c : Evote.cand) :
+  Require Import Coq.Logic.ConstructiveEpsilon.
+  
+  Definition constructive_prop (c d : Evote.cand):=
+     M (length Evote.cand_all) c d < M (length Evote.cand_all) d c.
+
+  Lemma constructive_deci_cand : forall (c d : Evote.cand),
+      {(constructive_prop c d)} + {~(constructive_prop c d)}.
+  Proof.
+    intros c d. unfold constructive_prop.
+    pose proof (Z_lt_ge_bool (M (length Evote.cand_all) c d) (M (length Evote.cand_all) d c)).
+    destruct H. destruct x. left. auto.
+    right. apply Zle_not_lt. omega.
+  Qed.
+  
+  Program Fixpoint find_cand (c : Evote.cand) (n : nat) (l : list Evote.cand) (H : In c l) : nat :=
+    match l with
+    | [] => _
+    | h :: t => if dec_cand c h then n
+               else find_cand c (S n) t _
+    end.
+  Obligation 2.
+  simpl in H. destruct H. symmetry in H.
+  pose proof (H0 H). inversion H1. assumption.
+  Defined.
+  
+  Definition f_cand_nat (c : Evote.cand) := find_cand c O Evote.cand_all (cand_fin c).
+
+  Program Fixpoint find_nat (n : nat) (l : list Evote.cand) (H : l <> nil) : Evote.cand :=
+    match l with
+    | [] => _
+    | h :: t =>
+      match n with
+      | O => h
+      | S n' =>
+        match t with
+        | [] => h
+        | _ => find_nat n' t _
+        end
+      end
+    end. 
+  
+  Definition g_nat_cand (n : nat) := find_nat n (Evote.cand_all) (cand_not_nil). 
+
+  Lemma L17 : forall c, g_nat_cand (f_cand_nat c) = c.
+  Admitted.
+
+    
+    
+    
+    
+  Lemma L18 (c : Evote.cand) :
     (exists d, M (length Evote.cand_all) c d < M (length Evote.cand_all) d c) ->
     (existsT (k : Z) (d : Evote.cand),
      ((Evote.PathT k d c) *
       (existsT (f : (Evote.cand * Evote.cand) -> bool),
        f (c, d) = true /\ Evote.coclosed k f))%type).
   Proof.
-    intros. destruct H as [d H].
-  
+    intros. 
+    pose proof (constructive_indefinite_ground_description
+                  _ f_cand_nat g_nat_cand L17 (constructive_prop c) (constructive_deci_cand c) H).
+    destruct X as [d X]. unfold constructive_prop in X.
+    remember (M (length Evote.cand_all) c d) as s. exists s, d.
+    split. apply Z.lt_le_incl in X. apply Z.le_ge in X.
+    apply L10 in X. auto.
+    exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <? s).  split. admit.
+    unfold Evote.coclosed. intros. destruct x as (x, z). simpl in *.
+    unfold Evote.W. apply andb_true_iff. split. unfold Evote.el. simpl in *. admit.
+    unfold Evote.mp. apply forallb_forall. intros. unfold Evote.mpf. apply orb_true_iff.
+    simpl in *.
+    
 End Count.
