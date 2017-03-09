@@ -882,18 +882,20 @@ Section Count.
     right. apply Zle_not_lt. omega.
   Qed.
   
-  Program Fixpoint find_cand (c : Evote.cand) (n : nat) (l : list Evote.cand) (H : In c l) : nat :=
+  Program Fixpoint find_cand (c : Evote.cand) (l : list Evote.cand) (H : In c l) : nat :=
     match l with
     | [] => _
-    | h :: t => if dec_cand c h then n
-               else find_cand c (S n) t _
+    | h :: t => if dec_cand c h then O
+               else S (find_cand c t _)
     end.
+  Obligation 1. inversion H.
   Obligation 2.
   simpl in H. destruct H. symmetry in H.
   pose proof (H0 H). inversion H1. assumption.
-  Defined.
   
-  Definition f_cand_nat (c : Evote.cand) := find_cand c O Evote.cand_all (cand_fin c).
+
+  Print find_cand.
+  Definition f_cand_nat (c : Evote.cand) := find_cand c Evote.cand_all (cand_fin c).
 
   Program Fixpoint find_nat (n : nat) (l : list Evote.cand) (H : l <> nil) : Evote.cand :=
     match l with
@@ -912,9 +914,8 @@ Section Count.
   Definition g_nat_cand (n : nat) := find_nat n (Evote.cand_all) (cand_not_nil). 
 
   Lemma L17 : forall c, g_nat_cand (f_cand_nat c) = c.
-  Admitted.
-
-    
+  Proof.
+    intros c. unfold g_nat_cand, f_cand_nat. 
     
     
     
