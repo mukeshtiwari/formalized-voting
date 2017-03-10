@@ -936,12 +936,25 @@ Section Count.
     remember (M (length Evote.cand_all) c d) as s. exists s, d.
     split. apply Z.lt_le_incl in X. apply Z.le_ge in X.
     apply L10 in X. auto.
-    exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <? s + 1).
+    exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <? s).  
+    simpl in *. split. apply Z.ltb_lt. admit.
+    
+    unfold Evote.coclosed. intros x; destruct x as (x, z); simpl in *.
+    intros. apply Z.ltb_lt in H0. unfold Evote.W.
+    apply andb_true_iff. split. unfold Evote.el. simpl. apply Z.ltb_lt.
+    clear H. clear Heqs. clear X.
+    induction (length Evote.cand_all). simpl in *. omega.
+    simpl in H0. apply Z.max_lub_lt_iff in H0. destruct H0. apply IHn. auto.
 
-    simpl.
-    split. admit. unfold Evote.coclosed. intros. destruct x as (x, z); simpl in *.
-    unfold Evote.W. apply andb_true_iff. unfold Evote.el, Evote.mp. simpl in *.
-    split. admit. apply forallb_forall. intros.
-    unfold Evote.mpf. apply orb_true_iff. simpl in *.  left.
-    unfold Evote.el. simpl.
+    unfold Evote.mp. apply forallb_forall. intros y Hy. unfold Evote.mpf.
+    apply orb_true_iff. unfold Evote.el. simpl.
+    assert (Evote.edge x y < s \/ Evote.edge x y >= s) by omega.
+    destruct H1. left. apply Z.ltb_lt. auto.
+    right. apply Z.ltb_lt.
+    assert (M (length Evote.cand_all) y z < s \/ M (length Evote.cand_all) y z >= s) by omega.
+    destruct H2. auto.
+    apply L1 in H2.  pose proof (Evote.cons _ _ _ _ H1 H2).
+    apply L2 in H3. destruct H3 as [n H3].
+    pose proof (L4 x z n). omega.
+    
 End Count.
