@@ -881,20 +881,22 @@ Section Count.
     destruct H. destruct x. left. auto.
     right. apply Zle_not_lt. omega.
   Qed.
-  
+
+  Require Import Coq.Program.Wf.
   Program Fixpoint find_cand (c : Evote.cand) (l : list Evote.cand) (H : In c l) : nat :=
     match l with
     | [] => _
     | h :: t => if dec_cand c h then O
                else S (find_cand c t _)
     end.
-  Obligation 1. inversion H.
-  Obligation 2.
-  simpl in H. destruct H. symmetry in H.
-  pose proof (H0 H). inversion H1. assumption.
+  Next Obligation.
+    inversion H.
+  Defined.
+  Next Obligation.
+    simpl in H. destruct H. symmetry in H.
+    pose proof (H0 H). inversion H1. assumption.
+  Defined.
   
-
-  Print find_cand.
   Definition f_cand_nat (c : Evote.cand) := find_cand c Evote.cand_all (cand_fin c).
 
   Program Fixpoint find_nat (n : nat) (l : list Evote.cand) (H : l <> nil) : Evote.cand :=
@@ -915,8 +917,8 @@ Section Count.
 
   Lemma L17 : forall c, g_nat_cand (f_cand_nat c) = c.
   Proof.
-    intros c. unfold g_nat_cand, f_cand_nat. 
-    
+    intros c. unfold g_nat_cand, f_cand_nat.
+    Admitted.
     
     
   Lemma L18 (c : Evote.cand) :
@@ -926,17 +928,20 @@ Section Count.
       (existsT (f : (Evote.cand * Evote.cand) -> bool),
        f (c, d) = true /\ Evote.coclosed k f))%type).
   Proof.
-    intros. 
-    pose proof (constructive_indefinite_ground_description
-                  _ f_cand_nat g_nat_cand L17 (constructive_prop c) (constructive_deci_cand c) H).
+    intros.
+    pose proof
+         (constructive_indefinite_ground_description
+            _ f_cand_nat g_nat_cand L17 (constructive_prop c) (constructive_deci_cand c) H).
     destruct X as [d X]. unfold constructive_prop in X.
     remember (M (length Evote.cand_all) c d) as s. exists s, d.
     split. apply Z.lt_le_incl in X. apply Z.le_ge in X.
     apply L10 in X. auto.
-    exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <? s).  split. admit.
-    unfold Evote.coclosed. intros. destruct x as (x, z). simpl in *.
-    unfold Evote.W. apply andb_true_iff. split. unfold Evote.el. simpl in *. admit.
-    unfold Evote.mp. apply forallb_forall. intros. unfold Evote.mpf. apply orb_true_iff.
-    simpl in *.
-    
+    exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <? s + 1).
+
+    simpl.
+    split. admit. unfold Evote.coclosed. intros. destruct x as (x, z); simpl in *.
+    unfold Evote.W. apply andb_true_iff. unfold Evote.el, Evote.mp. simpl in *.
+    split. admit. apply forallb_forall. intros.
+    unfold Evote.mpf. apply orb_true_iff. simpl in *.  left.
+    unfold Evote.el. simpl.
 End Count.
