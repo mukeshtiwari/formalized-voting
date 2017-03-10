@@ -882,7 +882,7 @@ Section Count.
     right. apply Zle_not_lt. omega.
   Qed.
 
-  Require Import Coq.Program.Wf.
+ 
   Program Fixpoint find_cand (c : Evote.cand) (l : list Evote.cand) (H : In c l) : nat :=
     match l with
     | [] => _
@@ -911,14 +911,27 @@ Section Count.
         | _ => find_nat n' t _
         end
       end
-    end. 
+    end.
   
   Definition g_nat_cand (n : nat) := find_nat n (Evote.cand_all) (cand_not_nil). 
 
+  
   Lemma L17 : forall c, g_nat_cand (f_cand_nat c) = c.
   Proof.
-    intros c. unfold g_nat_cand, f_cand_nat.
-    Admitted.
+    intros c. unfold g_nat_cand, f_cand_nat. 
+    induction Evote.cand_all. admit.
+
+    simpl. destruct (dec_cand c a). simpl. auto.
+    remember (find_cand c l
+                        match cand_fin c with
+                        | or_introl H => match n (eq_sym H) return (In c l) with
+                                        end
+                        | or_intror H => H
+                        end) as v.
+    destruct l. simpl. pose proof (cand_fin c).
+    simpl in H. intuition.
+
+    simpl. apply IHl.
     
     
   Lemma L18 (c : Evote.cand) :
