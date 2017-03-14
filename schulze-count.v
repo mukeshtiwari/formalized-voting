@@ -1006,6 +1006,20 @@ Section Count.
     pose proof (L4 x z n). omega.
   Qed.
 
-  
+  Lemma wins_loses_M : forall c, (wins c Evote.edge) + (loses c Evote.edge).
+  Proof.
+    intros c. pose proof (L7 c). destruct H. left.
+    unfold wins. apply L15. apply L14. intros d.
+    pose proof (proj1 (forallb_forall _ Evote.cand_all) e d (cand_fin d)).
+    simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H.
+    remember (M (length Evote.cand_all) d c) as s. apply L1 in H.
+    exists s. split. assumption.
+    intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
+    apply Z.ge_le in H0. pose proof (L4 d c n). omega.
+
+    right. apply L18. unfold c_wins in e. apply L11 in e.
+    destruct e as [d [H1 H2]]. apply Z.leb_gt in H2. exists d. auto.
+  Qed.
+
   
 End Count.
