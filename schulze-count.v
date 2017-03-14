@@ -764,6 +764,7 @@ Section Count.
     apply L2 in H. destruct H as [n H].
     pose proof (L4 d c n). omega.
     unfold Evote.coclosed.
+    
     Require Import fp_finite_Dirk.
     exists (Fixpoints.greatest_fixed_point _ _ (Evote.all_pairs_universal Evote.cand_all cand_fin)
                                       (Evote.W k) (Evote.monotone_operator_w k)).
@@ -786,7 +787,7 @@ Section Count.
     exists s. split. assumption.
     intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
     apply Z.ge_le in H0. pose proof (L4 d c n). omega.
-
+    
     
     right. unfold loses, c_wins in *. apply L11 in e. destruct e as [d [H1 H2]].
     apply Z.leb_gt in H2. apply L12 with (d := d) (k := M (length Evote.cand_all) d c).
@@ -882,58 +883,91 @@ Section Count.
     right. apply Zle_not_lt. omega.
   Qed.
 
- 
-  Program Fixpoint find_cand (c : Evote.cand) (l : list Evote.cand) (H : In c l) : nat :=
-    match l with
-    | [] => _
-    | h :: t => if dec_cand c h then O
-               else S (find_cand c t _)
-    end.
-  Next Obligation.
-    inversion H.
-  Defined.
-  Next Obligation.
-    simpl in H. destruct H. symmetry in H.
-    pose proof (H0 H). inversion H1. assumption.
-  Defined.
-  
-  Definition f_cand_nat (c : Evote.cand) := find_cand c Evote.cand_all (cand_fin c).
-
-  Program Fixpoint find_nat (n : nat) (l : list Evote.cand) (H : l <> nil) : Evote.cand :=
+  Program Fixpoint f0 a l (H : In a l) : nat :=
     match l with
     | [] => _
     | h :: t =>
-      match n with
-      | O => h
-      | S n' =>
-        match t with
-        | [] => h
-        | _ => find_nat n' t _
-        end
-      end
+      if dec_cand a h then O else S (f0 a t _)
     end.
-  
-  Definition g_nat_cand (n : nat) := find_nat n (Evote.cand_all) (cand_not_nil). 
+  Next Obligation.
+    destruct H; congruence.
+  Qed.
+  Next Obligation.
+    destruct H.
+    - exfalso; now apply H0.
+    - assumption.
+  Qed.
 
-  
-  Lemma L17 : forall c, g_nat_cand (f_cand_nat c) = c.
+  Definition f (c : Evote.cand) : nat := f0 c Evote.cand_all (cand_fin c).
+
+  Program Fixpoint g0 n l (H : (n < length l)%nat) : Evote.cand :=
+    match l, n with
+    | [], _ => _
+    | h :: _, O => h
+    | _ :: t, S n' => g0 n' t _
+    end.
+  Next Obligation.
+    exfalso; inversion H.
+  Qed.
+  Next Obligation.
+    now apply Lt.lt_S_n.
+  Qed.
+
+  Program Definition g (n : nat) : Evote.cand :=
+    if Compare_dec.le_lt_dec (length Evote.cand_all) n then _
+    else g0 n Evote.cand_all _.
+  Next Obligation.
+    destruct Evote.cand_all.
+    - exfalso; now apply cand_not_nil.
+    - exact c.
+  Qed.
+    
+  Lemma f0_lt_length (a : Evote.cand) (l : list Evote.cand) (H : In a l) :
+    (f0 a l H < length l)%nat.
   Proof.
-    intros c. unfold g_nat_cand, f_cand_nat. 
-    induction Evote.cand_all. admit.
+    revert a H.
+    induction l; intros.
+    - inversion H.
+    - simpl in *. destruct (dec_cand a0 a).
+      + omega.
+      + apply Lt.lt_n_S. apply IHl.
+  Qed.
 
-    simpl. destruct (dec_cand c a). simpl. auto.
-    remember (find_cand c l
-                        match cand_fin c with
-                        | or_introl H => match n (eq_sym H) return (In c l) with
-                                        end
-                        | or_intror H => H
-                        end) as v.
-    destruct l. simpl. pose proof (cand_fin c).
-    simpl in H. intuition.
+  Lemma f_lt_length (a : Evote.cand) : (f a < length Evote.cand_all)%nat.
+  Proof.
+    apply f0_lt_length.
+  Qed.
 
-    simpl. apply IHl.
-    
-    
+  Lemma g0_nth (n : nat) (l : list Evote.cand) (H : (n < length l)%nat) (c : Evote.cand) :
+    g0 n l H = nth n l c.
+  Proof.
+    revert l H.
+    induction n; intros; destruct l.
+    - inversion H.
+    - reflexivity.
+    - inversion H.
+    - apply IHn.
+  Qed.
+
+   Lemma nth_f0 (a : Evote.cand) (l : list Evote.cand) (H : In a l) (c : Evote.cand) :
+    nth (f0 a l H) l c = a.
+  Proof.
+    induction l.
+    - inversion H.
+    - simpl. now destruct dec_cand.
+  Qed.
+
+  Lemma L17 : forall x, g (f x) = x.
+  Proof.
+    intros.
+    unfold g.
+    destruct le_lt_dec.
+    - pose proof (f_lt_length x). exfalso; omega.
+    - unfold g_obligation_2, f.
+      rewrite g0_nth with (c := x).
+      apply nth_f0.
+  Qed.
+  
   Lemma L18 (c : Evote.cand) :
     (exists d, M (length Evote.cand_all) c d < M (length Evote.cand_all) d c) ->
     (existsT (k : Z) (d : Evote.cand),
@@ -944,7 +978,7 @@ Section Count.
     intros.
     pose proof
          (constructive_indefinite_ground_description
-            _ f_cand_nat g_nat_cand L17 (constructive_prop c) (constructive_deci_cand c) H).
+            _ f g L17 (constructive_prop c) (constructive_deci_cand c) H).
     destruct X as [d X]. unfold constructive_prop in X.
     remember (M (length Evote.cand_all) c d) as s.
     assert (s + 1 <= M (length Evote.cand_all) d c) by omega.
@@ -971,5 +1005,7 @@ Section Count.
     apply L2 in H4. destruct H4 as [n H4].
     pose proof (L4 x z n). omega.
   Qed.
+
+  
   
 End Count.
