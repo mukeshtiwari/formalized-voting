@@ -1023,4 +1023,10 @@ Section Count.
     destruct e as [d [H1 H2]]. apply Z.leb_gt in H2. exists d. auto.
   Defined.
 
+  Lemma final_count : forall (bs : list ballot), existsT (p : Count bs done), True.
+  Proof.
+    intros. pose proof (extract_prog bs). destruct X as [bs' [m X]].
+    pose proof (fin _ _ _ X wins_loses_M). exists X0. apply I.
+  Defined.
+  
 End Count.
