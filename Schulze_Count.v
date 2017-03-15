@@ -680,7 +680,7 @@ Section Count.
   Proof.
     intros c. destruct (c_wins c) eqn:Ht. left. reflexivity.
     right. reflexivity.
-  Qed.
+  Defined.
 
 
   (* this proof is exact copy of L2 *)
@@ -724,7 +724,7 @@ Section Count.
     }
     rewrite H2 in H0. pose proof (Zmn_lt _ _ l0). rewrite H3 in H0.
     specialize (IHl n H1 s f H0). destruct IHl. exists x0. intuition.
-  Qed.
+  Defined.
   
     
   Lemma L10 : forall n s c d, M n c d >= s -> Evote.PathT s c d.
@@ -738,7 +738,7 @@ Section Count.
     apply L9 in H. destruct H as [x [H1 H2]]. apply Zminmax in H2. destruct H2.
     specialize (IHn _ _ _ H0). specialize (Evote.consT _ _ _ _ H IHn). auto.
     apply cand_not_nil. apply dec_cand. apply IHn. assumption.
-  Qed.
+  Defined.
   
   Lemma L11 : forall (A : Type) (f : A -> bool) (l : list A),
       forallb f l = false -> existsT x, In x l /\ f x = false.
@@ -855,7 +855,7 @@ Section Count.
     apply L1 in H2. pose proof (Evote.cons _ _ _ _ H1 H2).
     apply L2 in H3. destruct H3 as [n H3].
     pose proof (L4 x z n). omega.
-  Qed.
+  Defined.
 
 
   (* losing using M function *)
@@ -1006,7 +1006,7 @@ Section Count.
     apply L1 in H3.  pose proof (Evote.cons _ _ _ _ H2 H3).
     apply L2 in H4. destruct H4 as [n H4].
     pose proof (L4 x z n). omega.
-  Qed.
+  Defined.
 
   Lemma wins_loses_M : forall c, (wins c Evote.edge) + (loses c Evote.edge).
   Proof.
