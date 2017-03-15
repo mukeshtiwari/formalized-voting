@@ -893,12 +893,12 @@ Section Count.
     end.
   Next Obligation.
     destruct H; congruence.
-  Qed.
+  Defined.
   Next Obligation.
     destruct H.
     - exfalso; now apply H0.
     - assumption.
-  Qed.
+  Defined.
 
   Definition f (c : Evote.cand) : nat := f0 c Evote.cand_all (cand_fin c).
 
@@ -910,10 +910,10 @@ Section Count.
     end.
   Next Obligation.
     exfalso; inversion H.
-  Qed.
+  Defined.
   Next Obligation.
     now apply Lt.lt_S_n.
-  Qed.
+  Defined.
 
   Program Definition g (n : nat) : Evote.cand :=
     if Compare_dec.le_lt_dec (length Evote.cand_all) n then _
@@ -922,7 +922,7 @@ Section Count.
     destruct Evote.cand_all.
     - exfalso; now apply cand_not_nil.
     - exact c.
-  Qed.
+  Defined.
     
   Lemma f0_lt_length (a : Evote.cand) (l : list Evote.cand) (H : In a l) :
     (f0 a l H < length l)%nat.
