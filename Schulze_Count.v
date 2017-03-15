@@ -23,13 +23,13 @@ Section Count.
       (at level 200, x binder, right associativity,
        format "'[' 'existsT'  '/  ' x  ..  y ,  '/  ' p ']'")
     : type_scope.
+
   (*
   Variable cand : Type.
   Variable cand_all : list cand. *)
-  (* Problem in importing the hypothesis from module Evote so leaving it for the moment *)
-  Hypothesis dec_cand : forall n m : Evote.cand, {n = m} + {n <> m}.
-  Hypothesis cand_fin : forall c : Evote.cand, In c Evote.cand_all.
-  Hypothesis cand_not_nil :  (* exists c : Evote.cand, True. *) Evote.cand_all <> nil.
+  Hypothesis dec_cand : forall n m : cand, {n = m} + {n <> m}.
+  Hypothesis cand_fin : forall c : cand, In c cand_all.
+  Hypothesis cand_not_nil :  (* exists c : Evote.cand, True. *) cand_all <> nil.
 
   (* the following need to be substituted with viable notions *)
   (* of evidence for winning / losing with given margin.      *)
@@ -41,18 +41,18 @@ Section Count.
 
 
   (* forall d, exists k, Path k c d /\ (forall l, Path l d c -> l <= k) *)
-  Definition wins c (m : Evote.cand -> Evote.cand -> Z) :=
-    forall d : Evote.cand, existsT (k : Z),
-    ((Evote.PathT k c d) *
-     (existsT (f : (Evote.cand * Evote.cand) -> bool),
-      f (d, c) = true /\ Evote.coclosed (k + 1) f))%type.
+  Definition wins c (m : cand -> cand -> Z) :=
+    forall d : cand, existsT (k : Z),
+    ((PathT k c d) *
+     (existsT (f : (cand * cand) -> bool),
+      f (d, c) = true /\ coclosed (k + 1) f))%type.
 
   (* exists k d, Path k d c /\ (forall l, Path l c d -> l < k) *)
-  Definition loses c (m : Evote.cand -> Evote.cand -> Z) :=
-    existsT (k : Z) (d : Evote.cand),
-    ((Evote.PathT k d c) *
-     (existsT (f : (Evote.cand * Evote.cand) -> bool),
-      f (c, d) = true /\ Evote.coclosed k f))%type.
+  Definition loses c (m : cand -> cand -> Z) :=
+    existsT (k : Z) (d : cand),
+    ((PathT k d c) *
+     (existsT (f : (cand * cand) -> bool),
+      f (c, d) = true /\ coclosed k f))%type.
   
   
   
@@ -66,7 +66,7 @@ Section Count.
   Definition ballot := list (list cand). *)
 
   (* new definition of ballot *)
-  Definition ballot := Evote.cand -> nat.
+  Definition ballot := cand -> nat.
 
   (* ballots are valid if every candidate is mentioned        *)
   (* precisely once.                                          *)
@@ -75,19 +75,19 @@ Section Count.
     (forall c: cand, In c (concat b)) /\ NoDup (concat b). *)
 
   Definition ballot_valid (p : ballot) : Prop :=
-    forall c : Evote.cand, (p c > 0)%nat.
+    forall c : cand, (p c > 0)%nat.
 
  
  
   (* the following needs to be instantiated with a definition *)
   (* that ensures that m is the margin function of ballots bs *)
-  Variable is_marg: (Evote.cand -> Evote.cand -> Z) -> (list ballot) -> Prop.
+  Variable is_marg: (cand -> cand -> Z) -> (list ballot) -> Prop.
 
   (* the count proceeds in several stages, represented by the *)
   (* node type: checking ballots, computing margins and       *)
   (* determining winners + evidence.                          *)
   Inductive Node : Type :=
-  | state : (list ballot * list ballot)  -> (Evote.cand -> Evote.cand -> Z) -> Node
+  | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
   | done.
 
   (* state with uncounted and invalid votes so far *)
@@ -99,7 +99,7 @@ Section Count.
   Definition earlier (c d: cand) (b: ballot) : Prop :=
     exists l1 lc l2 ld l3, b = l1++[lc]++l2++[ld]++l3 /\ In c lc /\ In d ld. *)
 
-  Definition earlier (c d : Evote.cand) (p : ballot) : Prop :=
+  Definition earlier (c d : cand) (p : ballot) : Prop :=
     (p c > 0)%nat /\ (p d > 0)%nat /\ (p c < p d)%nat.
   
 
@@ -107,13 +107,13 @@ Section Count.
   Definition equal (c d : cand) (b : ballot) : Prop :=
     exists l1 l l2, b = l1 ++ [l] ++ l2 /\ In c l /\ In d l. *)
 
-  Definition equal (c d : Evote.cand) (p : ballot) : Prop :=
+  Definition equal (c d : cand) (p : ballot) : Prop :=
     (p c > 0)%nat /\ (p d > 0)%nat /\ (p c = p d)%nat. 
 
 
   Theorem in_decidable :
-    forall (b : ballot) (l : list Evote.cand),
-      {forall c : Evote.cand, In c l -> (b c > 0)%nat} + {~(forall c : Evote.cand, In c l -> (b c > 0)%nat)}.
+    forall (b : ballot) (l : list cand),
+      {forall c : cand, In c l -> (b c > 0)%nat} + {~(forall c : cand, In c l -> (b c > 0)%nat)}.
   Proof.
     intros b. induction l.
     left. intros. inversion H. 
@@ -125,20 +125,20 @@ Section Count.
 
   Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
   Proof.
-    intros b. pose proof in_decidable b Evote.cand_all.
+    intros b. pose proof in_decidable b cand_all.
     destruct H; [left | right]; firstorder. 
   Qed.
   
   
-  Definition nty (c d : Evote.cand) := 0%Z.
+  Definition nty (c d : cand) := 0%Z.
 
-  Definition incdec (c d : Evote.cand) (t: Evote.cand -> Evote.cand -> Z)
-             (nt : Evote.cand -> Evote.cand -> Z) : Prop :=
+  Definition incdec (c d : cand) (t: cand -> cand -> Z)
+             (nt : cand -> cand -> Z) : Prop :=
     (nt c d = t c d + 1)%Z /\
     (nt d c = t d c - 1)%Z.
 
-  Definition nochange (c d : Evote.cand) (t : Evote.cand -> Evote.cand -> Z)
-             (nt : Evote.cand -> Evote.cand -> Z) : Prop :=
+  Definition nochange (c d : cand) (t : cand -> cand -> Z)
+             (nt : cand -> cand -> Z) : Prop :=
     nt c d = t c d.
   
   
@@ -146,7 +146,7 @@ Section Count.
   | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
   | cvalid u us m nm inbs :
       Count bs (state (u :: us, inbs) m) -> ballot_valid u -> 
-      (forall c d : Evote.cand, (earlier c d u -> incdec c d m nm) /\
+      (forall c d : cand, (earlier c d u -> incdec c d m nm) /\
                      (equal c d u -> nochange c d m nm)) ->
       Count bs (state (us, inbs) nm)
   | cinvalid u us m inbs :
@@ -154,10 +154,10 @@ Section Count.
       Count bs (state (us, u :: inbs) m)
   | fin m inbs : Count bs (state ([], inbs) m) ->
                  (forall c, (wins c m) + (loses c m)) -> Count bs done.
-
   
-  Definition incdect (p : ballot) (m : Evote.cand -> Evote.cand -> Z) :
-    Evote.cand -> Evote.cand -> Z :=
+  
+  Definition incdect (p : ballot) (m : cand -> cand -> Z) :
+    cand -> cand -> Z :=
     fun c d =>
       match nat_compare_alt (p c) (p d) with
       | Lt => (m c d + 1)%Z
@@ -166,7 +166,7 @@ Section Count.
       end.
 
        
-  Lemma incdec_proof : forall m (p : ballot) (c d : Evote.cand),
+  Lemma incdec_proof : forall m (p : ballot) (c d : cand),
       (earlier c d p -> incdec c d m (incdect p m)) /\
       (equal c d p -> nochange c d m (incdect p m)).
   Proof.
@@ -239,12 +239,12 @@ Section Count.
 
   (* the function M n maps a pair of candidates c, d to the strength of the strongest path of 
      length at most (n + 1) *)
-  Fixpoint M (n : nat) (c d : Evote.cand) : Z :=
+  Fixpoint M (n : nat) (c d : cand) : Z :=
     match n with
-    | O => Evote.edge c d 
+    | 0%nat => edge c d 
     | S n' =>
       Z.max (M n' c d)
-            (maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M n' x d)) Evote.cand_all))
+            (maxlist (map (fun x : cand => Z.min (edge c x) (M n' x d)) cand_all))
     end.
 
   (*
@@ -422,8 +422,8 @@ Section Count.
   Qed.
   
   (* induction on n *)  
-  Lemma L1 : forall (n : nat) (s : Z) (c d : Evote.cand),
-      M n c d >= s -> Evote.Path s c d.
+  Lemma L1 : forall (n : nat) (s : Z) (c d : cand),
+      M n c d >= s -> Path s c d.
   Proof.
     induction n. simpl. intros.
     constructor. auto.
@@ -431,11 +431,11 @@ Section Count.
     pose proof (proj1 (Zmaxlemma (M n c d) _  s) H).
     destruct H0. pose proof (IHn _ _ _ H0). assumption.
     pose proof
-         (Max_of_nonempty_list _ Evote.cand_all cand_not_nil dec_cand s
-                               (fun x : Evote.cand => Z.min (Evote.edge c x) (M n x d))).
+         (Max_of_nonempty_list _ cand_all cand_not_nil dec_cand s
+                               (fun x : cand => Z.min (edge c x) (M n x d))).
     destruct H1.  clear H2. pose proof (H1 H0).
     destruct H2 as [e H2]. destruct H2.
-    pose proof (Zminmax (Evote.edge c e) (M n e d) s). destruct H4.
+    pose proof (Zminmax (edge c e) (M n e d) s). destruct H4.
     specialize (H4 H3). destruct H4.
     constructor 2 with (d := e). auto.
     apply IHn. assumption.
@@ -443,11 +443,11 @@ Section Count.
 
   
   (* induction on path *)
-  Lemma L2 : forall (s : Z) (c d : Evote.cand),      
-      Evote.Path s c d -> exists n, M n c d >= s.
+  Lemma L2 : forall (s : Z) (c d : cand),      
+      Path s c d -> exists n, M n c d >= s.
   Proof.
     intros s c d H. induction H.
-    exists O. auto. destruct IHPath.
+    exists 0%nat. auto. destruct IHPath.
     exists (S x). simpl. apply Zmaxlemma. right.
     apply Max_of_nonempty_list.
     apply cand_not_nil. apply dec_cand. exists d.
@@ -465,8 +465,8 @@ Section Count.
 
   Fixpoint str c l d :=
     match l with
-    | [] => Evote.edge c d
-    | (x :: xs) => Z.min (Evote.edge c x)  (str x xs d)
+    | [] => edge c d
+    | (x :: xs) => Z.min (edge c x)  (str x xs d)
     end.
 
 
@@ -490,7 +490,7 @@ Section Count.
   Qed.
   
   Lemma path_length : forall k c d s,
-      M k c d >= s <-> exists (l : list Evote.cand), (length l <= k)%nat /\ str c l d >= s. 
+      M k c d >= s <-> exists (l : list cand), (length l <= k)%nat /\ str c l d >= s. 
   Proof.  
     split. generalize dependent s. generalize dependent d.
     generalize dependent c.
@@ -501,8 +501,8 @@ Section Count.
     specialize (IHk c d s H0). destruct IHk as [l [H1 H2]]. exists l. omega.
     clear H.
     pose proof
-         (Max_of_nonempty_list _ Evote.cand_all cand_not_nil dec_cand s
-                               (fun x : Evote.cand => Z.min (Evote.edge c x) (M k x d))).
+         (Max_of_nonempty_list _ cand_all cand_not_nil dec_cand s
+                               (fun x : cand => Z.min (edge c x) (M k x d))).
     
     destruct H. clear H1. specialize (H H0). destruct H as [e [H1 H2]].
     pose proof (proj1 (Zminmax _ _ s) H2). destruct H.
@@ -523,8 +523,8 @@ Section Count.
     generalize dependent a. generalize dependent d. generalize dependent c.
     induction l1; simpl; intros.
     apply Zminmax in H. auto. apply Zminmax in H. destruct H.
-    assert ((Evote.edge c a) >= s /\ (str a l1 a0) >= s /\ str a0 l2 d >= s ->
-            Z.min (Evote.edge c a) (str a l1 a0) >= s /\ str a0 l2 d >= s).
+    assert ((edge c a) >= s /\ (str a l1 a0) >= s /\ str a0 l2 d >= s ->
+            Z.min (edge c a) (str a l1 a0) >= s /\ str a0 l2 d >= s).
     {
       intros. destruct H1 as [H1 [H2 H3]]. split. apply Zminmax. auto. auto.
     }
@@ -567,7 +567,7 @@ Section Count.
   Qed.
 
   
-  Lemma L3 : forall k n c d (Hn: (length Evote.cand_all = n)%nat),
+  Lemma L3 : forall k n c d (Hn: (length cand_all = n)%nat),
       M (k + n) c d <= M n  c d.
   Proof.
     induction k using (well_founded_induction lt_wf). intros n c d Hn.
@@ -583,18 +583,18 @@ Section Count.
 
     (* length l > length Evote.cand_all and there are candidates. Remove the duplicate
        candidate *)
-    rewrite <- Hn in H3. assert (covers Evote.cand Evote.cand_all l).
+    rewrite <- Hn in H3. assert (covers cand cand_all l).
     {
       unfold covers. intros. pose proof (cand_fin x). assumption.
     }
-    pose proof (list_finite_elem _ n Evote.cand_all dec_cand Hn l H3 H4).
+    pose proof (list_finite_elem _ n cand_all dec_cand Hn l H3 H4).
     destruct H5 as [a [l1 [l2 [l3 H5]]]].
     pose proof (str_lemma_1 _ _ _ _ _ _ _ _ H5 H2).
     remember (l1 ++ a :: l3) as l0.
     assert ((length l0 <= n)%nat \/ (length l0 > n)%nat) by omega.
     destruct H7.
     pose proof (path_length n c d s). destruct H8.
-    assert ((exists l : list Evote.cand, (length l <= n)%nat /\ str c l d >= s)).
+    assert ((exists l : list cand, (length l <= n)%nat /\ str c l d >= s)).
     exists l0. intuition. specialize (H9 H10).  omega.   
     
     rewrite Hn in H3.
@@ -613,7 +613,7 @@ Section Count.
     specialize (H k' H12 n c d Hn).
     pose proof (path_length (length l0) c d (str c l0 d)).
     destruct H13.
-    assert ((exists l : list Evote.cand, (length l <= length l0)%nat /\ str c l d >= str c l0 d)).
+    assert ((exists l : list cand, (length l <= length l0)%nat /\ str c l d >= str c l0 d)).
     {
       exists l0. omega.
     }
@@ -623,16 +623,16 @@ Section Count.
   
       
     
-  Lemma L4 : forall (c d : Evote.cand) (n : nat),
-      M n c d <= M (length Evote.cand_all) c d. 
+  Lemma L4 : forall (c d : cand) (n : nat),
+      M n c d <= M (length cand_all) c d. 
   Proof.
-    intros c d n. assert ((n <= (length Evote.cand_all))%nat \/
-                          (n >= (length Evote.cand_all))%nat) by omega.
+    intros c d n. assert ((n <= (length cand_all))%nat \/
+                          (n >= (length cand_all))%nat) by omega.
     destruct H. apply monotone_M. assumption.
-    remember ((length Evote.cand_all)) as v.
+    remember ((length cand_all)) as v.
     assert ((n >= v)%nat -> exists p, (n = p + v)%nat).
     {
-      intros. induction H. exists O%nat. omega.
+      intros. induction H. exists 0%nat. omega.
       assert ((v <= m)%nat -> (m >= v)%nat) by omega.
       specialize (H1 H). specialize (IHle H1). destruct IHle as [p H2].
       exists (S p). omega.
@@ -644,18 +644,18 @@ Section Count.
   
   
   Definition c_wins c :=
-    forallb (fun d => (M (length Evote.cand_all) d c) <=? (M (length Evote.cand_all) c d))
-            Evote.cand_all.
+    forallb (fun d => (M (length cand_all) d c) <=? (M (length cand_all) c d))
+            cand_all.
 
-  Lemma L5 (c : Evote.cand) :
-    c_wins c = true <-> forall d, M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d. 
+  Lemma L5 (c : cand) :
+    c_wins c = true <-> forall d, M (length cand_all) d c <= M (length cand_all) c d. 
   Proof.
     split; intros.
     unfold c_wins in H.
     pose proof
          (proj1 (forallb_forall
-                   (fun d : Evote.cand => M (length Evote.cand_all) d c <=?
-                                       M (length Evote.cand_all) c d) Evote.cand_all) H).
+                   (fun d : cand => M (length cand_all) d c <=?
+                                 M (length cand_all) c d) cand_all) H).
     pose proof (H0 d (cand_fin d)). simpl in H1.
     apply Zle_bool_imp_le. assumption.
 
@@ -663,14 +663,14 @@ Section Count.
     pose proof H x. apply Zle_imp_le_bool. assumption.
   Qed.
 
-  Lemma L6 (c : Evote.cand) :
-    c_wins c = false <-> exists d, M (length Evote.cand_all) c d < M (length Evote.cand_all) d c.
+  Lemma L6 (c : cand) :
+    c_wins c = false <-> exists d, M (length cand_all) c d < M (length cand_all) d c.
   Proof.
     split; intros. unfold c_wins in H.
-    apply Evote.forallb_false in H. destruct H as [x [H1 H2]].
+    apply forallb_false in H. destruct H as [x [H1 H2]].
     exists x. apply Z.leb_gt in H2. omega.
 
-    destruct H as [d H]. unfold c_wins. apply Evote.forallb_false.
+    destruct H as [d H]. unfold c_wins. apply forallb_false.
     exists d. split. pose proof (cand_fin d). assumption.
     apply Z.leb_gt. omega.
   Qed.
@@ -684,8 +684,8 @@ Section Count.
 
 
   (* this proof is exact copy of L2 *)
-  Lemma L8 : forall (s : Z) (c d : Evote.cand),
-      Evote.PathT s c d -> exists n, M n c d >= s.
+  Lemma L8 : forall (s : Z) (c d : cand),
+      PathT s c d -> exists n, M n c d >= s.
   Proof.
     intros s c d H. 
     induction H. exists 0%nat. auto.
@@ -727,16 +727,16 @@ Section Count.
   Defined.
   
     
-  Lemma L10 : forall n s c d, M n c d >= s -> Evote.PathT s c d.
+  Lemma L10 : forall n s c d, M n c d >= s -> PathT s c d.
   Proof.
     induction n; simpl; intros. constructor. auto.
     unfold Z.max in H.
     destruct 
       (M n c d
-         ?= maxlist (map (fun x : Evote.cand => Z.min (Evote.edge c x) (M n x d)) Evote.cand_all)).
+         ?= maxlist (map (fun x : cand => Z.min (edge c x) (M n x d)) cand_all)).
     apply IHn. assumption.
     apply L9 in H. destruct H as [x [H1 H2]]. apply Zminmax in H2. destruct H2.
-    specialize (IHn _ _ _ H0). specialize (Evote.consT _ _ _ _ H IHn). auto.
+    specialize (IHn _ _ _ H0). specialize (consT _ _ _ _ H IHn). auto.
     apply cand_not_nil. apply dec_cand. apply IHn. assumption.
   Defined.
   
@@ -755,21 +755,21 @@ Section Count.
 
   (* These proofs include fixpoint library *)
   Lemma L12 : forall c d k,
-      Evote.Path k d c /\ (forall l, Evote.Path l c d -> l < k) ->
-      existsT (k : Z) (d : Evote.cand), ((Evote.PathT k d c) *
-     (existsT (f : (Evote.cand * Evote.cand) -> bool),
-      f (c, d) = true /\ Evote.coclosed k f))%type.
+      Path k d c /\ (forall l, Path l c d -> l < k) ->
+      existsT (k : Z) (d : cand), ((PathT k d c) *
+     (existsT (f : (cand * cand) -> bool),
+      f (c, d) = true /\ coclosed k f))%type.
   Proof.
     intros c d k H. destruct H. exists k, d.
-    split. apply L10 with (length Evote.cand_all).
+    split. apply L10 with (length cand_all).
     apply L2 in H. destruct H as [n H].
     pose proof (L4 d c n). omega.
-    unfold Evote.coclosed.
+    unfold coclosed.
     
     Require Import fp_finite_Dirk.
-    exists (Fixpoints.greatest_fixed_point _ _ (Evote.all_pairs_universal Evote.cand_all cand_fin)
-                                      (Evote.W k) (Evote.monotone_operator_w k)).
-    split. apply Evote.path_gfp. unfold not. intros.
+    exists (Fixpoints.greatest_fixed_point _ _ (all_pairs_universal cand_all cand_fin)
+                                      (W k) (monotone_operator_w k)).
+    split. apply path_gfp. unfold not. intros.
     pose proof (H0 k H1). omega.
 
     intros. destruct x.
@@ -777,38 +777,40 @@ Section Count.
     auto.
   Qed.
   
-    
-  Lemma wins_loses : forall c, (wins c Evote.edge) + (loses c Evote.edge).
-  Proof. 
-    intros c. pose proof (L7 c). destruct H. left.
-    apply Evote.th2. unfold Evote.wins, c_wins in *. intros d.
-    pose proof (proj1 (forallb_forall _ Evote.cand_all) e d (cand_fin d)).
+
+  (* Code breaking because of section and module *)
+  (*
+  Lemma wins_loses : forall c m, (wins c m) + (loses c m).
+  Proof.
+    intros c m. pose proof (L7 c). destruct H. left.
+    apply th2. unfold wins, c_wins in *. intros d.
+    pose proof (proj1 (forallb_forall _ cand_all) e d (cand_fin d)).
     simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H.
-    remember (M (length Evote.cand_all) d c) as s. apply L1 in H. 
+    remember (M (length cand_all) d c) as s. apply L1 in H. 
     exists s. split. assumption.
     intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
     apply Z.ge_le in H0. pose proof (L4 d c n). omega.
     
     
     right. unfold loses, c_wins in *. apply L11 in e. destruct e as [d [H1 H2]].
-    apply Z.leb_gt in H2. apply L12 with (d := d) (k := M (length Evote.cand_all) d c).
-    split. remember (M (length Evote.cand_all) d c) as s. apply L1 with (length Evote.cand_all).
+    apply Z.leb_gt in H2. apply L12 with (d := d) (k := M (length cand_all) d c).
+    split. remember (M (length cand_all) d c) as s. apply L1 with (length cand_all).
     omega.
 
     intros l H. apply L2 in H. destruct H as [n H].
     pose proof (L4 c d n). omega.
-  Qed.
+  Qed. *)
   (* End of fixpoint library code *)
   (* project finished *)
 
   (* Proofs using Matrix computation *)
   
-  Lemma L13 (c : Evote.cand) : forall d k,
-        Evote.Path k c d /\ (forall l, Evote.Path l d c -> l <= k) ->
-        M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d.
+  Lemma L13 (c : cand) : forall d k,
+        Path k c d /\ (forall l, Path l d c -> l <= k) ->
+        M (length cand_all) d c <= M (length cand_all) c d.
   Proof.
     intros d k [H1 H2].
-    remember (M (length Evote.cand_all) d c) as s.
+    remember (M (length cand_all) d c) as s.
     apply Z.eq_le_incl in Heqs.
     apply Z.le_ge in Heqs.
     pose proof (L1 _ _ _ _ Heqs). specialize (H2 s H).
@@ -816,55 +818,55 @@ Section Count.
     pose proof (L4 c d n). omega.
   Qed.
 
-  Lemma L14 (c : Evote.cand) :
-    (forall d, exists k, Evote.Path k c d /\ (forall l, Evote.Path l d c -> l <= k)) ->
-    forall d, M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d.
+  Lemma L14 (c : cand) :
+    (forall d, exists k, Path k c d /\ (forall l, Path l d c -> l <= k)) ->
+    forall d, M (length cand_all) d c <= M (length cand_all) c d.
   Proof.
     intros. specialize (H d). destruct H as [k [H1 H2]]. apply L13 with k.
     intuition.
   Qed.
   
-  Lemma L15 (c : Evote.cand) : (forall d,
-      M (length Evote.cand_all) d c <= M (length Evote.cand_all) c d) ->
-      forall d : Evote.cand, existsT (k : Z),
-    ((Evote.PathT k c d) *
-     (existsT (f : (Evote.cand * Evote.cand) -> bool),
-      f (d, c) = true /\ Evote.coclosed (k + 1) f))%type.
+  Lemma L15 (c : cand) : (forall d,
+      M (length cand_all) d c <= M (length cand_all) c d) ->
+      forall d : cand, existsT (k : Z),
+    ((PathT k c d) *
+     (existsT (f : (cand * cand) -> bool),
+      f (d, c) = true /\ coclosed (k + 1) f))%type.
   Proof.
-    intros. specialize (H d). remember (M (length Evote.cand_all) d c) as s.
+    intros. specialize (H d). remember (M (length cand_all) d c) as s.
     exists s. apply Z.le_ge in H. apply L10 in H. split. auto.
-    exists (fun x => M (length Evote.cand_all) (fst x) (snd x) <=? s). simpl in *. split.
+    exists (fun x => M (length cand_all) (fst x) (snd x) <=? s). simpl in *. split.
     apply Z.leb_le. omega.
   
-    unfold Evote.coclosed. intros. destruct x as (x, z). simpl in *.
-    apply Z.leb_le in H0. unfold Evote.W. apply andb_true_iff. split.
-    unfold Evote.el. simpl. apply Z.ltb_lt.
-    assert (Evote.edge x z <= s -> Evote.edge x z < s + 1) by omega.
+    unfold coclosed. intros. destruct x as (x, z). simpl in *.
+    apply Z.leb_le in H0. unfold W. apply andb_true_iff. split.
+    unfold el. simpl. apply Z.ltb_lt.
+    assert (edge x z <= s -> edge x z < s + 1) by omega.
     apply H1. clear H1. clear Heqs.
-    induction (length Evote.cand_all). simpl in *. auto.
+    induction (length cand_all). simpl in *. auto.
     simpl in H0. apply Z.max_lub_iff in H0.
     destruct H0. specialize (IHn H0). auto.
     
-    unfold Evote.mp. apply forallb_forall. intros y Hy.  unfold Evote.mpf. simpl in *.
-    apply orb_true_iff. unfold Evote.el. simpl.
-    assert (Evote.edge x y <= s \/ Evote.edge x y >= s + 1) by omega.
+    unfold mp. apply forallb_forall. intros y Hy.  unfold mpf. simpl in *.
+    apply orb_true_iff. unfold el. simpl.
+    assert (edge x y <= s \/ edge x y >= s + 1) by omega.
     destruct H1. left. apply Z.ltb_lt. omega.
     right. apply Z.leb_le.
-    assert (M (length Evote.cand_all) y z <= s \/ M (length Evote.cand_all) y z >= s + 1) by omega.
+    assert (M (length cand_all) y z <= s \/ M (length cand_all) y z >= s + 1) by omega.
     destruct H2. auto.
-    apply L1 in H2. pose proof (Evote.cons _ _ _ _ H1 H2).
+    apply L1 in H2. pose proof (cons _ _ _ _ H1 H2).
     apply L2 in H3. destruct H3 as [n H3].
     pose proof (L4 x z n). omega.
   Defined.
 
 
   (* losing using M function *)
-  Lemma L16 (c : Evote.cand) :
-    (exists k d, Evote.Path k d c /\ (forall l, Evote.Path l c d -> l < k)) ->
-    (exists d, M (length Evote.cand_all) c d < M (length Evote.cand_all) d c).
+  Lemma L16 (c : cand) :
+    (exists k d, Path k d c /\ (forall l, Path l c d -> l < k)) ->
+    (exists d, M (length cand_all) c d < M (length cand_all) d c).
   Proof.
     intros. destruct H as [k [d [H1 H2]]].
-    exists d. remember (M (length Evote.cand_all) c d)  as s.
+    exists d. remember (M (length cand_all) c d)  as s.
     pose proof (Z.eq_le_incl _ _ Heqs) as H3.
     apply Z.le_ge in H3. apply L1 in H3. specialize (H2 s H3).
     apply L2 in H1. destruct H1 as [n H1].
