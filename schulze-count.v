@@ -197,7 +197,7 @@ Section Count.
     intros. pose proof (cvalid bs a u m (incdect a m) inbs X b (incdec_proof m a)).
     specialize (IHu inbs (incdect a m) X0). destruct IHu as [Hinv [Hm H]].
     exists Hinv, Hm. assumption.
-  Qed.
+  Defined.
     
   Lemma extract_prog :
      forall (bs : list ballot), existsT i m, (Count bs (state ([], i) m)). 
@@ -206,7 +206,7 @@ Section Count.
     pose proof (extract_prog_gen bs bs [] nty (ax bs bs nty eq_refl eq_refl)).
     destruct X as [i [m Hc]].
     exists i, m. assumption.
-  Qed.
+  Defined.
   
   (* assume the definition for moment *)
   (* replace all the m with Evote.edge *)
@@ -753,6 +753,7 @@ Section Count.
     exists x. split. right. assumption. assumption.
   Qed.
 
+  (* These proofs include fixpoint library *)
   Lemma L12 : forall c d k,
       Evote.Path k d c /\ (forall l, Evote.Path l c d -> l < k) ->
       existsT (k : Z) (d : Evote.cand), ((Evote.PathT k d c) *
@@ -797,9 +798,10 @@ Section Count.
     intros l H. apply L2 in H. destruct H as [n H].
     pose proof (L4 c d n). omega.
   Qed.
-  
+  (* End of fixpoint library code *)
   (* project finished *)
-  (* Try to connect Prop level with Matrix *)
+
+  (* Proofs using Matrix computation *)
   
   Lemma L13 (c : Evote.cand) : forall d k,
         Evote.Path k c d /\ (forall l, Evote.Path l d c -> l <= k) ->
@@ -1019,7 +1021,6 @@ Section Count.
 
     right. apply L18. unfold c_wins in e. apply L11 in e.
     destruct e as [d [H1 H2]]. apply Z.leb_gt in H2. exists d. auto.
-  Qed.
+  Defined.
 
-  
 End Count.
