@@ -11,7 +11,7 @@ Require Import fp_finite_Dirk.
 Require Import Coq.ZArith.ZArith.
 Import ListNotations.
 Open Scope Z.
-Module Evote.  
+Section Evote.  
   (* type level existential quantifier *)
   Notation "'existsT' x .. y , p" :=
     (sigT (fun x => .. (sigT (fun y => p)) ..))
