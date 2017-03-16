@@ -246,8 +246,8 @@ End ListLemma.
 Section Evote. 
 
   (* candidates are a finite type with decidable equality *)
-  Variable cand : Type.
-  Variable cand_all : list cand.
+  Parameter cand : Type.
+  Parameter cand_all : list cand.
 
   (* edge is the margin in Schulze counting, i.e. edge c d is the number of 
      voters that perfer c over d *)
