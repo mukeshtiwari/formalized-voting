@@ -24,7 +24,7 @@ Section Evote.
 
   (* edge is the margin in Schulze counting, i.e. edge c d is the number of 
      voters that perfer c over d *)
-  Parameter edge : cand -> cand -> Z. 
+  Variable edge : cand -> cand -> Z. 
 
   Hypothesis cand_fin : forall c: cand, In c cand_all.
   Hypothesis dec_cand : forall n m : cand, {n = m} + {n <> m}.
@@ -357,4 +357,515 @@ Section Evote.
     | (x :: xs) => Z.min (edge c x)  (str x xs d)
     end.
 
+  Lemma path_len : forall k c d s l,
+      (length l <= k)%nat -> str c l d >= s -> M k c d >= s.
+  Proof.
+    induction k. intros. assert ((length l <= 0)%nat -> l = []).
+    {
+      destruct l. intros. reflexivity.
+      simpl in *. inversion H.
+    }
+    specialize (H1 H). subst. simpl in *. auto.
+    intros. simpl in *.
+    destruct l. simpl in *. apply Zmaxlemma.
+    left. apply IHk with []. simpl. omega. simpl. auto.
+    simpl in *. apply Zminmax in H0. destruct H0.
+    apply Zmaxlemma. right. apply Max_of_nonempty_list.
+    apply cand_not_nil. apply dec_cand. exists c0. split. specialize (cand_fin c0). assumption.
+    apply Zminmax. split.
+    omega. apply IHk with l. omega. omega.
+  Qed.
+
   
+  Lemma path_length : forall k c d s,
+      M k c d >= s <-> exists (l : list cand), (length l <= k)%nat /\ str c l d >= s. 
+  Proof.  
+    split. generalize dependent s. generalize dependent d.
+    generalize dependent c.
+    induction k. simpl. intros. exists []. simpl. intuition.
+
+    simpl. intros.
+    pose proof (proj1 (Zmaxlemma (M k c d) _ s) H). destruct H0.
+    specialize (IHk c d s H0). destruct IHk as [l [H1 H2]]. exists l. omega.
+    clear H.
+    pose proof
+         (Max_of_nonempty_list _ cand_all cand_not_nil dec_cand s
+                               (fun x : cand => Z.min (edge c x) (M k x d))).
+    
+    destruct H. clear H1. specialize (H H0). destruct H as [e [H1 H2]].
+    pose proof (proj1 (Zminmax _ _ s) H2). destruct H.
+    specialize (IHk e d s H3). destruct IHk as [l [H4 H5]].
+    exists (e :: l). simpl. split. omega.
+    apply Zminmax. intuition.
+
+    (* otherway *)
+    intros. destruct H as [l [H1 H2]].
+    pose proof (path_len k c d s l H1 H2). omega.    
+  Qed.
+
+  Lemma str_aux : forall c d a l1 l2 s,
+      str c (l1 ++ a :: l2) d >= s <-> str c l1 a >= s /\ str a l2 d >= s.
+  Proof.
+    split. generalize dependent s. generalize dependent l2.
+    generalize dependent a. generalize dependent d. generalize dependent c.
+    induction l1; simpl; intros.
+    apply Zminmax in H. auto. apply Zminmax in H. destruct H.
+    assert ((edge c a) >= s /\ (str a l1 a0) >= s /\ str a0 l2 d >= s ->
+            Z.min (edge c a) (str a l1 a0) >= s /\ str a0 l2 d >= s).
+    {
+      intros. destruct H1 as [H1 [H2 H3]]. split. apply Zminmax. auto. auto.
+    }
+    apply H1. split. assumption.
+    apply IHl1. assumption.
+
+    (* other part *)
+    generalize dependent s. generalize dependent l2.
+    generalize dependent a. generalize dependent d. generalize dependent c.
+    induction l1; simpl; intros. apply Zminmax. auto.
+    apply Zminmax. destruct H. apply Zminmax in H. destruct H.
+    split. auto. apply IHl1. auto.
+  Qed.
+
+  
+  Lemma str_lemma_1 : forall c d a l l1 l2 l3 s, l = l1 ++ a :: l2 ++ a :: l3 ->
+    str c l d >= s -> str c (l1 ++ a :: l3) d >= s.
+  Proof.
+   intros. subst. apply str_aux in H0. destruct H0.
+   apply str_aux in H0. destruct H0.
+   pose proof (proj2 (str_aux c d a l1 l3 s) (conj H H1)). auto.
+  Qed.
+
+  Lemma str_lemma_2 : forall c d a l l1 l2 l3 s,
+      l = l1 ++ a :: l2 ++ a :: l3 -> str c (l1 ++ a :: l3) d >= s -> str a l2 a >= s ->
+      str c (l1 ++ a :: l2 ++ a :: l3) d >= s.
+  Proof.
+    intros. apply str_aux in H0. destruct H0.
+    apply str_aux. split. auto.
+    apply str_aux. auto.
+  Qed.
+
+
+  Lemma list_and_num : forall (A : Type) (n : nat) (l : list A),
+      (length l > n)%nat -> exists p, (length l = p + n)%nat.
+  Proof.
+    intros A n l H. induction l. inversion H.
+    simpl in *. apply gt_S in H. destruct H. specialize (IHl H). destruct IHl as [p IHl].
+    exists (S p). omega. exists 1%nat. omega.
+  Qed.
+
+  Lemma L3 : forall k n c d (Hn: (length cand_all = n)%nat),
+      M (k + n) c d <= M n  c d.
+  Proof.
+    induction k using (well_founded_induction lt_wf). intros n c d Hn.
+    remember (M (k + n) c d) as s.
+    pose proof (Z.eq_le_incl _ _ Heqs). apply Z.le_ge in H0.
+    pose proof (proj1 (path_length _ _ _ _) H0). destruct H1 as [l [H1 H2]].
+    (* number of candidates <= length Evote.cand_all \/ > length Evote.cand_all *)
+    assert ((length l <= n)%nat \/ (length l > n)%nat) by omega.
+    destruct H3 as [H3 | H3].
+    pose proof (proj2 (path_length n c d s)
+                      (ex_intro (fun l => (length l <= n)%nat /\ str c l d >= s) l (conj H3 H2))).
+    omega.
+
+    (* length l > length Evote.cand_all and there are candidates. Remove the duplicate
+       candidate *)
+    rewrite <- Hn in H3. assert (covers cand cand_all l).
+    {
+      unfold covers. intros. pose proof (cand_fin x). assumption.
+    }
+    pose proof (list_finite_elem _ n cand_all dec_cand Hn l H3 H4).
+    destruct H5 as [a [l1 [l2 [l3 H5]]]].
+    pose proof (str_lemma_1 _ _ _ _ _ _ _ _ H5 H2).
+    remember (l1 ++ a :: l3) as l0.
+    assert ((length l0 <= n)%nat \/ (length l0 > n)%nat) by omega.
+    destruct H7.
+    pose proof (path_length n c d s). destruct H8.
+    assert ((exists l : list cand, (length l <= n)%nat /\ str c l d >= s)).
+    exists l0. intuition. specialize (H9 H10).  omega.   
+    
+    rewrite Hn in H3.
+    specialize (list_and_num _ _ _ H3); intros. destruct H8 as [p H8].
+    specialize (list_and_num _ _ _ H7); intros. destruct H9 as [k' H9].
+    assert ((length l0 < length l)%nat).
+    {
+      rewrite Heql0, H5.
+      rewrite app_length. rewrite app_length.
+      simpl. rewrite app_length. simpl.
+      omega.
+    }    
+    rewrite H9 in H10. rewrite H8 in H10.
+    assert (((k' + n) < (p + n))%nat -> (k' < p)%nat) by omega.
+    specialize (H11 H10). assert (k' < k)%nat by omega.
+    specialize (H k' H12 n c d Hn).
+    pose proof (path_length (length l0) c d (str c l0 d)).
+    destruct H13.
+    assert ((exists l : list cand, (length l <= length l0)%nat /\ str c l d >= str c l0 d)).
+    {
+      exists l0. omega.
+    }
+    specialize (H14 H15). clear H13. rewrite <- H9 in H. omega.
+  Qed.
+
+  Lemma L4 : forall (c d : cand) (n : nat),
+      M n c d <= M (length cand_all) c d. 
+  Proof.
+    intros c d n. assert ((n <= (length cand_all))%nat \/
+                          (n >= (length cand_all))%nat) by omega.
+    destruct H. apply monotone_M. assumption.
+    remember ((length cand_all)) as v.
+    assert ((n >= v)%nat -> exists p, (n = p + v)%nat).
+    {
+      intros. induction H. exists 0%nat. omega.
+      assert ((v <= m)%nat -> (m >= v)%nat) by omega.
+      specialize (H1 H). specialize (IHle H1). destruct IHle as [p H2].
+      exists (S p). omega.
+    }
+      
+    specialize (H0 H). destruct H0 as [p H0].
+    subst. apply L3. auto.
+  Qed.
+
+  Definition c_wins c :=
+    forallb (fun d => (M (length cand_all) d c) <=? (M (length cand_all) c d))
+            cand_all.
+
+  Lemma L5 (c : cand) :
+    c_wins c = true <-> forall d, M (length cand_all) d c <= M (length cand_all) c d. 
+  Proof.
+    split; intros.
+    unfold c_wins in H.
+    pose proof
+         (proj1 (forallb_forall
+                   (fun d : cand => M (length cand_all) d c <=?
+                                 M (length cand_all) c d) cand_all) H).
+    pose proof (H0 d (cand_fin d)). simpl in H1.
+    apply Zle_bool_imp_le. assumption.
+
+    unfold c_wins. apply forallb_forall. intros x Hin.
+    pose proof H x. apply Zle_imp_le_bool. assumption.
+  Qed.
+
+  Lemma forallb_false : forall (A : Type) (f : A -> bool) (l : list A), 
+                        forallb f l = false <-> (exists x, In x l /\ f x = false).
+  Proof.
+    intros A f l. split. intros H. induction l. simpl in H. inversion H.
+    simpl in H. apply andb_false_iff in H. destruct H.
+    exists a. split. simpl. left. auto. assumption.
+    pose proof IHl H. destruct H0. exists x. destruct  H0 as [H1 H2].
+    split. simpl. right. assumption. assumption.
+
+    intros. destruct H as [x [H1 H2]]. induction l. inversion H1.
+    simpl. apply andb_false_iff. simpl in H1. destruct H1.
+    left. congruence. right. apply IHl. assumption.
+  Qed.
+
+  Lemma L6 (c : cand) :
+    c_wins c = false <-> exists d, M (length cand_all) c d < M (length cand_all) d c.
+  Proof.
+    split; intros. unfold c_wins in H.
+    apply forallb_false in H. destruct H as [x [H1 H2]].
+    exists x. apply Z.leb_gt in H2. omega.
+
+    destruct H as [d H]. unfold c_wins. apply forallb_false.
+    exists d. split. pose proof (cand_fin d). assumption.
+    apply Z.leb_gt. omega.
+  Qed.
+
+  Lemma L7 : forall c, {c_wins c = true} + {c_wins c = false}.
+  Proof.
+    intros c. destruct (c_wins c) eqn:Ht. left. reflexivity.
+    right. reflexivity.
+  Defined.
+
+  (* this proof is exact copy of L2 *)
+  Lemma L8 : forall (s : Z) (c d : cand),
+      PathT s c d -> exists n, M n c d >= s.
+  Proof.
+    intros s c d H.
+    induction H. exists 0%nat. auto.
+    destruct IHPathT. exists (S x). simpl.
+    apply Zmaxlemma. right.
+    apply Max_of_nonempty_list. apply cand_not_nil.
+    apply dec_cand. exists d. split. pose proof (cand_fin d). auto.
+    apply Zminmax. auto.
+  Qed.
+
+  (* this proof is same as first half of Max_of_nonempty_list *)
+  Lemma L9 : forall (A : Type) (l : list A) (H : l <> nil)
+                          (H1 : forall x y : A, {x = y} + {x <> y}) (s : Z) (f : A -> Z),
+        maxlist (map f l) >= s -> existsT (x:A), In x l /\ f x >= s.
+  Proof.
+    induction l; intros. specialize (H eq_refl). inversion H.
+    pose proof (list_eq_dec H1 l []). destruct H2.
+    exists a. subst. intuition.
+
+    assert (Hm : {f a >= maxlist (map f l)} + {f a < maxlist (map f l)}) by
+        apply (Z_ge_lt_dec (f a) (maxlist (map f l))).
+    destruct Hm. rewrite map_cons in H0. pose proof (exists_last n).
+    destruct X as [l1 [x l2]].
+    assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
+    {
+      destruct l1. simpl in l2. rewrite l2. simpl. auto.
+      rewrite l2. simpl. auto.
+    }
+    pose proof (Z.ge_le _ _ g). pose proof (Z.max_l _ _ H3).
+    rewrite H2 in H0. rewrite H4 in H0. exists a. intuition.
+    rewrite map_cons in H0. pose proof (exists_last n). destruct X as [l1 [x l2]].
+    assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
+    {
+      destruct l1. simpl in l2. rewrite l2. simpl. auto.
+      rewrite l2. simpl. auto.
+    }
+    rewrite H2 in H0. pose proof (Zmn_lt _ _ l0). rewrite H3 in H0.
+    specialize (IHl n H1 s f H0). destruct IHl. exists x0. intuition.
+  Defined.
+
+  Lemma L10 : forall n s c d, M n c d >= s -> PathT s c d.
+  Proof.
+    induction n; simpl; intros. constructor. auto.
+    unfold Z.max in H.
+    destruct 
+      (M n c d
+         ?= maxlist (map (fun x : cand => Z.min (edge c x) (M n x d)) cand_all)).
+    apply IHn. assumption.
+    apply L9 in H. destruct H as [x [H1 H2]]. apply Zminmax in H2. destruct H2.
+    specialize (IHn _ _ _ H0). specialize (consT _ _ _ _ H IHn). auto.
+    apply cand_not_nil. apply dec_cand. apply IHn. assumption.
+  Defined.
+  
+  Lemma L11 : forall (A : Type) (f : A -> bool) (l : list A),
+      forallb f l = false -> existsT x, In x l /\ f x = false.
+  Proof.
+    intros A f. induction l. simpl. intros. inversion H.
+    simpl. intros. destruct (f a) eqn:H1. destruct (forallb f l) eqn:H2.
+    inversion H. specialize (IHl eq_refl). clear H.
+    destruct IHl as [x [H3 H4]].
+    exists x. split. right. auto. assumption.
+    destruct (forallb f l) eqn:H2. exists a. split. left. auto. assumption.
+    clear H. specialize (IHl eq_refl). destruct IHl as [x [H3 H4]].
+    exists x. split. right. assumption. assumption.
+  Qed.
+
+  (* winning criteria from prop to type *)
+  Lemma L13 (c : cand) : forall d k,
+        Path k c d /\ (forall l, Path l d c -> l <= k) ->
+        M (length cand_all) d c <= M (length cand_all) c d.
+  Proof.
+    intros d k [H1 H2].
+    remember (M (length cand_all) d c) as s.
+    apply Z.eq_le_incl in Heqs.
+    apply Z.le_ge in Heqs.
+    pose proof (L1 _ _ _ _ Heqs). specialize (H2 s H).
+    apply L2 in H1. destruct H1 as [n H1].
+    pose proof (L4 c d n). omega.
+  Qed.
+
+  Lemma L14 (c : cand) :
+    (forall d, exists k, Path k c d /\ (forall l, Path l d c -> l <= k)) ->
+    forall d, M (length cand_all) d c <= M (length cand_all) c d.
+  Proof.
+    intros. specialize (H d). destruct H as [k [H1 H2]]. apply L13 with k.
+    intuition.
+  Qed.
+  
+  Lemma L15 (c : cand) : (forall d,
+      M (length cand_all) d c <= M (length cand_all) c d) ->
+      forall d : cand, existsT (k : Z),
+    ((PathT k c d) *
+     (existsT (f : (cand * cand) -> bool),
+      f (d, c) = true /\ coclosed (k + 1) f))%type.
+  Proof.
+    intros. specialize (H d). remember (M (length cand_all) d c) as s.
+    exists s. apply Z.le_ge in H. apply L10 in H. split. auto.
+    exists (fun x => M (length cand_all) (fst x) (snd x) <=? s). simpl in *. split.
+    apply Z.leb_le. omega.
+  
+    unfold coclosed. intros. destruct x as (x, z). simpl in *.
+    apply Z.leb_le in H0. unfold W. apply andb_true_iff. split.
+    unfold el. simpl. apply Z.ltb_lt.
+    assert (edge x z <= s -> edge x z < s + 1) by omega.
+    apply H1. clear H1. clear Heqs.
+    induction (length cand_all). simpl in *. auto.
+    simpl in H0. apply Z.max_lub_iff in H0.
+    destruct H0. specialize (IHn H0). auto.
+    
+    unfold mp. apply forallb_forall. intros y Hy.  unfold mpf. simpl in *.
+    apply orb_true_iff. unfold el. simpl.
+    assert (edge x y <= s \/ edge x y >= s + 1) by omega.
+    destruct H1. left. apply Z.ltb_lt. omega.
+    right. apply Z.leb_le.
+    assert (M (length cand_all) y z <= s \/ M (length cand_all) y z >= s + 1) by omega.
+    destruct H2. auto.
+    apply L1 in H2. pose proof (cons _ _ _ _ H1 H2).
+    apply L2 in H3. destruct H3 as [n H3].
+    pose proof (L4 x z n). omega.
+  Defined.
+  (* end of winning criteria *)
+
+  (* losing using M function *)
+  Lemma L16 (c : cand) :
+    (exists k d, Path k d c /\ (forall l, Path l c d -> l < k)) ->
+    (exists d, M (length cand_all) c d < M (length cand_all) d c).
+  Proof.
+    intros. destruct H as [k [d [H1 H2]]].
+    exists d. remember (M (length cand_all) c d)  as s.
+    pose proof (Z.eq_le_incl _ _ Heqs) as H3.
+    apply Z.le_ge in H3. apply L1 in H3. specialize (H2 s H3).
+    apply L2 in H1. destruct H1 as [n H1].
+    pose proof (L4 d c n). omega.
+  Qed.
+  
+  Definition constructive_prop (c d : cand):=
+     M (length cand_all) c d < M (length cand_all) d c.
+
+  Lemma constructive_deci_cand : forall (c d : Evote.cand),
+      {(constructive_prop c d)} + {~(constructive_prop c d)}.
+  Proof.
+    intros c d. unfold constructive_prop.
+    pose proof (Z_lt_ge_bool (M (length cand_all) c d) (M (length cand_all) d c)).
+    destruct H. destruct x. left. auto.
+    right. apply Zle_not_lt. omega.
+  Qed.
+
+  Program Fixpoint f0 a l (H : In a l) : nat :=
+    match l with
+    | [] => _
+    | h :: t =>
+      if dec_cand a h then O else S (f0 a t _)
+    end.
+  Next Obligation.
+    destruct H; congruence.
+  Defined.
+  Next Obligation.
+    destruct H.
+    - exfalso; now apply H0.
+    - assumption.
+  Defined.
+
+  Definition f (c : cand) : nat := f0 c cand_all (cand_fin c).
+
+  Program Fixpoint g0 n l (H : (n < length l)%nat) : cand :=
+    match l, n with
+    | [], _ => _
+    | h :: _, O => h
+    | _ :: t, S n' => g0 n' t _
+    end.
+  Next Obligation.
+    exfalso; inversion H.
+  Defined.
+  Next Obligation.
+    now apply Lt.lt_S_n.
+  Defined.
+
+  Program Definition g (n : nat) : cand :=
+    if Compare_dec.le_lt_dec (length cand_all) n then _
+    else g0 n cand_all _.
+  Next Obligation.
+    destruct cand_all.
+    - exfalso; now apply cand_not_nil.
+    - exact c.
+  Defined.
+    
+  Lemma f0_lt_length (a : cand) (l : list cand) (H : In a l) :
+    (f0 a l H < length l)%nat.
+  Proof.
+    revert a H.
+    induction l; intros.
+    - inversion H.
+    - simpl in *. destruct (dec_cand a0 a).
+      + omega.
+      + apply Lt.lt_n_S. apply IHl.
+  Qed.
+
+  Lemma f_lt_length (a : cand) : (f a < length cand_all)%nat.
+  Proof.
+    apply f0_lt_length.
+  Qed.
+
+  Lemma g0_nth (n : nat) (l : list cand) (H : (n < length l)%nat) (c : cand) :
+    g0 n l H = nth n l c.
+  Proof.
+    revert l H.
+    induction n; intros; destruct l.
+    - inversion H.
+    - reflexivity.
+    - inversion H.
+    - apply IHn.
+  Qed.
+
+  Lemma nth_f0 (a : cand) (l : list cand) (H : In a l) (c : cand) :
+    nth (f0 a l H) l c = a.
+  Proof.
+    induction l.
+    - inversion H.
+    - simpl. now destruct dec_cand.
+  Qed.
+
+  Lemma L17 : forall x, g (f x) = x.
+  Proof.
+    intros.
+    unfold g.
+    destruct le_lt_dec.
+    - pose proof (f_lt_length x). exfalso; omega.
+    - unfold g_obligation_2, f.
+      rewrite g0_nth with (c := x).
+      apply nth_f0.
+  Qed.
+
+  Lemma L18 (c : cand) :
+    (exists d, M (length cand_all) c d < M (length cand_all) d c) ->
+    (existsT (k : Z) (d : Evote.cand),
+     ((PathT k d c) *
+      (existsT (f : (cand * cand) -> bool),
+       f (c, d) = true /\ coclosed k f))%type).
+  Proof.
+    intros.
+    pose proof
+         (constructive_indefinite_ground_description
+            _ f g L17 (constructive_prop c) (constructive_deci_cand c) H).
+    destruct X as [d X]. unfold constructive_prop in X.
+    remember (M (length cand_all) c d) as s.
+    assert (s + 1 <= M (length cand_all) d c) by omega.
+    exists (s + 1), d. split. apply Z.le_ge in H0.
+    apply L10 in H0. auto.
+    exists (fun x => M (length cand_all) (fst x) (snd x) <? s + 1).  
+    simpl in *. split. apply Z.ltb_lt. omega.
+    
+    unfold coclosed. intros x; destruct x as (x, z); simpl in *.
+    intros. apply Z.ltb_lt in H1. unfold W.
+    apply andb_true_iff. split. unfold el. simpl. apply Z.ltb_lt.
+    clear H. clear Heqs. clear X. clear H0.
+    induction (length cand_all). simpl in *. omega.
+    simpl in H1. apply Z.max_lub_lt_iff in H1. destruct H1. apply IHn. auto.
+
+    unfold mp. apply forallb_forall. intros y Hy. unfold mpf.
+    apply orb_true_iff. unfold el. simpl.
+    assert (edge x y < s + 1 \/ edge x y >= s + 1) by omega.
+    destruct H2. left. apply Z.ltb_lt. auto.
+    right. apply Z.ltb_lt.
+    assert (M (length cand_all) y z < s + 1 \/ M (length cand_all) y z >= s + 1) by omega.
+    destruct H3. auto.
+    apply L1 in H3.  pose proof (Evote.cons _ _ _ _ H2 H3).
+    apply L2 in H4. destruct H4 as [n H4].
+    pose proof (L4 x z n). omega.
+  Defined.
+
+  
+  Lemma wins_loses_M : forall c, (wins_type c) + (loses_type c).
+  Proof.
+    intros c. pose proof (L7 c). destruct H. left.
+    unfold wins_type. apply L15. apply L14. intros d.
+    pose proof (proj1 (forallb_forall _ cand_all) e d (cand_fin d)).
+    simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H.
+    remember (M (length cand_all) d c) as s. apply L1 in H.
+    exists s. split. assumption.
+    intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
+    apply Z.ge_le in H0. pose proof (L4 d c n). omega.
+
+    right. apply L18. unfold c_wins in e. apply L11 in e.
+    destruct e as [d [H1 H2]]. apply Z.leb_gt in H2. exists d. auto.
+  Defined.
+
+End Evote.
+
+
