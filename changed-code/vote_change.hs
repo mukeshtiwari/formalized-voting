@@ -665,8 +665,7 @@ charCand 'D' = D
 charCand 'E' = E
 
 balfun :: [(Cand, Nat)] -> Ballot
-balfun xs = f where 
-  [(A, b1), (B, b2), (C, b3), (D, b4), (E, b5)] = xs 
+balfun ((A, b1) : (B, b2) : (C, b3) : (D, b4) : (E, b5) : _) = f where
   f :: Cand -> Nat
   f A = b1
   f B = b2
