@@ -2,7 +2,9 @@
 module Vote_change where
 
 import qualified Prelude
-
+import System.IO
+import qualified Data.Map as M 
+import qualified Data.List as L
 __ :: any
 __ = Prelude.error "Logical or arity value used"
 
@@ -28,9 +30,11 @@ andb b1 b2 =
    True -> b2;
    False -> False}
 
+
 data Nat =
    O
  | S Nat
+ deriving (Prelude.Show, Prelude.Eq, Prelude.Ord)
 
 nat_rect :: a1 -> (Nat -> a1 -> a1) -> Nat -> a1
 nat_rect f1 f2 n =
@@ -438,10 +442,19 @@ l9 l h1 s f1 =
         case iHl0 of {
          ExistT x0 _ -> ExistT x0 __}}}) l __ h1 s f1 __
 
-data Cand = Alice | Bob | Charlie deriving (Prelude.Eq, Prelude.Show)	 
+
+data Cand = A | B | C | D | E deriving (Prelude.Eq, Prelude.Ord, Prelude.Show)
 
 cand_all :: List Cand
-cand_all = Cons Alice (Cons Bob (Cons Charlie Nil))
+cand_all = Cons A (Cons B (Cons C (Cons D (Cons E Nil))))
+
+
+{-
+data Cand = A | B | C deriving (Prelude.Eq, Prelude.Ord, Prelude.Show)
+
+cand_all :: List Cand
+cand_all = Cons A (Cons B (Cons C Nil))
+-}
 
 data PathT =
    UnitT Cand Cand
@@ -588,9 +601,11 @@ instance Prelude.Show Count where
   show (Ax _ _) = "x"
   show (Cvalid _ _ _ _ _ _) = "Valid"
   show (Cinvalid _ _ _ _ _) = "Invalid"
-  show (Fin _ _ _ f) =  "Alice: " Prelude.++ (Prelude.show (f Alice)) Prelude.++
-                        "Bob: " Prelude.++ (Prelude.show (f Bob)) Prelude.++
-                        "Charlie: " Prelude.++ (Prelude.show (f Charlie))
+  show (Fin _ _ _ f) =  "A: " Prelude.++ (Prelude.show (f A)) Prelude.++
+                        "B: " Prelude.++ (Prelude.show (f B)) Prelude.++
+                        "C: " Prelude.++ (Prelude.show (f C)) Prelude.++
+                        "D: " Prelude.++ (Prelude.show (f D)) Prelude.++
+                        "E: " Prelude.++ (Prelude.show (f E)) 
 
 
 incdect :: Ballot -> (Cand -> Cand -> Z) -> Cand -> Cand -> Z
@@ -632,42 +647,40 @@ coqNat n
   | n Prelude.== 0 = O
   | Prelude.otherwise = S (coqNat (n Prelude.- 1))
 
-b1 :: Ballot
-b1 Alice = coqNat 1 -- S O
-b1 Bob = coqNat 2 --S (S O)
-b1 Charlie = coqNat 3 --S (S (S O))
-
-b2 :: Ballot
-b2 Alice = coqNat 3 --(S (S (S O)))
-b2 Bob = coqNat 2 -- (S (S O))
-b2 Charlie = coqNat 1 --(S O)
-
-b3  :: Ballot
-b3 Alice = coqNat 2 -- (S (S O))
-b3 Bob = coqNat 1 --(S O)
-b3 Charlie = coqNat 3 --(S (S (S O)))
-
-b4 :: Ballot
-b4 Alice = coqNat 1 --(S O)
-b4 Bob = coqNat 3 --(S (S (S O)))
-b4 Charlie = coqNat 2 --(S (S O))
-
 
 candEq :: Cand -> Cand -> Sumbool
 candEq c d 
   | c Prelude.== d = Left
   | Prelude.otherwise = Right
 
-bs :: List Ballot
-bs = haskCoq [b1, b2, b3, b4]
- 
-test = final_count candEq bs
 
 {- Wikipedia example -}
 
 
+charCand :: Prelude.Char -> Cand
+charCand 'A' = A
+charCand 'B' = B
+charCand 'C' = C
+charCand 'D' = D
+charCand 'E' = E
 
+balfun :: [(Cand, Nat)] -> Ballot
+balfun xs = f where 
+  [(A, b1), (B, b2), (C, b3), (D, b4), (E, b5)] = xs 
+  f :: Cand -> Nat
+  f A = b1
+  f B = b2
+  f C = b3
+  f D = b4
+  f E = b5
 
+main :: IO ()
+main = do 
+  r <- readFile "votes.txt"
+  let votes = final_count candEq Prelude.. haskCoq Prelude.. Prelude.map balfun Prelude..
+              Prelude.map (Prelude.map (\(y, z) -> (charCand y, coqNat z))) 
+              Prelude.. Prelude.map L.sort Prelude.. Prelude.map (\x ->  Prelude.zip x [1..]) Prelude.. Prelude.lines Prelude.$ r
+  Prelude.print votes
 
 
 
