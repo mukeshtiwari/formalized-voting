@@ -627,43 +627,30 @@ haskCoq :: [a] -> List a
 haskCoq [] = Nil
 haskCoq (h : hs) = Cons h (haskCoq hs)
 
+coqNat :: Prelude.Int -> Nat
+coqNat n
+  | n Prelude.== 0 = O
+  | Prelude.otherwise = S (coqNat (n Prelude.- 1))
 
 b1 :: Ballot
-b1 Alice = S O
-b1 Bob = S (S O)
-b1 Charlie = S (S (S O))
-
-{-
-b2 :: Ballot
-b2 Alice = S O
-b2 Bob = S (S O)
-b2 Charlie = S (S (S O))
-
-b3 :: Ballot
-b3 Alice = S O
-b3 Bob = S (S O)
-b3 Charlie = S (S (S O))
-
-b4 :: Ballot
-b4 Alice = S O
-b4 Bob = S (S O)
-b4 Charlie = S (S (S O))
--}
+b1 Alice = coqNat 1 -- S O
+b1 Bob = coqNat 2 --S (S O)
+b1 Charlie = coqNat 3 --S (S (S O))
 
 b2 :: Ballot
-b2 Alice = (S (S (S O)))
-b2 Bob = (S (S O))
-b2 Charlie = (S O)
+b2 Alice = coqNat 3 --(S (S (S O)))
+b2 Bob = coqNat 2 -- (S (S O))
+b2 Charlie = coqNat 1 --(S O)
 
 b3  :: Ballot
-b3 Alice = (S (S O))
-b3 Bob = (S O)
-b3 Charlie = (S (S (S O)))
+b3 Alice = coqNat 2 -- (S (S O))
+b3 Bob = coqNat 1 --(S O)
+b3 Charlie = coqNat 3 --(S (S (S O)))
 
 b4 :: Ballot
-b4 Alice = (S O)
-b4 Bob = (S (S (S O)))
-b4 Charlie = (S (S O))
+b4 Alice = coqNat 1 --(S O)
+b4 Bob = coqNat 3 --(S (S (S O)))
+b4 Charlie = coqNat 2 --(S (S O))
 
 
 candEq :: Cand -> Cand -> Sumbool
@@ -675,3 +662,12 @@ bs :: List Ballot
 bs = haskCoq [b1, b2, b3, b4]
  
 test = final_count candEq bs
+
+{- Wikipedia example -}
+
+
+
+
+
+
+
