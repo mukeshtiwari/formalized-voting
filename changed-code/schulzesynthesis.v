@@ -137,6 +137,36 @@ Section Evote.
       destruct Hmp; [intuition | omega].
   Qed.
 
+  (* elg is boolean function returns true if the edge between two candidates of >= k. *)
+  Definition elg (k : Z) (p : (cand * cand)) : bool :=
+    Zge_bool (edge (fst p) (snd p)) k.
+
+  (* mp k (a, c) f (for midpoint) returns true if there's a midpoint b st.
+     the edge between a and b is >= k /\ the function f (b, c) = true *)
+  Definition mpg (k : Z) (p : (cand * cand)) (f : (cand * cand) -> bool) :=
+    let a := fst p in
+    let c := snd p in
+    existsb (fun b => andb (elg k (a, b)) (f (b, c))) cand_all.
+
+  
+  (* Now adding Matrix code and removing fixpoint code *)
+
+  Fixpoint maxlist (l : list Z) : Z :=
+    match l with
+    | [] => 0%Z
+    | [h] => h
+    | h :: t => Z.max h (maxlist t)
+    end.
   
   
+  (* the function M n maps a pair of candidates c, d to the strength of the strongest path of 
+     length at most (n + 1) *)
+  Fixpoint M (n : nat) (c d : cand) : Z :=
+    match n with
+    | 0%nat => edge c d 
+    | S n' =>
+      Z.max (M n' c d)
+            (maxlist (map (fun x : cand => Z.min (edge c x) (M n' x d)) cand_all))
+    end.
+
   
