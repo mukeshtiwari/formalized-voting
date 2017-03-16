@@ -120,4 +120,23 @@ Section Evote.
     + left; auto.
   Qed.
 
+  Lemma coclosed_path : forall k f, coclosed k f -> forall s x y,
+        Path s x y -> f (x, y) = true -> s < k.
+  Proof.
+    intros k f Hcc x s y p.
+    induction p.
+    (* unit path *)
+    + intros Hin; specialize (Hcc (c, d) Hin); apply andb_true_iff in Hcc;
+        destruct Hcc as [Hccl Hccr]; apply Zlt_is_lt_bool in Hccl; simpl in Hccl;  omega.
+    (* non unit path *)
+    + intros Hin; specialize (Hcc (c, e) Hin); apply andb_true_iff in Hcc;
+        destruct Hcc as [Hccl Hccr]; unfold el in Hccl; simpl in Hccl.
+      assert (Hmp : forall m, f (m, (snd (c, e))) = true \/ edge (fst (c, e)) m < k)
+        by (apply mp_log; auto); simpl in Hmp.
+      specialize (Hmp d).
+      destruct Hmp; [intuition | omega].
+  Qed.
+
+  
+  
   
