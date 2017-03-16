@@ -90,5 +90,34 @@ Section Evote.
      (existsT (f : (cand * cand) -> bool),
       f (d, c) = true /\ coclosed (k + 1) f))%type.
 
+  (* losing condition in Schuze counting *)
+  Definition loses_prop (c : cand) :=
+    exists k d, Path k d c /\ (forall l, Path l c d -> l < k).
   
+  Definition loses_type (c : cand) :=
+    existsT (k : Z) (d : cand),
+    ((PathT k d c) *
+     (existsT (f : (cand * cand) -> bool),
+      f (c, d) = true /\ coclosed k f))%type.
+
+  (* type-level paths allow to construct evidence for the existence of paths *)
+  Lemma path_equivalence : forall c d k , PathT k c d -> Path k c d.
+  Proof.
+    intros c d k H.
+    induction H; [constructor 1 | constructor 2 with d]; auto.
+  Qed.
+
+  
+  Lemma mp_log : forall k p f,
+      mp k p f = true -> forall b, f (b, snd p) = true \/ edge (fst p) b < k.
+  Proof.
+    intros k p f H b.
+    assert (Hin : In b cand_all) by  apply cand_fin.
+    assert (Hp : In b cand_all -> (mpf k p f) b = true) by (apply forallb_forall; auto).
+    specialize (Hp Hin); apply orb_true_iff in Hp; destruct Hp as [Hpl | Hpr];
+      destruct p as (a, c); simpl in *.
+    + right; apply Zlt_is_lt_bool; auto.
+    + left; auto.
+  Qed.
+
   
