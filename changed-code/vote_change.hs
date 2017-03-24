@@ -20,9 +20,11 @@ eq_rec :: a1 -> a2 -> a1 -> a2
 eq_rec x f1 y =
   eq_rect x f1 y
 
+
 data Bool =
    True
  | False
+deriving instance (Prelude.Show Bool)
 
 andb :: Bool -> Bool -> Bool
 andb b1 b2 =
@@ -54,8 +56,10 @@ instance Prelude.Show (Sum a b) where
   show (Inl _) = "Left"
   show (Inr _) = "Right"
 
+
 data Prod a b =
    Pair a b
+deriving instance (Prelude.Show a, Prelude.Show b) => Prelude.Show (Prod a b)
 
 fst :: (Prod a1 a2) -> a1
 fst p =
@@ -70,6 +74,8 @@ snd p =
 data List a =
    Nil
  | Cons a (List a)
+deriving instance (Prelude.Show a) => Prelude.Show (List a)
+
 
 list_rect :: a2 -> (a1 -> (List a1) -> a2 -> a2) -> (List a1) -> a2
 list_rect f1 f2 l =
@@ -91,6 +97,7 @@ data Comparison =
    Eq
  | Lt
  | Gt
+deriving instance (Prelude.Show Comparison)
 
 compOpp :: Comparison -> Comparison
 compOpp r =
@@ -105,13 +112,16 @@ type Sig a =
   
 data SigT a p =
    ExistT a p
+--deriving instance (Prelude.Show a, Prelude.Show p) => Prelude.Show (SigT a p)
 
 instance (Prelude.Show a) => Prelude.Show (SigT a p) where
   show (ExistT a p) = Prelude.show a
 
+
 data Sumbool =
    Left
  | Right
+deriving instance (Prelude.Show Sumbool)
 
 sumbool_rect :: (() -> a1) -> (() -> a1) -> Sumbool -> a1
 sumbool_rect f1 f2 s =
@@ -126,16 +136,19 @@ sumbool_rec =
 data Sumor a =
    Inleft a
  | Inright
+deriving instance (Prelude.Show a) => Prelude.Show (Sumor a)
 
 data Positive =
    XI Positive
  | XO Positive
  | XH
+deriving instance (Prelude.Show Positive)
 
 data Z =
    Z0
  | Zpos Positive
  | Zneg Positive
+deriving instance (Prelude.Show Z)
 
 succ :: Positive -> Positive
 succ x =
@@ -448,17 +461,10 @@ data Cand = A | B | C | D | E deriving (Prelude.Eq, Prelude.Ord, Prelude.Show)
 cand_all :: List Cand
 cand_all = Cons A (Cons B (Cons C (Cons D (Cons E Nil))))
 
-
-{-
-data Cand = A | B | C deriving (Prelude.Eq, Prelude.Ord, Prelude.Show)
-
-cand_all :: List Cand
-cand_all = Cons A (Cons B (Cons C Nil))
--}
-
 data PathT =
    UnitT Cand Cand
  | ConsT Cand Cand Cand PathT
+deriving instance (Prelude.Show PathT)
 
 type Wins_type = Cand -> SigT Z (Prod PathT (SigT ((Prod Cand Cand) -> Bool) ()))
 
@@ -636,6 +642,7 @@ final_count dec_cand bs =
    ExistT bs' s ->
     case s of {
      ExistT m0 x0 -> let {x1 = Fin m0 bs' x0 (wins_loses_M m0 dec_cand)} in ExistT x1 __}}
+
 
 
 haskCoq :: [a] -> List a
