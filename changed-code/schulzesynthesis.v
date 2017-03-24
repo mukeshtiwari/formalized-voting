@@ -693,6 +693,21 @@ Section Evote.
     apply L2 in H3. destruct H3 as [n H3].
     pose proof (L4 x z n). omega.
   Defined.
+
+  Lemma wins_prop_type : forall c, wins_prop c -> wins_type c.
+  Proof.
+    intros c H. unfold wins_prop, wins_type in *.
+    apply L15. apply L14. auto.
+  Qed.
+
+  Lemma wins_type_prop : forall c, wins_type c -> wins_prop c.
+  Proof.
+    intros c H. unfold wins_prop, wins_type in *. intros d.
+    destruct (H d) as [k [H1 [f [H3 H4]]]].
+    exists k. split. apply path_equivalence. auto.
+    intros l H5. pose proof (coclosed_path _ _ H4).
+    pose proof (H0 l _ _ H5 H3). omega.
+  Qed.
   (* end of winning criteria *)
 
   (* losing using M function *)
@@ -843,6 +858,20 @@ Section Evote.
     pose proof (L4 x z n). omega.
   Defined.
 
+  Lemma loses_prop_type : forall c, loses_prop c -> loses_type c.
+  Proof.
+    intros c H. unfold loses_prop, loses_type in *. apply L18.
+    apply L16. auto.
+  Qed.
+
+  Lemma loses_type_prop : forall c, loses_type c -> loses_prop c.
+  Proof.
+    intros c H. unfold loses_prop, loses_type in *.
+    destruct H as [k [d [Hp [f [Hf Hc]]]]].
+    exists k, d. split. apply path_equivalence. auto.
+    intros l H. pose proof (coclosed_path k f Hc).
+    pose proof (H0 l _ _ H Hf). omega.
+  Qed.
   
   Lemma wins_loses_M : forall c, (wins_type c) + (loses_type c).
   Proof.
