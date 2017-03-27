@@ -12,6 +12,7 @@ deriving instance (P.Eq Cand)
 deriving instance (P.Ord Cand)
 deriving instance (P.Show Cand)
 deriving instance (P.Show Bool)
+deriving instance (P.Eq Bool)
 deriving instance (P.Show Nat)
 deriving instance (P.Eq Nat)
 deriving instance (P.Ord Nat)
@@ -23,7 +24,12 @@ deriving instance (P.Show Sumbool)
 deriving instance (P.Show a) => P.Show (Sumor a)
 deriving instance (P.Show Positive)
 deriving instance (P.Show Z)
-deriving instance (P.Show PathT)
+
+instance P.Show PathT where
+  show (UnitT x y) = P.show x P.++ " --> " P.++ P.show y
+  show (ConsT x _ _ p) = P.show x P.++ " --> " P.++ P.show p
+
+-- deriving instance (P.Show PathT)
 instance P.Show (SigT Count ()) where
   show (ExistT v _) = P.show v
 
@@ -33,19 +39,25 @@ show_winner g x [] = ""
 show_winner g x (y : ys) =
   case (g y) of 
    (ExistT u (Pair v (ExistT f _))) -> 
-    "Cand = " P.++ P.show y P.++ "\n" P.++ 
-    "ExistT K = " P.++ " " P.++ P.show u P.++ "\n" P.++ 
+    "Candidate = " P.++ P.show y P.++ "\n" P.++ 
+    "Strength = " P.++ " " P.++ P.show u P.++ "\n" P.++ 
     "Path from " P.++ P.show x P.++ " to " P.++ P.show y P.++ " = " P.++ P.show v P.++ "\n" P.++ 
-    "Exists function f [Pair " P.++ P.show y P.++ " " P.++ P.show x P.++ "] = " P.++ P.show (f (Pair y x)) P.++ "\n------------\n" P.++ show_winner g x ys
+    {- "Exists function f [Pair " P.++ P.show y P.++ " " P.++ P.show x P.++ "] = " P.++ P.show (f (Pair y x)) P.++ "\n" P.++ -}
+    "coclosed set = " P.++ P.show (P.filter (\x -> f x P.== True) [Pair a b | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b]) P.++ 
+    "\n------------\n" P.++ show_winner g x ys
+
 
 show_loser :: Loses_type -> Cand -> P.String
 show_loser g x = 
   case g of 
    (ExistT u (ExistT c (Pair p (ExistT f _)))) -> 
-    "Exists K = " P.++ P.show u P.++ "\n" P.++ 
-    "Exists Cand = " P.++ P.show c P.++ "\n" P.++ 
+    "Strength = " P.++ P.show u P.++ "\n" P.++ 
+    "Candidate that beats " P.++ P.show x P.++ " = " P.++ P.show c P.++ "\n" P.++ 
     "Path from " P.++ P.show c P.++ " to " P.++ P.show x P.++ " = " P.++ P.show p P.++ "\n" P.++ 
-    "Exists function f [Pair " P.++ P.show x P.++ " " P.++ P.show c P.++ "] = " P.++ P.show (f (Pair x  c)) P.++ "\n-----------" 
+    {- "Exists function f [Pair " P.++ P.show x P.++ " " P.++ P.show c P.++ "] = " P.++ P.show (f (Pair x  c)) P.++ "\n" P.++ -}
+    "coclosed set = " P.++ P.show (P.filter (\x -> f x P.== True) [Pair a b | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b]) P.++ 
+    "\n-----------" 
+
 
 show_cand :: (Cand -> Sum Wins_type Loses_type) -> Cand -> P.String
 show_cand f x =
