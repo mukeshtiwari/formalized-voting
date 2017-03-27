@@ -6,7 +6,7 @@ import Lib
 
 c2hl :: List a -> [a]
 c2hl Nil = []
-c2hl (Cons x xs) = x:(c2hl xs)
+c2hl (Cons x xs) = x : (c2hl xs)
 
 deriving instance (P.Eq Cand)
 deriving instance (P.Ord Cand)
@@ -15,58 +15,46 @@ deriving instance (P.Show Bool)
 deriving instance (P.Show Nat)
 deriving instance (P.Eq Nat)
 deriving instance (P.Ord Nat)
-
-{- for the moment assume the instance -}
-instance (P.Show a, P.Show b) => P.Show (Sum a b) where
-  show (Inl f) = "Winner " P.++ P.show f P.++ "\n"
-  show (Inr f) = "Loser " P.++ P.show f  P.++ "\n"
-
+deriving instance (P.Show a, P.Show b) => P.Show (Sum a b) 
 deriving instance (P.Show a, P.Show b) => P.Show (Prod a b)
 deriving instance (P.Show a) => P.Show (List a)
 deriving instance (P.Show Comparison)
-
-instance (P.Show a) => P.Show (Cand -> a) where
-  show f = show_l (c2hl cand_all) where
-    show_l [] = ""
-    show_l [c] = (P.show c) P.++ "[" P.++ (P.show (f c)) P.++ "]"
-    show_l (c:cs) = (P.show c) P.++ "[" P.++ (P.show (f c)) P.++ "] " P.++ (show_l cs) 
-
-
-instance (P.Show a) => P.Show ((Prod Cand Cand) -> a) where
-  show f = show_l [(Pair a b) | a <- (c2hl cand_all), b <- (c2hl cand_all)] where
-    show_l [] = ""
-    show_l [c] = (P.show c) P.++ "[" P.++ (P.show (f c)) P.++ "]"
-    show_l (c:cs) = (P.show c) P.++ "[" P.++ (P.show (f c)) P.++ "] " P.++ (show_l cs)
-
-{-
-instance (P.Show a, P.Show p) => P.Show (SigT a p) where
-  show (ExistT a p) = P.show a P.++ " " P.++ P.show p 
---}
-
-instance (P.Show a) => P.Show (SigT Z (Prod PathT (SigT a ()))) where
-  show (ExistT v (Pair x (ExistT y _))) = P.show v P.++ "  " P.++ P.show x P.++ " " P.++ P.show y
-
-instance (P.Show a) => P.Show (SigT Z (SigT Cand (Prod PathT (SigT a ())))) where
-  show (ExistT v (ExistT c (Pair x (ExistT y _)))) = P.show v P.++ " " P.++ P.show c P.++ " " P.++ P.show x P.++ " " P.++ P.show y
-
-instance P.Show (SigT Count ()) where
-  show (ExistT v _) = P.show v
-
 deriving instance (P.Show Sumbool)
 deriving instance (P.Show a) => P.Show (Sumor a)
 deriving instance (P.Show Positive)
 deriving instance (P.Show Z)
 deriving instance (P.Show PathT)
+instance P.Show (SigT Count ()) where
+  show (ExistT v _) = P.show v
 
-{- assume it for the moment -}
-instance P.Show Count where 
+
+show_winner :: Wins_type -> Cand -> [Cand] -> P.String
+show_winner g x [] = ""
+show_winner g x (y : ys) =
+  case (g y) of 
+   (ExistT u (Pair v (ExistT f _))) -> 
+    "Cand = " P.++ P.show y P.++ "\n" P.++ 
+    "ExistT K = " P.++ " " P.++ P.show u P.++ "\n" P.++ 
+    "Path from " P.++ P.show x P.++ " to " P.++ P.show y P.++ " = " P.++ P.show v P.++ "\n" P.++ 
+    "Exists function f [Pair " P.++ P.show y P.++ " " P.++ P.show x P.++ "] = " P.++ P.show (f (Pair y x)) P.++ "\n------------\n" P.++ show_winner g x ys
+
+show_loser :: Loses_type -> Cand -> P.String
+show_loser g x = 
+  case g of 
+   (ExistT u (ExistT c (Pair p (ExistT f _)))) -> 
+    "Exists K = " P.++ P.show u P.++ "\n" P.++ 
+    "Exists Cand = " P.++ P.show c P.++ "\n" P.++ 
+    "Path from " P.++ P.show c P.++ " to " P.++ P.show x P.++ " = " P.++ P.show p P.++ "\n" P.++ 
+    "Exists function f [Pair " P.++ P.show x P.++ " " P.++ P.show c P.++ "] = " P.++ P.show (f (Pair x  c)) P.++ "\n-----------" 
+
+show_cand :: (Cand -> Sum Wins_type Loses_type) -> Cand -> P.String
+show_cand f x =
+   case (f x) of
+    Inl g -> "Winner " P.++ P.show x P.++ "\n-----------\n" P.++ show_winner g x (P.filter (\y -> y P./= x) (c2hl cand_all)) P.++ "\n"
+    Inr h -> "Loser " P.++ P.show x P.++ "\n-----------\n" P.++ show_loser h x P.++ "\n"
+
+instance P.Show Count where
   show (Ax _ _) = "x"
   show (Cvalid _ _ _ _ _ _) = "Valid"
   show (Cinvalid _ _ _ _ _) = "Invalid"
-  show (Fin _ _ _ f) =  "A: " P.++ (P.show (f A)) P.++
-                        "B: " P.++ (P.show (f B)) P.++
-                        "C: " P.++ (P.show (f C)) P.++
-                        "D: " P.++ (P.show (f D)) P.++
-                        "E: " P.++ (P.show (f E)) 
-
-
+  show (Fin _ _ _ f) =  P.unlines P.$ P.map (show_cand f) (c2hl cand_all)
