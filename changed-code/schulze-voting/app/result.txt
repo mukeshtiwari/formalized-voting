@@ -1,0 +1,1056 @@
+Starting computation for file votes_wiki.txt
+
+
+
+Loser A
+-----------
+Strength = Zpos (XO (XO XH))
+Candidate that beats A = E
+Path from E to A = E --> B --> A
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+-----------
+
+Loser B
+-----------
+Strength = Zpos (XO (XI XH))
+Candidate that beats B = A
+Path from A to B = A --> D --> C --> B
+coclosed set = [Pair A E,Pair B A,Pair B E,Pair C A,Pair C E,Pair D A,Pair D E,Pair E A]
+-----------
+
+Loser C
+-----------
+Strength = Zpos (XO (XI XH))
+Candidate that beats C = A
+Path from A to C = A --> D --> C
+coclosed set = [Pair A E,Pair B A,Pair B E,Pair C A,Pair C E,Pair D A,Pair D E,Pair E A]
+-----------
+
+Loser D
+-----------
+Strength = Zpos (XO (XI XH))
+Candidate that beats D = A
+Path from A to D = A --> D
+coclosed set = [Pair A E,Pair B A,Pair B E,Pair C A,Pair C E,Pair D A,Pair D E,Pair E A]
+-----------
+
+Winner E
+-----------
+Candidate = A
+Strength =  Zpos (XI XH)
+Path from E to A = E --> B --> A
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = B
+Strength =  Zpos (XI XH)
+Path from E to B = E --> D --> C --> B
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = C
+Strength =  Zpos (XI XH)
+Path from E to C = E --> D --> C
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = D
+Strength =  Zpos (XI XH)
+Path from E to D = E --> D
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+
+
+
+Time consume for file votes_wiki.txt = 23.740336s
+
+
+
+
+Starting computation for file votes_100.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XI XH))
+Candidate that beats A = C
+Path from C to A = C --> A
+coclosed set = [Pair A C,Pair A D,Pair B C,Pair B D,Pair C D,Pair E C,Pair E D]
+-----------
+
+Loser B
+-----------
+Strength = Zneg XH
+Candidate that beats B = A
+Path from A to B = A --> B
+coclosed set = [Pair A C,Pair A D,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E,Pair C D,Pair E C,Pair E D]
+-----------
+
+Loser C
+-----------
+Strength = Zneg (XI (XI (XO XH)))
+Candidate that beats C = D
+Path from D to C = D --> C
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+-----------
+
+Winner D
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO (XI XH)))
+Path from D to A = D --> A
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+------------
+Candidate = B
+Strength =  Zneg (XO (XO (XI XH)))
+Path from D to B = D --> B
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+------------
+Candidate = C
+Strength =  Zneg (XO (XO (XI XH)))
+Path from D to C = D --> C
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+------------
+Candidate = E
+Strength =  Zneg (XO (XO (XI XH)))
+Path from D to E = D --> E
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+------------
+
+
+Loser E
+-----------
+Strength = Zneg (XI (XI XH))
+Candidate that beats E = C
+Path from C to E = C --> E
+coclosed set = [Pair A C,Pair A D,Pair B C,Pair B D,Pair C D,Pair E C,Pair E D]
+-----------
+
+
+Time consume for file votes_100.txt = 57.256875s
+
+
+
+
+Starting computation for file votes_200.txt
+
+
+
+Winner A
+-----------
+Candidate = B
+Strength =  Zpos (XO (XO XH))
+Path from A to B = A --> C --> D --> B
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair B E,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = C
+Strength =  Zpos (XO (XI XH))
+Path from A to C = A --> C
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair B E,Pair C A,Pair D A,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = D
+Strength =  Zpos (XO (XI XH))
+Path from A to D = A --> C --> D
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair B E,Pair C A,Pair D A,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = E
+Strength =  Z0
+Path from A to E = A --> E
+coclosed set = [Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+
+
+Loser B
+-----------
+Strength = Zpos (XI (XO XH))
+Candidate that beats B = A
+Path from A to B = A --> C --> D --> B
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair B E,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser C
+-----------
+Strength = Zpos (XI (XI XH))
+Candidate that beats C = A
+Path from A to C = A --> C
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair B E,Pair C A,Pair D A,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser D
+-----------
+Strength = Zpos (XI (XI XH))
+Candidate that beats D = A
+Path from A to D = A --> C --> D
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair B E,Pair C A,Pair D A,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser E
+-----------
+Strength = Zpos XH
+Candidate that beats E = A
+Path from A to E = A --> E
+coclosed set = [Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+
+Time consume for file votes_200.txt = 99.821292s
+
+
+
+
+Starting computation for file votes_300.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XI (XO XH)))
+Candidate that beats A = B
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair A E,Pair B E,Pair C B,Pair C E,Pair D B,Pair D E]
+-----------
+
+Loser B
+-----------
+Strength = Zneg (XI (XI (XO (XO XH))))
+Candidate that beats B = E
+Path from E to B = E --> B
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+-----------
+
+Loser C
+-----------
+Strength = Zneg (XI (XI (XO XH)))
+Candidate that beats C = B
+Path from B to C = B --> C
+coclosed set = [Pair A B,Pair A E,Pair B E,Pair C B,Pair C E,Pair D B,Pair D E]
+-----------
+
+Loser D
+-----------
+Strength = Zneg (XI (XI (XO XH)))
+Candidate that beats D = B
+Path from B to D = B --> D
+coclosed set = [Pair A B,Pair A E,Pair B E,Pair C B,Pair C E,Pair D B,Pair D E]
+-----------
+
+Winner E
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO (XI (XO XH))))
+Path from E to A = E --> A
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = B
+Strength =  Zneg (XO (XO (XI (XO XH))))
+Path from E to B = E --> B
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = C
+Strength =  Zneg (XO (XO (XI (XO XH))))
+Path from E to C = E --> C
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = D
+Strength =  Zneg (XO (XO (XI (XO XH))))
+Path from E to D = E --> D
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+
+
+
+Time consume for file votes_300.txt = 176.322658s
+
+
+
+
+Starting computation for file votes_400.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XO XH))
+Candidate that beats A = D
+Path from D to A = D --> A
+coclosed set = [Pair A D,Pair B A,Pair B C,Pair B D,Pair C D,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser B
+-----------
+Strength = Zneg (XI (XI (XO XH)))
+Candidate that beats B = A
+Path from A to B = A --> B
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser C
+-----------
+Strength = Zneg XH
+Candidate that beats C = A
+Path from A to C = A --> C
+coclosed set = [Pair A D,Pair B A,Pair B C,Pair B D,Pair C A,Pair C D,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Winner D
+-----------
+Candidate = A
+Strength =  Zneg (XO (XI XH))
+Path from D to A = D --> A
+coclosed set = [Pair A D,Pair B A,Pair B C,Pair B D,Pair C D,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = B
+Strength =  Zneg (XO (XO (XI XH)))
+Path from D to B = D --> B
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = C
+Strength =  Zneg (XO (XI XH))
+Path from D to C = D --> C
+coclosed set = [Pair A D,Pair B A,Pair B C,Pair B D,Pair C D,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = E
+Strength =  Zneg (XO (XO (XI XH)))
+Path from D to E = D --> C --> E
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+
+
+Loser E
+-----------
+Strength = Zneg (XI (XI (XO XH)))
+Candidate that beats E = A
+Path from A to E = A --> B --> E
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+
+Time consume for file votes_400.txt = 217.820714s
+
+
+
+
+Starting computation for file votes_500.txt
+
+
+
+Winner A
+-----------
+Candidate = B
+Strength =  Zneg (XO (XI XH))
+Path from A to B = A --> B
+coclosed set = [Pair B A,Pair C A,Pair D A,Pair E A]
+------------
+Candidate = C
+Strength =  Zneg (XO (XI XH))
+Path from A to C = A --> C
+coclosed set = [Pair B A,Pair C A,Pair D A,Pair E A]
+------------
+Candidate = D
+Strength =  Zneg (XO (XI XH))
+Path from A to D = A --> D
+coclosed set = [Pair B A,Pair C A,Pair D A,Pair E A]
+------------
+Candidate = E
+Strength =  Zneg (XO (XI XH))
+Path from A to E = A --> E
+coclosed set = [Pair B A,Pair C A,Pair D A,Pair E A]
+------------
+
+
+Loser B
+-----------
+Strength = Zneg (XI (XO XH))
+Candidate that beats B = A
+Path from A to B = A --> B
+coclosed set = [Pair B A,Pair C A,Pair D A,Pair E A]
+-----------
+
+Loser C
+-----------
+Strength = Zneg (XI (XO XH))
+Candidate that beats C = A
+Path from A to C = A --> C
+coclosed set = [Pair B A,Pair C A,Pair D A,Pair E A]
+-----------
+
+Loser D
+-----------
+Strength = Zneg (XI (XO XH))
+Candidate that beats D = A
+Path from A to D = A --> D
+coclosed set = [Pair B A,Pair C A,Pair D A,Pair E A]
+-----------
+
+Loser E
+-----------
+Strength = Zneg (XI (XO XH))
+Candidate that beats E = A
+Path from A to E = A --> E
+coclosed set = [Pair B A,Pair C A,Pair D A,Pair E A]
+-----------
+
+
+Time consume for file votes_500.txt = 258.756295s
+
+
+
+
+Starting computation for file votes_1000.txt
+
+
+
+Loser A
+-----------
+Strength = Zpos (XI (XI (XI XH)))
+Candidate that beats A = B
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E,Pair E A,Pair E B]
+-----------
+
+Winner B
+-----------
+Candidate = A
+Strength =  Zpos (XO (XI (XI XH)))
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E,Pair E A,Pair E B]
+------------
+Candidate = C
+Strength =  Zpos (XO (XI (XI XH)))
+Path from B to C = B --> E --> C
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E,Pair E A,Pair E B]
+------------
+Candidate = D
+Strength =  Zpos (XO (XI (XO XH)))
+Path from B to D = B --> E --> C --> D
+coclosed set = [Pair D A,Pair D B,Pair D C,Pair D E]
+------------
+Candidate = E
+Strength =  Zpos (XO (XI (XI XH)))
+Path from B to E = B --> E
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E,Pair E A,Pair E B]
+------------
+
+
+Loser C
+-----------
+Strength = Zpos (XI (XI (XI XH)))
+Candidate that beats C = A
+Path from A to C = A --> E --> C
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E,Pair E A,Pair E B]
+-----------
+
+Loser D
+-----------
+Strength = Zpos (XI (XI (XO XH)))
+Candidate that beats D = A
+Path from A to D = A --> E --> C --> D
+coclosed set = [Pair D A,Pair D B,Pair D C,Pair D E]
+-----------
+
+Loser E
+-----------
+Strength = Zpos (XI (XI (XI XH)))
+Candidate that beats E = A
+Path from A to E = A --> E
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E,Pair E A,Pair E B]
+-----------
+
+
+Time consume for file votes_1000.txt = 527.103788s
+
+
+
+
+Starting computation for file votes_2000.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI XH)
+Candidate that beats A = B
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E,Pair E A,Pair E B]
+-----------
+
+Winner B
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO XH))
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E,Pair E A,Pair E B]
+------------
+Candidate = C
+Strength =  Zneg (XO (XI (XI (XI XH))))
+Path from B to C = B --> C
+coclosed set = [Pair C A,Pair C B,Pair D A,Pair D B,Pair E A,Pair E B]
+------------
+Candidate = D
+Strength =  Zneg (XO (XI (XI (XI XH))))
+Path from B to D = B --> D
+coclosed set = [Pair C A,Pair C B,Pair D A,Pair D B,Pair E A,Pair E B]
+------------
+Candidate = E
+Strength =  Zneg (XO (XI (XI (XI XH))))
+Path from B to E = B --> E
+coclosed set = [Pair C A,Pair C B,Pair D A,Pair D B,Pair E A,Pair E B]
+------------
+
+
+Loser C
+-----------
+Strength = Zneg (XI (XO (XI (XI XH))))
+Candidate that beats C = A
+Path from A to C = A --> C
+coclosed set = [Pair C A,Pair C B,Pair D A,Pair D B,Pair E A,Pair E B]
+-----------
+
+Loser D
+-----------
+Strength = Zneg (XI (XO (XI (XI XH))))
+Candidate that beats D = A
+Path from A to D = A --> D
+coclosed set = [Pair C A,Pair C B,Pair D A,Pair D B,Pair E A,Pair E B]
+-----------
+
+Loser E
+-----------
+Strength = Zneg (XI (XO (XI (XI XH))))
+Candidate that beats E = A
+Path from A to E = A --> E
+coclosed set = [Pair C A,Pair C B,Pair D A,Pair D B,Pair E A,Pair E B]
+-----------
+
+
+Time consume for file votes_2000.txt = 1070.86386s
+
+
+
+
+Starting computation for file votes_3000.txt
+
+
+
+Loser A
+-----------
+Strength = Zpos (XI (XI XH))
+Candidate that beats A = B
+Path from B to A = B --> E --> A
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair A E,Pair B D,Pair C D,Pair E D]
+-----------
+
+Loser B
+-----------
+Strength = Zpos (XI (XI (XI XH)))
+Candidate that beats B = C
+Path from C to B = C --> B
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E,Pair C D,Pair C E,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser C
+-----------
+Strength = Zneg (XI (XI (XI (XO (XO XH)))))
+Candidate that beats C = D
+Path from D to C = D --> C
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+-----------
+
+Winner D
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO (XO (XI (XO XH)))))
+Path from D to A = D --> A
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+------------
+Candidate = B
+Strength =  Zneg (XO (XO (XO (XI (XO XH)))))
+Path from D to B = D --> B
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+------------
+Candidate = C
+Strength =  Zneg (XO (XO (XO (XI (XO XH)))))
+Path from D to C = D --> C
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+------------
+Candidate = E
+Strength =  Zneg (XO (XO (XO (XI (XO XH)))))
+Path from D to E = D --> E
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+------------
+
+
+Loser E
+-----------
+Strength = Zneg (XI (XI (XI (XO (XO XH)))))
+Candidate that beats E = D
+Path from D to E = D --> E
+coclosed set = [Pair A D,Pair B D,Pair C D,Pair E D]
+-----------
+
+
+Time consume for file votes_3000.txt = 1864.844603s
+
+
+
+
+Starting computation for file votes_4000.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XO (XI (XI (XO XH)))))
+Candidate that beats A = B
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair A D,Pair C B,Pair C D,Pair E B,Pair E D]
+-----------
+
+Winner B
+-----------
+Candidate = A
+Strength =  Zneg (XO (XI (XI (XI (XO XH)))))
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair A D,Pair C B,Pair C D,Pair E B,Pair E D]
+------------
+Candidate = C
+Strength =  Zneg (XO (XI (XI (XI (XO XH)))))
+Path from B to C = B --> C
+coclosed set = [Pair A B,Pair A D,Pair C B,Pair C D,Pair E B,Pair E D]
+------------
+Candidate = D
+Strength =  Zneg (XO (XO (XO (XO (XO XH)))))
+Path from B to D = B --> D
+coclosed set = [Pair A B,Pair A D,Pair C B,Pair C D,Pair D B,Pair E B,Pair E D]
+------------
+Candidate = E
+Strength =  Zneg (XO (XI (XI (XI (XO XH)))))
+Path from B to E = B --> E
+coclosed set = [Pair A B,Pair A D,Pair C B,Pair C D,Pair E B,Pair E D]
+------------
+
+
+Loser C
+-----------
+Strength = Zneg (XI (XO (XI (XI (XO XH)))))
+Candidate that beats C = B
+Path from B to C = B --> C
+coclosed set = [Pair A B,Pair A D,Pair C B,Pair C D,Pair E B,Pair E D]
+-----------
+
+Loser D
+-----------
+Strength = Zneg (XI (XI (XI (XI XH))))
+Candidate that beats D = B
+Path from B to D = B --> D
+coclosed set = [Pair A B,Pair A D,Pair C B,Pair C D,Pair D B,Pair E B,Pair E D]
+-----------
+
+Loser E
+-----------
+Strength = Zneg (XI (XO (XI (XI (XO XH)))))
+Candidate that beats E = B
+Path from B to E = B --> E
+coclosed set = [Pair A B,Pair A D,Pair C B,Pair C D,Pair E B,Pair E D]
+-----------
+
+
+Time consume for file votes_4000.txt = 2358.40053s
+
+
+
+
+Starting computation for file votes_5000.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XI (XO (XI XH))))
+Candidate that beats A = C
+Path from C to A = C --> A
+coclosed set = [Pair A C,Pair A E,Pair B C,Pair B E,Pair D C,Pair D E]
+-----------
+
+Loser B
+-----------
+Strength = Zneg (XI (XO XH))
+Candidate that beats B = A
+Path from A to B = A --> B
+coclosed set = [Pair A C,Pair A E,Pair B A,Pair B C,Pair B E,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E]
+-----------
+
+Loser C
+-----------
+Strength = Zneg (XI (XO (XO (XI XH))))
+Candidate that beats C = E
+Path from E to C = E --> C
+coclosed set = [Pair A C,Pair A E,Pair B C,Pair B E,Pair C E,Pair D C,Pair D E]
+-----------
+
+Loser D
+-----------
+Strength = Zneg (XI (XO XH))
+Candidate that beats D = A
+Path from A to D = A --> B --> D
+coclosed set = [Pair A C,Pair A E,Pair B A,Pair B C,Pair B E,Pair C E,Pair D A,Pair D B,Pair D C,Pair D E]
+-----------
+
+Winner E
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO (XI (XI XH))))
+Path from E to A = E --> A
+coclosed set = [Pair A C,Pair A E,Pair B C,Pair B E,Pair D C,Pair D E]
+------------
+Candidate = B
+Strength =  Zneg (XO (XO (XI (XI XH))))
+Path from E to B = E --> B
+coclosed set = [Pair A C,Pair A E,Pair B C,Pair B E,Pair D C,Pair D E]
+------------
+Candidate = C
+Strength =  Zneg (XO (XI (XO (XI XH))))
+Path from E to C = E --> C
+coclosed set = [Pair A C,Pair A E,Pair B C,Pair B E,Pair C E,Pair D C,Pair D E]
+------------
+Candidate = D
+Strength =  Zneg (XO (XO (XI (XI XH))))
+Path from E to D = E --> D
+coclosed set = [Pair A C,Pair A E,Pair B C,Pair B E,Pair D C,Pair D E]
+------------
+
+
+
+Time consume for file votes_5000.txt = 3033.049717s
+
+
+
+
+Starting computation for file votes_6000.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XI (XI (XI (XI (XI XH))))))
+Candidate that beats A = B
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser B
+-----------
+Strength = Zpos (XI (XO (XI (XI XH))))
+Candidate that beats B = C
+Path from C to B = C --> D --> B
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair B C,Pair B D,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Winner C
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO (XO (XO (XO (XO (XO XH)))))))
+Path from C to A = C --> A
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = B
+Strength =  Zpos (XO (XO (XI (XI XH))))
+Path from C to B = C --> D --> B
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair B C,Pair B D,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = D
+Strength =  Zpos (XO (XO (XI (XI XH))))
+Path from C to D = C --> D
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair B C,Pair B D,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = E
+Strength =  Zneg (XO (XO (XO (XO (XO (XO (XO XH)))))))
+Path from C to E = C --> E
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair E B,Pair E C,Pair E D]
+------------
+
+
+Loser D
+-----------
+Strength = Zpos (XI (XO (XI (XI XH))))
+Candidate that beats D = C
+Path from C to D = C --> D
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair B C,Pair B D,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser E
+-----------
+Strength = Zneg (XI (XI (XI (XI (XI XH)))))
+Candidate that beats E = A
+Path from A to E = A --> E
+coclosed set = [Pair A B,Pair A C,Pair A D,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+
+Time consume for file votes_6000.txt = 3619.497256s
+
+
+
+
+Starting computation for file votes_7000.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI XH)
+Candidate that beats A = B
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Winner B
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO XH))
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = C
+Strength =  Zneg (XO (XO XH))
+Path from B to C = B --> C
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = D
+Strength =  Zneg (XO (XO XH))
+Path from B to D = B --> C --> D
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+Candidate = E
+Strength =  Zneg (XO (XO (XI (XO XH))))
+Path from B to E = B --> E
+coclosed set = [Pair E A,Pair E B,Pair E C,Pair E D]
+------------
+
+
+Loser C
+-----------
+Strength = Zneg (XI XH)
+Candidate that beats C = A
+Path from A to C = A --> C
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser D
+-----------
+Strength = Zneg (XI XH)
+Candidate that beats D = A
+Path from A to D = A --> C --> D
+coclosed set = [Pair A B,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C,Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+Loser E
+-----------
+Strength = Zneg (XI (XI (XO (XO XH))))
+Candidate that beats E = A
+Path from A to E = A --> C --> E
+coclosed set = [Pair E A,Pair E B,Pair E C,Pair E D]
+-----------
+
+
+Time consume for file votes_7000.txt = 4000.479229s
+
+
+
+
+Starting computation for file votes_8000.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XI (XO (XO (XI XH)))))
+Candidate that beats A = C
+Path from C to A = C --> E --> A
+coclosed set = [Pair A C,Pair B C,Pair D C,Pair E C]
+-----------
+
+Loser B
+-----------
+Strength = Zneg (XI (XI (XI (XO (XO XH)))))
+Candidate that beats B = A
+Path from A to B = A --> B
+coclosed set = [Pair A C,Pair B A,Pair B C,Pair B D,Pair B E,Pair D C,Pair E C]
+-----------
+
+Winner C
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO (XI (XO (XI XH)))))
+Path from C to A = C --> E --> A
+coclosed set = [Pair A C,Pair B C,Pair D C,Pair E C]
+------------
+Candidate = B
+Strength =  Zneg (XO (XO (XI (XO (XI XH)))))
+Path from C to B = C --> B
+coclosed set = [Pair A C,Pair B C,Pair D C,Pair E C]
+------------
+Candidate = D
+Strength =  Zneg (XO (XO (XI (XO (XI XH)))))
+Path from C to D = C --> D
+coclosed set = [Pair A C,Pair B C,Pair D C,Pair E C]
+------------
+Candidate = E
+Strength =  Zneg (XO (XO (XI (XO (XI XH)))))
+Path from C to E = C --> E
+coclosed set = [Pair A C,Pair B C,Pair D C,Pair E C]
+------------
+
+
+Loser D
+-----------
+Strength = Zpos (XI (XI (XO (XI XH))))
+Candidate that beats D = A
+Path from A to D = A --> D
+coclosed set = [Pair A C,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E,Pair D A,Pair D C,Pair D E,Pair E C]
+-----------
+
+Loser E
+-----------
+Strength = Zneg (XI (XI (XO (XO (XI XH)))))
+Candidate that beats E = C
+Path from C to E = C --> E
+coclosed set = [Pair A C,Pair B C,Pair D C,Pair E C]
+-----------
+
+
+Time consume for file votes_8000.txt = 4983.8402s
+
+
+
+
+Starting computation for file votes_9000.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XO (XI (XI (XO XH)))))
+Candidate that beats A = C
+Path from C to A = C --> A
+coclosed set = [Pair A C,Pair A D,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E]
+-----------
+
+Loser B
+-----------
+Strength = Zneg (XI (XO (XI (XI (XO (XO XH))))))
+Candidate that beats B = A
+Path from A to B = A --> B
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair B E]
+-----------
+
+Loser C
+-----------
+Strength = Zneg (XI (XO (XO (XO XH))))
+Candidate that beats C = D
+Path from D to C = D --> E --> C
+coclosed set = [Pair A C,Pair A D,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E,Pair C D,Pair C E,Pair E D]
+-----------
+
+Winner D
+-----------
+Candidate = A
+Strength =  Zneg (XO (XI (XI (XI (XO XH)))))
+Path from D to A = D --> A
+coclosed set = [Pair A C,Pair A D,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E]
+------------
+Candidate = B
+Strength =  Zneg (XO (XI (XI (XI (XO (XO XH))))))
+Path from D to B = D --> B
+coclosed set = [Pair B A,Pair B C,Pair B D,Pair B E]
+------------
+Candidate = C
+Strength =  Zneg (XO (XI (XO (XO XH))))
+Path from D to C = D --> E --> C
+coclosed set = [Pair A C,Pair A D,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E,Pair C D,Pair C E,Pair E D]
+------------
+Candidate = E
+Strength =  Zneg (XO (XI (XO (XO XH))))
+Path from D to E = D --> E
+coclosed set = [Pair A C,Pair A D,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E,Pair C D,Pair C E,Pair E D]
+------------
+
+
+Loser E
+-----------
+Strength = Zneg (XI (XO (XO (XO XH))))
+Candidate that beats E = D
+Path from D to E = D --> E
+coclosed set = [Pair A C,Pair A D,Pair A E,Pair B A,Pair B C,Pair B D,Pair B E,Pair C D,Pair C E,Pair E D]
+-----------
+
+
+Time consume for file votes_9000.txt = 6116.178312s
+
+
+
+
+Starting computation for file votes_10000.txt
+
+
+
+Loser A
+-----------
+Strength = Zneg (XI (XO (XO (XO XH))))
+Candidate that beats A = B
+Path from B to A = B --> A
+coclosed set = [Pair A B,Pair A D,Pair A E,Pair B E,Pair C A,Pair C B,Pair C D,Pair C E,Pair D E]
+-----------
+
+Loser B
+-----------
+Strength = Zneg (XI (XI (XI (XI (XO XH)))))
+Candidate that beats B = E
+Path from E to B = E --> B
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+-----------
+
+Loser C
+-----------
+Strength = Zneg (XI (XI (XI (XI XH))))
+Candidate that beats C = A
+Path from A to C = A --> C
+coclosed set = [Pair A E,Pair B E,Pair C A,Pair C B,Pair C D,Pair C E,Pair D E]
+-----------
+
+Loser D
+-----------
+Strength = Zneg (XI (XI (XI XH)))
+Candidate that beats D = B
+Path from B to D = B --> D
+coclosed set = [Pair A B,Pair A D,Pair A E,Pair B E,Pair C A,Pair C B,Pair C D,Pair C E,Pair D B,Pair D E]
+-----------
+
+Winner E
+-----------
+Candidate = A
+Strength =  Zneg (XO (XO (XO (XO (XI XH)))))
+Path from E to A = E --> B --> A
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = B
+Strength =  Zneg (XO (XO (XO (XO (XI XH)))))
+Path from E to B = E --> B
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = C
+Strength =  Zneg (XO (XO (XO (XO (XI XH)))))
+Path from E to C = E --> C
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+Candidate = D
+Strength =  Zneg (XO (XO (XO (XO (XI XH)))))
+Path from E to D = E --> D
+coclosed set = [Pair A E,Pair B E,Pair C E,Pair D E]
+------------
+
+
+
+Time consume for file votes_10000.txt = 6743.123985s
+
+
+
+
