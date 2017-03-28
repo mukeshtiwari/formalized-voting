@@ -5,6 +5,8 @@ import Cand
 import Derivation
 import System.IO
 import Data.List as L
+import System.Random.Shuffle
+import Control.Monad as M
 
 haskCoq :: [a] -> List a
 haskCoq [] = Nil
@@ -41,9 +43,17 @@ balfun ((A, b1) : (B, b2) : (C, b3) : (D, b4) : (E, b5) : _) = f where
   f D = b4
   f E = b5
 
+
+createCand :: P.Int -> IO ()
+createCand n = do 
+  t <- mapM shuffleM (P.replicate n "ABCDE")
+  writeFile "votes_100.txt" (P.unlines t)
+ 
+
 main :: IO ()
 main = do 
-  r <- readFile "votes.txt"
+  -- createCand 100
+  r <- readFile "votes_100.txt"
   let votes = final_count candEq P.. haskCoq P.. P.map balfun P..
               P.map (P.map (\(y, z) -> (charCand y, coqNat z))) 
               P.. P.map L.sort P.. P.map (\x ->  P.zip x [1..]) P.. P.lines P.$ r
