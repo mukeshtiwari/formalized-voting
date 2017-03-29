@@ -888,5 +888,28 @@ Section Evote.
     destruct e as [d [H1 H2]]. apply Z.leb_gt in H2. exists d. auto.
   Defined.
 
+  Lemma first_one : 
+    forall c : cand, c_wins c = true <-> (exists x : wins_type c, wins_loses_M c = inl x).
+  Proof.
+    split; intros. destruct (wins_loses_M c) eqn:Ht. exists w. auto. 
+    pose proof (loses_type_prop c l). unfold loses_prop in H0.
+    apply L16 in H0. pose proof (proj1 (L5 c) H). destruct H0. specialize (H1 x). omega.
+    destruct H. pose proof (wins_type_prop c x). unfold wins_prop in H0.
+    apply L5. apply L14. auto.
+  Qed.
+
+  Lemma second_one : 
+    forall c : cand, c_wins c = false <-> (exists x : loses_type c, wins_loses_M c = inr x).
+  Proof.
+    split; intros. destruct (wins_loses_M c) eqn:Ht.
+    pose proof (wins_type_prop c w).
+    pose proof (proj1 (L6 c) H). unfold wins_prop in H0.
+    pose proof (L14 c H0). destruct H1. specialize (H2 x). omega.
+    exists l. auto.
+    destruct H. pose proof (loses_type_prop c x). unfold loses_prop in H0.
+    apply L6. apply L16. auto.
+  Qed.
+  
+
 End Evote.
 

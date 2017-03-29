@@ -32,11 +32,17 @@ Section Count.
   
   (* the count proceeds in several stages, represented by the *)
   (* node type: checking ballots, computing margins and       *)
-  (* determining winners + evidence.                          *)
+  (* determining winners + evidence.                         
   Inductive Node : Type :=
   | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
   | done.
+   *)
 
+  Inductive Node : Type :=
+  | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
+  | winners : (cand -> bool) ->  Node.
+
+  
   (* earlier c d b means that c occurs earlier in the ballot b *)
   Definition earlier (c d : cand) (p : ballot) : Prop :=
     (p c > 0)%nat /\ (p d > 0)%nat /\ (p c < p d)%nat.
@@ -72,6 +78,8 @@ Section Count.
   Definition nochange (c d : cand) (t : cand -> cand -> Z)
              (nt : cand -> cand -> Z) : Prop :=
     nt c d = t c d.
+
+
   
   Inductive Count (bs : list ballot) : Node -> Type :=
   | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
@@ -83,9 +91,31 @@ Section Count.
   | cinvalid u us m inbs :
       Count bs (state (u :: us, inbs) m) -> ~(ballot_valid u) ->
       Count bs (state (us, u :: inbs) m)
-  | fin m inbs : Count bs (state ([], inbs) m) ->
-                 (forall c, (wins_type m c) + (loses_type m c)) -> Count bs done.
+  | fin m inbs w (d : (forall c, (wins_type m c) + (loses_type m c))):
+      Count bs (state ([], inbs) m) ->
+      (forall c, w c = true <-> (exists x, d c = inl x)) ->
+      (forall c, w c = false <-> (exists x, d c = inr x)) ->
+      Count bs (winners w).
 
+  
+  (*
+  Inductive Count (bs : list ballot) : Node -> Type :=
+  | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
+  | cvalid u us m nm inbs :
+      Count bs (state (u :: us, inbs) m) -> ballot_valid u -> 
+      (forall c d : cand, (earlier c d u -> incdec c d m nm) /\
+                     (equal c d u -> nochange c d m nm)) ->
+      Count bs (state (us, inbs) nm)
+  | cinvalid u us m inbs :
+      Count bs (state (u :: us, inbs) m) -> ~(ballot_valid u) ->
+      Count bs (state (us, u :: inbs) m)
+  | fin m inbs : Count bs (state ([], inbs) m) ->
+                 (forall c, (wins_type m c) + (loses_type m c)) -> Count bs done. 
+   *)  
+  
+
+
+  
   Definition incdect (p : ballot) (m : cand -> cand -> Z) :
     cand -> cand -> Z :=
     fun c d =>
@@ -137,12 +167,22 @@ Section Count.
     destruct X as [i [m Hc]].
     exists i, m. assumption.
   Defined.
-
-   Lemma final_count : forall (bs : list ballot), existsT (p : Count bs done), True.
+    
+  Lemma final_count : forall (bs : list ballot), existsT (f : cand -> bool) (p : Count bs (winners f)), True.
+  Proof.
+    intros. pose proof (extract_prog bs). destruct X as [bs' [m X]].
+    pose proof (fin bs _ bs' (c_wins m) (wins_loses_M m cand_fin dec_cand cand_not_nil) X).
+    pose proof (X0 (first_one m cand_fin dec_cand cand_not_nil)
+                   (second_one m cand_fin dec_cand cand_not_nil)).
+    exists (c_wins m). exists X1. apply I.
+  Defined.
+  (*
+  Lemma final_count : forall (bs : list ballot), existsT (p : Count bs done), True.
   Proof.
     intros. pose proof (extract_prog bs). destruct X as [bs' [m X]].
     pose proof (fin _ _ _ X (wins_loses_M m cand_fin dec_cand cand_not_nil)). exists X0. apply I.
   Defined.
-
+   *)
+  
 End Count.
 
