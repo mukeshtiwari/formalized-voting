@@ -1,4 +1,0 @@
-ABC
-CBA
-BAC
-ACB
