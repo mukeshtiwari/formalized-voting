@@ -3,10 +3,11 @@ module Derivation where
 import qualified Prelude as P
 import Lib
 
+{-
 c2hl :: List a -> [a]
 c2hl Nil = []
 c2hl (Cons x xs) = x : (c2hl xs)
-
+-}
 deriving instance (P.Eq Cand)
 deriving instance (P.Ord Cand)
 deriving instance (P.Show Cand)
@@ -31,8 +32,8 @@ instance P.Show PathT where
   show (ConsT x _ _ p) = P.show x P.++ " --> " P.++ P.show p
 
 -- deriving instance (P.Show PathT)
-instance P.Show ((Cand -> Bool), (Count, ())) where
-  show (f, (v, _)) = P.show (P.map (\x -> P.show x P.++ " ---> " P.++ if (f x) P.== P.True then "Winner" else "Loser") (c2hl cand_all)) P.++ "\n\n" P.++ P.show v
+instance  {-# OVERLAPPING #-} P.Show (Cand -> P.Bool, (Count, ())) where
+  show (f, (v, _)) = P.show (P.map (\x -> P.show x P.++ " ---> " P.++ if (f x) P.== P.True then "Winner" else "Loser") cand_all) P.++ "\n\n" P.++ P.show v
 
 
 show_winner :: Wins_type -> Cand -> [Cand] -> P.String
@@ -43,7 +44,7 @@ show_winner g x (y : ys) =
     "Candidate = " P.++ P.show y P.++ "\n" P.++ 
     "Strength = " P.++ " " P.++ P.show u P.++ "\n" P.++ 
     "Path from " P.++ P.show x P.++ " to " P.++ P.show y P.++ " = " P.++ P.show v P.++ "\n" P.++ 
-    "coclosed set = " P.++ P.show (P.filter (\x -> f x P.== P.True) [Pair a b | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b]) P.++ 
+    "coclosed set = " P.++ P.show (P.filter (\x -> f x P.== P.True) [(a, b) | a <- cand_all, b <- cand_all, a P./= b]) P.++ 
     "\n------------\n" P.++ show_winner g x ys
 
 
@@ -54,21 +55,21 @@ show_loser g x =
     "Strength = " P.++ P.show u P.++ "\n" P.++ 
     "Candidate that beats " P.++ P.show x P.++ " = " P.++ P.show c P.++ "\n" P.++ 
     "Path from " P.++ P.show c P.++ " to " P.++ P.show x P.++ " = " P.++ P.show p P.++ "\n" P.++
-    "coclosed set = " P.++ P.show (P.filter (\x -> f x P.== P.True) [Pair a b | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b]) P.++ 
+    "coclosed set = " P.++ P.show (P.filter (\x -> f x P.== P.True) [(a, b) | a <- cand_all, b <- cand_all, a P./= b]) P.++ 
     "\n-----------" 
 
 
-show_cand :: (Cand -> Sum Wins_type Loses_type) -> Cand -> P.String
+show_cand :: (Cand -> P.Either Wins_type Loses_type) -> Cand -> P.String
 show_cand f x =
    case (f x) of
-    Left g -> "Winner " P.++ P.show x P.++ "\n-----------\n" P.++ show_winner g x (P.filter (\y -> y P./= x) (c2hl cand_all)) P.++ "\n"
-    Right h -> "Loser " P.++ P.show x P.++ "\n-----------\n" P.++ show_loser h x P.++ "\n"
+    P.Left g -> "Winner " P.++ P.show x P.++ "\n-----------\n" P.++ show_winner g x (P.filter (\y -> y P./= x) cand_all) P.++ "\n"
+    P.Right h -> "Loser " P.++ P.show x P.++ "\n-----------\n" P.++ show_loser h x P.++ "\n"
 
 instance P.Show Count where
   show (Ax _ _) = "x"
   show (Cvalid _ _ _ _ _ _) = "Valid"
   show (Cinvalid _ _ _ _ _) = "Invalid"
-  show (Fin _ _ _ f _) =  P.unlines P.$ P.map (show_cand f) (c2hl cand_all)
+  show (Fin _ _ _ f _) =  P.unlines P.$ P.map (show_cand f) cand_all
 
 
 

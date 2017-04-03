@@ -431,7 +431,7 @@ l9 l h1 s f1 =
 {- Try to move this definition in other file -}
 data Cand = A | B | C | D | E
 
-cand_all :: List Cand
+cand_all :: [Cand]
 cand_all = [A, B, C, D, E]
 {- End of definition -}
 
