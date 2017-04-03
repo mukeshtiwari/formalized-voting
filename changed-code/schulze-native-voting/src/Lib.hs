@@ -432,7 +432,7 @@ l9 l h1 s f1 =
 data Cand = A | B | C | D | E
 
 cand_all :: List Cand
-cand_all = Cons A (Cons B (Cons C (Cons D (Cons E Nil))))
+cand_all = [A, B, C, D, E]
 {- End of definition -}
 
 
