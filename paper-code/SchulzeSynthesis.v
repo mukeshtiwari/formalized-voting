@@ -440,7 +440,6 @@ Section Evote.
     intros l H5. pose proof (coclosed_path _ _ H4).
     pose proof (H0 l _ _ H5 H3). omega.
   Qed.
-
   (* End of winning criteria *)
 
   (* losing using M function *)
@@ -607,4 +606,41 @@ Section Evote.
     pose proof (H0 l _ _ H Hf). omega.
   Qed.
 
+  Lemma wins_loses_M : forall c, (wins_type c) + (loses_type c).
+  Proof.
+    intros c. pose proof (L7 c). destruct H. left.
+    unfold wins_type. apply L15. apply L14. intros d.
+    pose proof (proj1 (forallb_forall _ cand_all) e d (cand_fin d)).
+    simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H.
+    remember (M (length cand_all) d c) as s. apply L1 in H.
+    exists s. split. assumption.
+    intros. rewrite Heqs. apply L2 in H0. destruct H0 as [n H0].
+    apply Z.ge_le in H0. pose proof (L4 d c n). omega.
+    right. apply L18. unfold c_wins in e. apply L11 in e.
+    destruct e as [d [H1 H2]]. apply Z.leb_gt in H2. exists d. auto.
+  Defined.
   
+  Lemma winner_one : 
+    forall c : cand, c_wins c = true <-> (exists x : wins_type c, wins_loses_M c = inl x).
+  Proof.
+    split; intros. destruct (wins_loses_M c) eqn:Ht. exists w. auto. 
+    pose proof (loses_type_prop c l). unfold loses_prop in H0.
+    apply L16 in H0. pose proof (proj1 (L5 c) H). destruct H0. specialize (H1 x). omega.
+    destruct H. pose proof (wins_type_prop c x). unfold wins_prop in H0.
+    apply L5. apply L14. auto.
+  Qed.
+  
+  Lemma loser_one : 
+    forall c : cand, c_wins c = false <-> (exists x : loses_type c, wins_loses_M c = inr x).
+  Proof.
+    split; intros. destruct (wins_loses_M c) eqn:Ht.
+    pose proof (wins_type_prop c w).
+    pose proof (proj1 (L6 c) H). unfold wins_prop in H0.
+    pose proof (L14 c H0). destruct H1. specialize (H2 x). omega.
+    exists l. auto.
+    destruct H. pose proof (loses_type_prop c x). unfold loses_prop in H0.
+    apply L6. apply L16. auto.
+  Qed.
+  
+End Evote.
+
