@@ -75,3 +75,65 @@ Section Evote.
     existsT (k : Z) (d : cand),
     ((PathT k d c) *
      (existsT (f : (cand * cand) -> bool), f (c, d) = true /\ coclosed k f))%type.
+
+  (* type-level notions of winning and losing are equivalent *)
+  (* auxilary lemmas needed for the proof of equivalence     *)
+  (* search for wins_prop_type and wins_type_prop for the    *)
+  (* statement and proof of equivalence, dually for losing.  *)
+
+  (**** all lemmas needed for the proof of the below should go here ****)
+
+   (* type-level paths allow to construct evidence for the existence of paths *)
+  Lemma path_equivalence : forall c d k , PathT k c d -> Path k c d.
+  Proof.
+    intros c d k H.
+    induction H; [constructor 1 | constructor 2 with d]; auto.
+  Qed.
+
+  Lemma mp_log : forall (k : Z) (x : cand * cand) (p : cand * cand -> bool),
+      (forallb (fun m => orb (marg_lt k (fst x, m)) (p (m, snd x))) cand_all) = true ->
+      forall b, p (b, snd x) = true \/ marg (fst x) b < k.
+   Proof.
+     intros k x p H b.
+     assert (Hin : In b cand_all) by  apply cand_fin.
+     pose proof (proj1 (forallb_forall _ cand_all) H b Hin) as Hp. simpl in Hp.
+     apply orb_true_iff in Hp; destruct Hp as [Hpl | Hpr]; destruct x as (a, c); simpl in *.
+     + right; apply Zlt_is_lt_bool; auto.
+     + left;auto.
+   Qed.
+
+   Lemma coclosed_path : forall k f, coclosed k f -> forall s x y,
+        Path s x y -> f (x, y) = true -> s < k.
+  Proof.
+    intros k f Hcc x s y p. induction p.
+    (* unit path *)
+    + intros Hin; specialize (Hcc (c, d) Hin); apply andb_true_iff in Hcc;
+        destruct Hcc as [Hccl Hccr]; apply Zlt_is_lt_bool in Hccl; simpl in Hccl;  omega.
+    (* non unit path *)
+    + intros Hin; specialize (Hcc (c, e) Hin); apply andb_true_iff in Hcc;
+        destruct Hcc as [Hccl Hccr]; unfold marg_lt in Hccl; simpl in Hccl.
+      assert (Hmp : forall m, f (m, (snd (c, e))) = true \/ marg (fst (c, e)) m < k)
+        by (apply mp_log; auto); simpl in Hmp.
+      specialize (Hmp d). destruct Hmp; [intuition | omega].
+  Qed.
+  
+  (**** all generic lemmas about lists etc. should go elsewhere ****)
+
+  (* the type level winning condition can be reconstruced from *)
+  (* propositional knowledge of winning *)
+  Lemma wins_prop_type : forall c, wins_prop c -> wins_type c.
+  Proof.
+    intros c H. unfold wins_prop, wins_type in *.
+    apply L15. apply L14. auto.
+  Qed.
+
+  (* dually, the type-level information witnessing winners *)
+  (* entails prop-level knowledge. *)
+  Lemma wins_type_prop : forall c, wins_type c -> wins_prop c.
+  Proof.
+    intros c H. unfold wins_prop, wins_type in *. intros d.
+    destruct (H d) as [k [H1 [f [H3 H4]]]].
+    exists k. split. apply path_equivalence. auto.
+    intros l H5. pose proof (coclosed_path _ _ H4).
+    pose proof (H0 l _ _ H5 H3). omega.
+  Qed.
