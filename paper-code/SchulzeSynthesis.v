@@ -440,3 +440,171 @@ Section Evote.
     intros l H5. pose proof (coclosed_path _ _ H4).
     pose proof (H0 l _ _ H5 H3). omega.
   Qed.
+
+  (* End of winning criteria *)
+
+  (* losing using M function *)
+  Lemma L16 (c : cand) :
+    (exists k d, Path k d c /\ (forall l, Path l c d -> l < k)) ->
+    (exists d, M (length cand_all) c d < M (length cand_all) d c).
+  Proof.
+    intros. destruct H as [k [d [H1 H2]]].
+    exists d. remember (M (length cand_all) c d)  as s.
+    pose proof (Z.eq_le_incl _ _ Heqs) as H3.
+    apply Z.le_ge in H3. apply L1 in H3. specialize (H2 s H3).
+    apply L2 in H1. destruct H1 as [n H1].
+    pose proof (L4 d c n). omega.
+  Qed.
+
+  
+  Definition constructive_prop (c d : cand):=
+    M (length cand_all) c d < M (length cand_all) d c.
+
+  Lemma constructive_deci_cand : forall (c d : cand),
+      {(constructive_prop c d)} + {~(constructive_prop c d)}.
+  Proof.
+    intros c d. unfold constructive_prop.
+    pose proof (Z_lt_ge_bool (M (length cand_all) c d) (M (length cand_all) d c)).
+    destruct H. destruct x. left. auto.
+    right. apply Zle_not_lt. omega.
+  Qed.
+  
+  Program Fixpoint f0 a l (H : In a l) : nat :=
+    match l with
+    | [] => _
+    | h :: t =>
+      if dec_cand a h then O else S (f0 a t _)
+    end.
+  Next Obligation.
+    destruct H; congruence.
+  Defined.
+  Next Obligation.
+    destruct H.
+    - exfalso; now apply H0.
+    - assumption.
+  Defined.
+  
+  Definition f (c : cand) : nat := f0 c cand_all (cand_fin c).
+  
+  Program Fixpoint g0 n l (H : (n < length l)%nat) : cand :=
+    match l, n with
+    | [], _ => _
+    | h :: _, O => h
+    | _ :: t, S n' => g0 n' t _
+    end.
+  Next Obligation.
+    exfalso; inversion H.
+  Defined.
+  Next Obligation.
+    now apply Lt.lt_S_n.
+  Defined.
+  
+  Program Definition g (n : nat) : cand :=
+    if Compare_dec.le_lt_dec (length cand_all) n then _
+    else g0 n cand_all _.
+  Next Obligation.
+    destruct cand_all.
+    - exfalso; now apply cand_not_nil.
+    - exact c.
+  Defined.
+  
+  Lemma f0_lt_length (a : cand) (l : list cand) (H : In a l) :
+    (f0 a l H < length l)%nat.
+  Proof.
+    revert a H.
+    induction l; intros.
+    - inversion H.
+    - simpl in *. destruct (dec_cand a0 a).
+      + omega.
+      + apply Lt.lt_n_S. apply IHl.
+  Qed.
+  
+  Lemma f_lt_length (a : cand) : (f a < length cand_all)%nat.
+  Proof.
+    apply f0_lt_length.
+  Qed.
+  
+  Lemma g0_nth (n : nat) (l : list cand) (H : (n < length l)%nat) (c : cand) :
+    g0 n l H = nth n l c.
+  Proof.
+    revert l H.
+    induction n; intros; destruct l.
+    - inversion H.
+    - reflexivity.
+    - inversion H.
+    - apply IHn.
+  Qed.
+  
+  Lemma nth_f0 (a : cand) (l : list cand) (H : In a l) (c : cand) :
+    nth (f0 a l H) l c = a.
+  Proof.
+    induction l.
+    - inversion H.
+    - simpl. now destruct dec_cand.
+  Qed.
+  
+  Lemma L17 : forall x, g (f x) = x.
+  Proof.
+    intros.
+    unfold g.
+    destruct le_lt_dec.
+    - pose proof (f_lt_length x). exfalso; omega.
+    - unfold g_obligation_2, f.
+      rewrite g0_nth with (c := x).
+      apply nth_f0.
+  Qed.
+  
+  Lemma L18 (c : cand) :
+    (exists d, M (length cand_all) c d < M (length cand_all) d c) ->
+    (existsT (k : Z) (d : cand),
+     ((PathT k d c) *
+      (existsT (f : (cand * cand) -> bool),
+       f (c, d) = true /\ coclosed k f))%type).
+  Proof.
+    intros.
+    pose proof
+         (constructive_indefinite_ground_description
+            _ f g L17 (constructive_prop c) (constructive_deci_cand c) H).
+    destruct X as [d X]. unfold constructive_prop in X.
+    remember (M (length cand_all) c d) as s.
+    assert (s + 1 <= M (length cand_all) d c) by omega.
+    exists (s + 1), d. split. apply Z.le_ge in H0.
+    apply L10 in H0. auto.
+    exists (fun x => M (length cand_all) (fst x) (snd x) <? s + 1).  
+    simpl in *. split. apply Z.ltb_lt. omega.
+    unfold coclosed. intros x; destruct x as (x, z); simpl in *.
+    intros. apply Z.ltb_lt in H1. unfold W.
+    apply andb_true_iff. split. unfold marg_lt. simpl. apply Z.ltb_lt.
+    clear H. clear Heqs. clear X. clear H0.
+    induction (length cand_all). simpl in *. omega.
+    simpl in H1. apply Z.max_lub_lt_iff in H1. destruct H1. apply IHn. auto.
+    apply forallb_forall. intros y Hy.
+    apply orb_true_iff. unfold marg_lt. simpl.
+    assert (marg x y < s + 1 \/ marg x y >= s + 1) by omega.
+    destruct H2. left. apply Z.ltb_lt. auto.
+    right. apply Z.ltb_lt.
+    assert (M (length cand_all) y z < s + 1 \/ M (length cand_all) y z >= s + 1) by omega.
+    destruct H3. auto.
+    apply L1 in H3.  pose proof (Evote.cons _ _ _ _ H2 H3).
+    apply L2 in H4. destruct H4 as [n H4].
+    pose proof (L4 x z n). omega.
+  Defined.
+
+  (* losing from type to prop level and prop to type level *)
+
+  Lemma loses_prop_type : forall c, loses_prop c -> loses_type c.
+  Proof.
+    intros c H. unfold loses_prop, loses_type in *. apply L18.
+    apply L16. auto.
+  Qed.
+  
+  Lemma loses_type_prop : forall c, loses_type c -> loses_prop c.
+  Proof.
+    intros c H. unfold loses_prop, loses_type in *.
+    destruct H as [k [d [Hp [f [Hf Hc]]]]].
+    exists k, d. split. apply path_equivalence. auto.
+    intros l H. pose proof (coclosed_path k f Hc).
+    pose proof (H0 l _ _ H Hf). omega.
+  Qed.
+
+  
