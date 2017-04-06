@@ -1,0 +1,268 @@
+Votes = [[(A,2),(B,3),(C,1),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,3),(B,2),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,3),(B,1),(C,2),(D,4)],[(A,1),(B,2),(C,3),(D,4)],[(A,2),(B,3),(C,1),(D,4)],[(A,3),(B,2),(C,1),(D,4)]], Invalid Votes = [] , Margin = ["margin A B = 0","margin A C = 0","margin A D = 0","margin B A = 0","margin B C = 0","margin B D = 0","margin C A = 0","margin C B = 0","margin C D = 0","margin D A = 0","margin D B = 0","margin D C = 0"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 1","margin A C = -1","margin A D = 1","margin B A = -1","margin B C = -1","margin B D = 1","margin C A = 1","margin C B = 1","margin C D = 1","margin D A = -1","margin D B = -1","margin D C = -1"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 0","margin A C = -2","margin A D = 2","margin B A = 0","margin B C = 0","margin B D = 2","margin C A = 2","margin C B = 0","margin C D = 2","margin D A = -2","margin D B = -2","margin D C = -2"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 1","margin A C = -1","margin A D = 3","margin B A = -1","margin B C = 1","margin B D = 3","margin C A = 1","margin C B = -1","margin C D = 3","margin D A = -3","margin D B = -3","margin D C = -3"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 2","margin A C = -2","margin A D = 4","margin B A = -2","margin B C = 0","margin B D = 4","margin C A = 2","margin C B = 0","margin C D = 4","margin D A = -4","margin D B = -4","margin D C = -4"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 3","margin A C = -1","margin A D = 5","margin B A = -3","margin B C = 1","margin B D = 5","margin C A = 1","margin C B = -1","margin C D = 5","margin D A = -5","margin D B = -5","margin D C = -5"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 4","margin A C = -2","margin A D = 6","margin B A = -4","margin B C = 0","margin B D = 6","margin C A = 2","margin C B = 0","margin C D = 6","margin D A = -6","margin D B = -6","margin D C = -6"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 3","margin A C = -3","margin A D = 7","margin B A = -3","margin B C = 1","margin B D = 7","margin C A = 3","margin C B = -1","margin C D = 7","margin D A = -7","margin D B = -7","margin D C = -7"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 4","margin A C = -2","margin A D = 8","margin B A = -4","margin B C = 2","margin B D = 8","margin C A = 2","margin C B = -2","margin C D = 8","margin D A = -8","margin D B = -8","margin D C = -8"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 3","margin A C = -3","margin A D = 9","margin B A = -3","margin B C = 3","margin B D = 9","margin C A = 3","margin C B = -3","margin C D = 9","margin D A = -9","margin D B = -9","margin D C = -9"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 2","margin A C = -4","margin A D = 10","margin B A = -2","margin B C = 4","margin B D = 10","margin C A = 4","margin C B = -4","margin C D = 10","margin D A = -10","margin D B = -10","margin D C = -10"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 3","margin A C = -3","margin A D = 11","margin B A = -3","margin B C = 5","margin B D = 11","margin C A = 3","margin C B = -5","margin C D = 11","margin D A = -11","margin D B = -11","margin D C = -11"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 4","margin A C = -2","margin A D = 12","margin B A = -4","margin B C = 6","margin B D = 12","margin C A = 2","margin C B = -6","margin C D = 12","margin D A = -12","margin D B = -12","margin D C = -12"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 5","margin A C = -1","margin A D = 13","margin B A = -5","margin B C = 7","margin B D = 13","margin C A = 1","margin C B = -7","margin C D = 13","margin D A = -13","margin D B = -13","margin D C = -13"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 4","margin A C = -2","margin A D = 14","margin B A = -4","margin B C = 8","margin B D = 14","margin C A = 2","margin C B = -8","margin C D = 14","margin D A = -14","margin D B = -14","margin D C = -14"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 5","margin A C = -3","margin A D = 15","margin B A = -5","margin B C = 7","margin B D = 15","margin C A = 3","margin C B = -7","margin C D = 15","margin D A = -15","margin D B = -15","margin D C = -15"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 6","margin A C = -2","margin A D = 16","margin B A = -6","margin B C = 8","margin B D = 16","margin C A = 2","margin C B = -8","margin C D = 16","margin D A = -16","margin D B = -16","margin D C = -16"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 5","margin A C = -3","margin A D = 17","margin B A = -5","margin B C = 9","margin B D = 17","margin C A = 3","margin C B = -9","margin C D = 17","margin D A = -17","margin D B = -17","margin D C = -17"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 4","margin A C = -4","margin A D = 18","margin B A = -4","margin B C = 10","margin B D = 18","margin C A = 4","margin C B = -10","margin C D = 18","margin D A = -18","margin D B = -18","margin D C = -18"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 5","margin A C = -5","margin A D = 19","margin B A = -5","margin B C = 9","margin B D = 19","margin C A = 5","margin C B = -9","margin C D = 19","margin D A = -19","margin D B = -19","margin D C = -19"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 6","margin A C = -4","margin A D = 20","margin B A = -6","margin B C = 10","margin B D = 20","margin C A = 4","margin C B = -10","margin C D = 20","margin D A = -20","margin D B = -20","margin D C = -20"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 7","margin A C = -3","margin A D = 21","margin B A = -7","margin B C = 11","margin B D = 21","margin C A = 3","margin C B = -11","margin C D = 21","margin D A = -21","margin D B = -21","margin D C = -21"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 6","margin A C = -4","margin A D = 22","margin B A = -6","margin B C = 12","margin B D = 22","margin C A = 4","margin C B = -12","margin C D = 22","margin D A = -22","margin D B = -22","margin D C = -22"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 7","margin A C = -3","margin A D = 23","margin B A = -7","margin B C = 13","margin B D = 23","margin C A = 3","margin C B = -13","margin C D = 23","margin D A = -23","margin D B = -23","margin D C = -23"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 8","margin A C = -4","margin A D = 24","margin B A = -8","margin B C = 12","margin B D = 24","margin C A = 4","margin C B = -12","margin C D = 24","margin D A = -24","margin D B = -24","margin D C = -24"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 9","margin A C = -3","margin A D = 25","margin B A = -9","margin B C = 13","margin B D = 25","margin C A = 3","margin C B = -13","margin C D = 25","margin D A = -25","margin D B = -25","margin D C = -25"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 8","margin A C = -4","margin A D = 26","margin B A = -8","margin B C = 14","margin B D = 26","margin C A = 4","margin C B = -14","margin C D = 26","margin D A = -26","margin D B = -26","margin D C = -26"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 9","margin A C = -3","margin A D = 27","margin B A = -9","margin B C = 15","margin B D = 27","margin C A = 3","margin C B = -15","margin C D = 27","margin D A = -27","margin D B = -27","margin D C = -27"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -4","margin A D = 28","margin B A = -10","margin B C = 14","margin B D = 28","margin C A = 4","margin C B = -14","margin C D = 28","margin D A = -28","margin D B = -28","margin D C = -28"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -5","margin A D = 29","margin B A = -11","margin B C = 13","margin B D = 29","margin C A = 5","margin C B = -13","margin C D = 29","margin D A = -29","margin D B = -29","margin D C = -29"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -6","margin A D = 30","margin B A = -10","margin B C = 14","margin B D = 30","margin C A = 6","margin C B = -14","margin C D = 30","margin D A = -30","margin D B = -30","margin D C = -30"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -5","margin A D = 31","margin B A = -11","margin B C = 15","margin B D = 31","margin C A = 5","margin C B = -15","margin C D = 31","margin D A = -31","margin D B = -31","margin D C = -31"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 12","margin A C = -4","margin A D = 32","margin B A = -12","margin B C = 16","margin B D = 32","margin C A = 4","margin C B = -16","margin C D = 32","margin D A = -32","margin D B = -32","margin D C = -32"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -5","margin A D = 33","margin B A = -11","margin B C = 17","margin B D = 33","margin C A = 5","margin C B = -17","margin C D = 33","margin D A = -33","margin D B = -33","margin D C = -33"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -6","margin A D = 34","margin B A = -10","margin B C = 18","margin B D = 34","margin C A = 6","margin C B = -18","margin C D = 34","margin D A = -34","margin D B = -34","margin D C = -34"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -5","margin A D = 35","margin B A = -11","margin B C = 19","margin B D = 35","margin C A = 5","margin C B = -19","margin C D = 35","margin D A = -35","margin D B = -35","margin D C = -35"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 12","margin A C = -4","margin A D = 36","margin B A = -12","margin B C = 20","margin B D = 36","margin C A = 4","margin C B = -20","margin C D = 36","margin D A = -36","margin D B = -36","margin D C = -36"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 13","margin A C = -5","margin A D = 37","margin B A = -13","margin B C = 19","margin B D = 37","margin C A = 5","margin C B = -19","margin C D = 37","margin D A = -37","margin D B = -37","margin D C = -37"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 12","margin A C = -6","margin A D = 38","margin B A = -12","margin B C = 20","margin B D = 38","margin C A = 6","margin C B = -20","margin C D = 38","margin D A = -38","margin D B = -38","margin D C = -38"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -7","margin A D = 39","margin B A = -11","margin B C = 21","margin B D = 39","margin C A = 7","margin C B = -21","margin C D = 39","margin D A = -39","margin D B = -39","margin D C = -39"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -8","margin A D = 40","margin B A = -10","margin B C = 20","margin B D = 40","margin C A = 8","margin C B = -20","margin C D = 40","margin D A = -40","margin D B = -40","margin D C = -40"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -7","margin A D = 41","margin B A = -11","margin B C = 21","margin B D = 41","margin C A = 7","margin C B = -21","margin C D = 41","margin D A = -41","margin D B = -41","margin D C = -41"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -8","margin A D = 42","margin B A = -10","margin B C = 22","margin B D = 42","margin C A = 8","margin C B = -22","margin C D = 42","margin D A = -42","margin D B = -42","margin D C = -42"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 9","margin A C = -9","margin A D = 43","margin B A = -9","margin B C = 23","margin B D = 43","margin C A = 9","margin C B = -23","margin C D = 43","margin D A = -43","margin D B = -43","margin D C = -43"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -8","margin A D = 44","margin B A = -10","margin B C = 24","margin B D = 44","margin C A = 8","margin C B = -24","margin C D = 44","margin D A = -44","margin D B = -44","margin D C = -44"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -7","margin A D = 45","margin B A = -11","margin B C = 25","margin B D = 45","margin C A = 7","margin C B = -25","margin C D = 45","margin D A = -45","margin D B = -45","margin D C = -45"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -8","margin A D = 46","margin B A = -10","margin B C = 24","margin B D = 46","margin C A = 8","margin C B = -24","margin C D = 46","margin D A = -46","margin D B = -46","margin D C = -46"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -7","margin A D = 47","margin B A = -11","margin B C = 25","margin B D = 47","margin C A = 7","margin C B = -25","margin C D = 47","margin D A = -47","margin D B = -47","margin D C = -47"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -8","margin A D = 48","margin B A = -10","margin B C = 26","margin B D = 48","margin C A = 8","margin C B = -26","margin C D = 48","margin D A = -48","margin D B = -48","margin D C = -48"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 9","margin A C = -9","margin A D = 49","margin B A = -9","margin B C = 27","margin B D = 49","margin C A = 9","margin C B = -27","margin C D = 49","margin D A = -49","margin D B = -49","margin D C = -49"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 8","margin A C = -10","margin A D = 50","margin B A = -8","margin B C = 28","margin B D = 50","margin C A = 10","margin C B = -28","margin C D = 50","margin D A = -50","margin D B = -50","margin D C = -50"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 9","margin A C = -9","margin A D = 51","margin B A = -9","margin B C = 29","margin B D = 51","margin C A = 9","margin C B = -29","margin C D = 51","margin D A = -51","margin D B = -51","margin D C = -51"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 10","margin A C = -10","margin A D = 52","margin B A = -10","margin B C = 28","margin B D = 52","margin C A = 10","margin C B = -28","margin C D = 52","margin D A = -52","margin D B = -52","margin D C = -52"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 11","margin A C = -9","margin A D = 53","margin B A = -11","margin B C = 29","margin B D = 53","margin C A = 9","margin C B = -29","margin C D = 53","margin D A = -53","margin D B = -53","margin D C = -53"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 12","margin A C = -8","margin A D = 54","margin B A = -12","margin B C = 30","margin B D = 54","margin C A = 8","margin C B = -30","margin C D = 54","margin D A = -54","margin D B = -54","margin D C = -54"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 13","margin A C = -9","margin A D = 55","margin B A = -13","margin B C = 29","margin B D = 55","margin C A = 9","margin C B = -29","margin C D = 55","margin D A = -55","margin D B = -55","margin D C = -55"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 14","margin A C = -8","margin A D = 56","margin B A = -14","margin B C = 30","margin B D = 56","margin C A = 8","margin C B = -30","margin C D = 56","margin D A = -56","margin D B = -56","margin D C = -56"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 15","margin A C = -7","margin A D = 57","margin B A = -15","margin B C = 31","margin B D = 57","margin C A = 7","margin C B = -31","margin C D = 57","margin D A = -57","margin D B = -57","margin D C = -57"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -6","margin A D = 58","margin B A = -16","margin B C = 32","margin B D = 58","margin C A = 6","margin C B = -32","margin C D = 58","margin D A = -58","margin D B = -58","margin D C = -58"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -5","margin A D = 59","margin B A = -17","margin B C = 33","margin B D = 59","margin C A = 5","margin C B = -33","margin C D = 59","margin D A = -59","margin D B = -59","margin D C = -59"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 18","margin A C = -6","margin A D = 60","margin B A = -18","margin B C = 32","margin B D = 60","margin C A = 6","margin C B = -32","margin C D = 60","margin D A = -60","margin D B = -60","margin D C = -60"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -7","margin A D = 61","margin B A = -17","margin B C = 33","margin B D = 61","margin C A = 7","margin C B = -33","margin C D = 61","margin D A = -61","margin D B = -61","margin D C = -61"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -8","margin A D = 62","margin B A = -16","margin B C = 34","margin B D = 62","margin C A = 8","margin C B = -34","margin C D = 62","margin D A = -62","margin D B = -62","margin D C = -62"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -9","margin A D = 63","margin B A = -17","margin B C = 33","margin B D = 63","margin C A = 9","margin C B = -33","margin C D = 63","margin D A = -63","margin D B = -63","margin D C = -63"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 18","margin A C = -10","margin A D = 64","margin B A = -18","margin B C = 32","margin B D = 64","margin C A = 10","margin C B = -32","margin C D = 64","margin D A = -64","margin D B = -64","margin D C = -64"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -11","margin A D = 65","margin B A = -17","margin B C = 31","margin B D = 65","margin C A = 11","margin C B = -31","margin C D = 65","margin D A = -65","margin D B = -65","margin D C = -65"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -12","margin A D = 66","margin B A = -16","margin B C = 32","margin B D = 66","margin C A = 12","margin C B = -32","margin C D = 66","margin D A = -66","margin D B = -66","margin D C = -66"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 15","margin A C = -13","margin A D = 67","margin B A = -15","margin B C = 33","margin B D = 67","margin C A = 13","margin C B = -33","margin C D = 67","margin D A = -67","margin D B = -67","margin D C = -67"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -14","margin A D = 68","margin B A = -16","margin B C = 32","margin B D = 68","margin C A = 14","margin C B = -32","margin C D = 68","margin D A = -68","margin D B = -68","margin D C = -68"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -13","margin A D = 69","margin B A = -17","margin B C = 33","margin B D = 69","margin C A = 13","margin C B = -33","margin C D = 69","margin D A = -69","margin D B = -69","margin D C = -69"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 18","margin A C = -12","margin A D = 70","margin B A = -18","margin B C = 34","margin B D = 70","margin C A = 12","margin C B = -34","margin C D = 70","margin D A = -70","margin D B = -70","margin D C = -70"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -13","margin A D = 71","margin B A = -17","margin B C = 33","margin B D = 71","margin C A = 13","margin C B = -33","margin C D = 71","margin D A = -71","margin D B = -71","margin D C = -71"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -14","margin A D = 72","margin B A = -16","margin B C = 32","margin B D = 72","margin C A = 14","margin C B = -32","margin C D = 72","margin D A = -72","margin D B = -72","margin D C = -72"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 15","margin A C = -15","margin A D = 73","margin B A = -15","margin B C = 33","margin B D = 73","margin C A = 15","margin C B = -33","margin C D = 73","margin D A = -73","margin D B = -73","margin D C = -73"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -14","margin A D = 74","margin B A = -16","margin B C = 34","margin B D = 74","margin C A = 14","margin C B = -34","margin C D = 74","margin D A = -74","margin D B = -74","margin D C = -74"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -13","margin A D = 75","margin B A = -17","margin B C = 35","margin B D = 75","margin C A = 13","margin C B = -35","margin C D = 75","margin D A = -75","margin D B = -75","margin D C = -75"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 18","margin A C = -12","margin A D = 76","margin B A = -18","margin B C = 36","margin B D = 76","margin C A = 12","margin C B = -36","margin C D = 76","margin D A = -76","margin D B = -76","margin D C = -76"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -13","margin A D = 77","margin B A = -17","margin B C = 37","margin B D = 77","margin C A = 13","margin C B = -37","margin C D = 77","margin D A = -77","margin D B = -77","margin D C = -77"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -14","margin A D = 78","margin B A = -16","margin B C = 38","margin B D = 78","margin C A = 14","margin C B = -38","margin C D = 78","margin D A = -78","margin D B = -78","margin D C = -78"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 15","margin A C = -15","margin A D = 79","margin B A = -15","margin B C = 39","margin B D = 79","margin C A = 15","margin C B = -39","margin C D = 79","margin D A = -79","margin D B = -79","margin D C = -79"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -14","margin A D = 80","margin B A = -16","margin B C = 40","margin B D = 80","margin C A = 14","margin C B = -40","margin C D = 80","margin D A = -80","margin D B = -80","margin D C = -80"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -13","margin A D = 81","margin B A = -17","margin B C = 41","margin B D = 81","margin C A = 13","margin C B = -41","margin C D = 81","margin D A = -81","margin D B = -81","margin D C = -81"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -14","margin A D = 82","margin B A = -16","margin B C = 42","margin B D = 82","margin C A = 14","margin C B = -42","margin C D = 82","margin D A = -82","margin D B = -82","margin D C = -82"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -15","margin A D = 83","margin B A = -17","margin B C = 41","margin B D = 83","margin C A = 15","margin C B = -41","margin C D = 83","margin D A = -83","margin D B = -83","margin D C = -83"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -16","margin A D = 84","margin B A = -16","margin B C = 40","margin B D = 84","margin C A = 16","margin C B = -40","margin C D = 84","margin D A = -84","margin D B = -84","margin D C = -84"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 15","margin A C = -17","margin A D = 85","margin B A = -15","margin B C = 39","margin B D = 85","margin C A = 17","margin C B = -39","margin C D = 85","margin D A = -85","margin D B = -85","margin D C = -85"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 14","margin A C = -18","margin A D = 86","margin B A = -14","margin B C = 40","margin B D = 86","margin C A = 18","margin C B = -40","margin C D = 86","margin D A = -86","margin D B = -86","margin D C = -86"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 15","margin A C = -17","margin A D = 87","margin B A = -15","margin B C = 41","margin B D = 87","margin C A = 17","margin C B = -41","margin C D = 87","margin D A = -87","margin D B = -87","margin D C = -87"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 16","margin A C = -18","margin A D = 88","margin B A = -16","margin B C = 40","margin B D = 88","margin C A = 18","margin C B = -40","margin C D = 88","margin D A = -88","margin D B = -88","margin D C = -88"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -17","margin A D = 89","margin B A = -17","margin B C = 41","margin B D = 89","margin C A = 17","margin C B = -41","margin C D = 89","margin D A = -89","margin D B = -89","margin D C = -89"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 18","margin A C = -18","margin A D = 90","margin B A = -18","margin B C = 40","margin B D = 90","margin C A = 18","margin C B = -40","margin C D = 90","margin D A = -90","margin D B = -90","margin D C = -90"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 19","margin A C = -17","margin A D = 91","margin B A = -19","margin B C = 41","margin B D = 91","margin C A = 17","margin C B = -41","margin C D = 91","margin D A = -91","margin D B = -91","margin D C = -91"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 18","margin A C = -18","margin A D = 92","margin B A = -18","margin B C = 40","margin B D = 92","margin C A = 18","margin C B = -40","margin C D = 92","margin D A = -92","margin D B = -92","margin D C = -92"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 17","margin A C = -19","margin A D = 93","margin B A = -17","margin B C = 39","margin B D = 93","margin C A = 19","margin C B = -39","margin C D = 93","margin D A = -93","margin D B = -93","margin D C = -93"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 18","margin A C = -18","margin A D = 94","margin B A = -18","margin B C = 40","margin B D = 94","margin C A = 18","margin C B = -40","margin C D = 94","margin D A = -94","margin D B = -94","margin D C = -94"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 19","margin A C = -19","margin A D = 95","margin B A = -19","margin B C = 39","margin B D = 95","margin C A = 19","margin C B = -39","margin C D = 95","margin D A = -95","margin D B = -95","margin D C = -95"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 20","margin A C = -18","margin A D = 96","margin B A = -20","margin B C = 40","margin B D = 96","margin C A = 18","margin C B = -40","margin C D = 96","margin D A = -96","margin D B = -96","margin D C = -96"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,1),(C,2),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 19","margin A C = -19","margin A D = 97","margin B A = -19","margin B C = 41","margin B D = 97","margin C A = 19","margin C B = -41","margin C D = 97","margin D A = -97","margin D B = -97","margin D C = -97"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,1),(B,2),(C,3),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 20","margin A C = -18","margin A D = 98","margin B A = -20","margin B C = 42","margin B D = 98","margin C A = 18","margin C B = -42","margin C D = 98","margin D A = -98","margin D B = -98","margin D C = -98"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,2),(B,3),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 21","margin A C = -19","margin A D = 99","margin B A = -21","margin B C = 41","margin B D = 99","margin C A = 19","margin C B = -41","margin C D = 99","margin D A = -99","margin D B = -99","margin D C = -99"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [[(A,3),(B,2),(C,1),(D,4)]....], Invalid Votes = [], Margin = ["margin A B = 20","margin A C = -20","margin A D = 100","margin B A = -20","margin B C = 40","margin B D = 100","margin C A = 20","margin C B = -40","margin C D = 100","margin D A = -100","margin D B = -100","margin D C = -100"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Votes = [], Invalid Votes = [], Margin = ["margin A B = 20","margin A C = -20","margin A D = 100","margin B A = -20","margin B C = 40","margin B D = 100","margin C A = 20","margin C B = -40","margin C D = 100","margin D A = -100","margin D B = -100","margin D C = -100"]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+A ---> Winner
+B ---> Winner
+C ---> Loser
+D ---> Loser
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Winner A
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Candidate = B
+Strength =  20
+Path from A to B = A --> B
+coclosed set = [Pair A B,Pair A C,Pair B A,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Candidate = C
+Strength =  20
+Path from A to C = A --> B --> C
+coclosed set = [Pair A B,Pair A C,Pair B A,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Candidate = D
+Strength =  -100
+Path from A to D = A --> D
+coclosed set = [Pair D A,Pair D B,Pair D C]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Winner B
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Candidate = A
+Strength =  20
+Path from B to A = B --> C --> A
+coclosed set = [Pair A B,Pair A C,Pair B A,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Candidate = C
+Strength =  20
+Path from B to C = B --> C
+coclosed set = [Pair A B,Pair A C,Pair B A,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Candidate = D
+Strength =  -100
+Path from B to D = B --> D
+coclosed set = [Pair D A,Pair D B,Pair D C]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Loser C
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Strength = 21
+Candidate that beats C = B
+Path from B to C = B --> C
+coclosed set = [Pair A B,Pair A C,Pair B A,Pair C A,Pair C B,Pair D A,Pair D B,Pair D C]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Loser D
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Strength = -99
+Candidate that beats D = A
+Path from A to D = A --> D
+coclosed set = [Pair D A,Pair D B,Pair D C]
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+

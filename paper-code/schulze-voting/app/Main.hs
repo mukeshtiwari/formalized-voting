@@ -32,29 +32,30 @@ charCand 'A' = A
 charCand 'B' = B
 charCand 'C' = C
 charCand 'D' = D
-charCand 'E' = E
+--charCand 'E' = E
 
 balfun :: [(Cand, Nat)] -> Ballot
-balfun ((A, b1) : (B, b2) : (C, b3) : (D, b4) : (E, b5) : _) = f where
+balfun ((A, b1) : (B, b2) : (C, b3) : (D, b4) {-: (E, b5) -}: _) = f where
   f :: Cand -> Nat
   f A = b1
   f B = b2
   f C = b3
   f D = b4
-  f E = b5
+  --f E = b5
 
 
-createCand :: P.Int -> IO ()
-createCand n = do 
-  t <- mapM shuffleM (P.replicate n "ABCDE")
-  writeFile ("votes_" P.++ P.show n P.++ ".txt") (P.unlines t)
+createCand :: IO ()
+createCand = do
+  let t = (P.replicate 40 "ABCD") P.++ (P.replicate 30 "BCAD") P.++ (P.replicate 20 "CABD") P.++ (P.replicate 10 "CBAD")
+  v <- shuffleM t
+  writeFile ("votes_rivest_shen.txt") (P.unlines v)
  
 
 main :: IO ()
 main = do
   {- call this function to create list of ballots -} 
-  -- createCand 10000
-   r <- readFile "votes_wiki.txt"
+   --createCand
+   r <- readFile "votes_rivest_shen.txt"
    let votes = final_count candEq P.. haskCoq P.. P.map balfun P..
               P.map (P.map (\(y, z) -> (charCand y, coqNat z))) 
               P.. P.map L.sort P.. P.map (\x ->  P.zip x [1..]) P.. P.lines P.$ r
