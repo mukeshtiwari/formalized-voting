@@ -437,7 +437,6 @@ l9 l h1 s f1 =
          ExistT x0 _ -> ExistT x0 __}}}) l __ h1 s f1 __
 
 
-
 {- Try to move this definition in other file -}
 data Cand = A | B | C | D | E
 
@@ -445,6 +444,13 @@ cand_all :: List Cand
 cand_all = Cons A (Cons B (Cons C (Cons D (Cons E Nil))))
 {- End of definition -}
 
+
+{-
+-- Three candidate dataset
+data Cand = A | B | C
+cand_all :: List Cand
+cand_all = Cons A (Cons B (Cons C Nil))
+-}
 
 data PathT =
    UnitT Cand Cand
