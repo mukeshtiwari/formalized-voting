@@ -54,7 +54,7 @@ createCand = do
 main :: IO ()
 main = do
   {- call this function to create list of ballots -} 
-   createCand
+   --createCand
    r <- readFile "votes_customized.txt"
    let votes = final_count candEq P.. haskCoq P.. P.map balfun P..
               P.map (P.map (\(y, z) -> (charCand y, coqNat z))) 
