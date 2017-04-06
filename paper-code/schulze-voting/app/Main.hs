@@ -46,16 +46,16 @@ balfun ((A, b1) : (B, b2) : (C, b3) : (D, b4) {-: (E, b5) -}: _) = f where
 
 createCand :: IO ()
 createCand = do
-  let t = (P.replicate 40 "ABCD") P.++ (P.replicate 30 "BCAD") P.++ (P.replicate 20 "CABD") P.++ (P.replicate 10 "CBAD")
+  let t = (P.replicate 4 "ABCD") P.++ (P.replicate 3 "BCAD") P.++ (P.replicate 2 "CABD") P.++ (P.replicate 1 "ACBD")
   v <- shuffleM t
-  writeFile ("votes_rivest_shen.txt") (P.unlines v)
+  writeFile ("votes_customized.txt") (P.unlines v)
  
 
 main :: IO ()
 main = do
   {- call this function to create list of ballots -} 
-   --createCand
-   r <- readFile "votes_rivest_shen.txt"
+   createCand
+   r <- readFile "votes_customized.txt"
    let votes = final_count candEq P.. haskCoq P.. P.map balfun P..
               P.map (P.map (\(y, z) -> (charCand y, coqNat z))) 
               P.. P.map L.sort P.. P.map (\x ->  P.zip x [1..]) P.. P.lines P.$ r
