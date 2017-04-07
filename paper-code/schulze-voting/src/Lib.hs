@@ -436,6 +436,7 @@ l9 l h1 s f1 =
         case iHl0 of {
          ExistT x0 _ -> ExistT x0 __}}}) l __ h1 s f1 __
 
+
 {-
 {- Try to move this definition in other file -}
 data Cand = A | B | C | D | E
@@ -445,12 +446,10 @@ cand_all = Cons A (Cons B (Cons C (Cons D (Cons E Nil))))
 {- End of definition -}
 -}
 
-
--- Three candidate dataset
 data Cand = A | B | C | D
+
 cand_all :: List Cand
 cand_all = Cons A (Cons B (Cons C (Cons D Nil)))
-
 
 data PathT =
    UnitT Cand Cand
@@ -500,13 +499,12 @@ l10 dec_cand marg n s c d =
        ExistT x _ -> let {iHn0 = iHn s0 x d0 __} in ConsT c0 x d0 iHn0};
      _ -> iHn s0 c0 d0 __}) n s c d __
 
-l15 :: (Cand -> Cand -> Sumbool) -> (Cand -> Cand -> Z) -> Cand -> Cand ->
-       SigT Z (Prod PathT (SigT ((Prod Cand Cand) -> Bool) ()))
+l15 :: (Cand -> Cand -> Sumbool) -> (Cand -> Cand -> Z) -> Cand -> Wins_type
 l15 dec_cand marg c d =
-  let {s = m marg (length cand_all) d c} in
+  let {s = m marg (length cand_all) c d} in
   ExistT s
-  (let {h = l10 dec_cand marg (length cand_all) s c d} in
-   Pair h (ExistT (\x -> leb (m marg (length cand_all) (fst x) (snd x)) s)
+  (let {h1 = l10 dec_cand marg (length cand_all) s c d} in
+   Pair h1 (ExistT (\x -> leb (m marg (length cand_all) (fst x) (snd x)) s)
    __))
 
 constructive_deci_cand :: (Cand -> Cand -> Z) -> Cand -> Cand -> Sumbool
@@ -561,18 +559,15 @@ g n =
    Left -> g_obligation_1 n;
    Right -> g0 n cand_all}
 
-l18 :: (Cand -> Cand -> Sumbool) -> (Cand -> Cand -> Z) -> Cand -> SigT 
-       Z (SigT Cand (Prod PathT (SigT ((Prod Cand Cand) -> Bool) ())))
+l18 :: (Cand -> Cand -> Sumbool) -> (Cand -> Cand -> Z) -> Cand -> Loses_type
 l18 dec_cand marg c =
   let {
    x = constructive_indefinite_ground_description (f dec_cand) g
          (constructive_deci_cand marg c)}
   in
-  let {s = m marg (length cand_all) c x} in
-  ExistT (add0 s (Zpos XH)) (ExistT x (Pair
-  (l10 dec_cand marg (length cand_all) (add0 s (Zpos XH)) x c) (ExistT
-  (\x0 ->
-  ltb (m marg (length cand_all) (fst x0) (snd x0)) (add0 s (Zpos XH))) __)))
+  let {s = m marg (length cand_all) x c} in
+  ExistT s (ExistT x (Pair (l10 dec_cand marg (length cand_all) s x c)
+  (ExistT (\x0 -> ltb (m marg (length cand_all) (fst x0) (snd x0)) s) __)))
 
 wins_loses_M :: (Cand -> Cand -> Sumbool) -> (Cand -> Cand -> Z) -> Cand ->
                 Sum Wins_type Loses_type

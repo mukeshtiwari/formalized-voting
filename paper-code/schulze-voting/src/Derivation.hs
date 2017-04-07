@@ -48,9 +48,11 @@ instance P.Show PathT where
   show (UnitT x y) = P.show x P.++ " --> " P.++ P.show y
   show (ConsT x _ _ p) = P.show x P.++ " --> " P.++ P.show p
 
+
+
 -- deriving instance (P.Show PathT)
 instance P.Show (SigT (Cand -> Bool) (SigT Count ())) where
-  show (ExistT f (ExistT v _)) = {- P.unlines (P.map (\x -> P.show x P.++ " ---> " P.++ if (f x) P.== True then "Winner" else "Loser") (c2hl cand_all)) P.++ "\n\n" P.++ -} P.show v
+  show (ExistT f (ExistT v _)) = P.show v
 
 
 show_winner :: Wins_type -> Cand -> [Cand] -> P.String
@@ -58,52 +60,42 @@ show_winner g x [] = ""
 show_winner g x (y : ys) =
   case (g y) of 
    (ExistT u (Pair v (ExistT f _))) -> 
-    "Candidate = " P.++ P.show y P.++ "\n" P.++ 
-    "Strength = " P.++ " " P.++ P.show (haskZ u) P.++ "\n" P.++ 
-    "Path from " P.++ P.show x P.++ " to " P.++ P.show y P.++ " = " P.++ P.show v P.++ "\n" P.++ 
-    "coclosed set = " P.++ P.show (P.filter (\x -> f x P.== True) [Pair a b | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b])
-     P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n" P.++ show_winner g x ys
+    "   for " P.++ P.show y P.++ ": " P.++ "path " P.++ P.show v P.++ " of strenght "  P.++ P.show (haskZ u) P.++  ", " P.++ 
+    P.show (1 P.+ haskZ u) P.++ "-" P.++ "coclosed set: " P.++ P.show (P.filter (\(xx, yy) -> f (Pair xx yy) P.== True) [(a, b) | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b])
+    P.++ "\n" P.++ show_winner g x ys
 
 
 show_loser :: Loses_type -> Cand -> P.String
 show_loser g x = 
   case g of 
    (ExistT u (ExistT c (Pair p (ExistT f _)))) -> 
-    "Strength = " P.++ P.show (haskZ u) P.++ "\n" P.++ 
-    "Candidate that beats " P.++ P.show x P.++ " = " P.++ P.show c P.++ "\n" P.++ 
-    "Path from " P.++ P.show c P.++ " to " P.++ P.show x P.++ " = " P.++ P.show p P.++ "\n" P.++
-    "coclosed set = " P.++ P.show (P.filter (\x -> f x P.== True) [Pair a b | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b])
-     P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"
+    "   for " P.++ P.show c P.++ ": " P.++ "path " P.++ P.show p P.++ " of strength >= " P.++ P.show (haskZ u) P.++ ", " P.++
+    P.show (haskZ u) P.++ "-" P.++ "coclosed set: " P.++ P.show (P.filter (\(xx, yy) -> f (Pair xx yy) P.== True) [(a, b) | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b])
 
 
 show_cand :: (Cand -> Sum Wins_type Loses_type) -> Cand -> P.String
 show_cand f x =
    case (f x) of
-    Inl g -> "Winner " P.++ P.show x  P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n" 
-                       P.++ show_winner g x (P.filter (\y -> y P./= x) (c2hl cand_all)) P.++ "\n"
-    Inr h -> "Loser "  P.++ P.show x  P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n" 
-                       P.++ show_loser h x P.++ "\n"
+    Inl g -> "winning: " P.++ P.show x  P.++ "\n" P.++ show_winner g x (P.filter (\y -> y P./= x) (c2hl cand_all))
+    Inr h -> "losing: "  P.++ P.show x  P.++ "\n" P.++ show_loser h x
 
-show_ballot :: Ballot -> [(Cand, P.Int)]
-show_ballot f = P.map (\x -> (x, haskInt (f x)))  (c2hl cand_all)
+show_ballot :: Ballot -> P.String
+show_ballot f = P.unwords (P.map (\x -> P.show x P.++ P.show (haskInt (f x)))  (c2hl cand_all))
 
 show_list_ballot :: List Ballot -> P.String
 show_list_ballot ls = P.show (P.map show_ballot (c2hl ls))
 
 show_marg :: (Cand -> Cand -> Z) -> P.String
-show_marg m = P.show (P.map (\(x, y) -> "margin " P.++ P.show x P.++ " " P.++ P.show y P.++ " = " P.++ P.show (haskZ (m x y))) [(a, b) | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b])
+show_marg m = "[" P.++ P.unwords (P.map (\(x, y) -> P.show x P.++ P.show y P.++ ":" P.++ P.show (haskZ (m x y))) [(a, b) | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b]) P.++ "]"
 
 instance P.Show Count where
-  show (Ax ls m) = "Votes = " P.++ show_list_ballot ls P.++ ", Invalid Votes = [] " P.++ ", Margin = " P.++ show_marg m 
+  show (Ax ls m) = ""
+  show (Cvalid u us m nm inbs c) = P.show c P.++ "V = [" P.++ show_ballot u P.++ ",....]" P.++ ", I = " P.++ show_list_ballot inbs  P.++ ", M = " P.++ show_marg m
                                       P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"
-  show (Cvalid u us m nm inbs c) = P.show c P.++ "Votes = [" P.++ P.show (show_ballot u) P.++ "....]" P.++ ", Invalid Votes = " P.++ show_list_ballot inbs  P.++ ", Margin = " P.++ show_marg nm
+  show (Cinvalid u us m inbs c) = P.show c P.++ "I = [" P.++ show_ballot u P.++ ",....], I = " P.++ show_list_ballot inbs P.++ ", M = " P.++ show_marg m
                                       P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"
-  show (Cinvalid u us m inbs c) = P.show c P.++ "Invalid Vote = [" P.++ P.show (show_ballot u) P.++ "....], Invalid Votes = " P.++ show_list_ballot inbs P.++ ", Margin = " P.++ show_marg m
-                                      P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"
-  show (Fin m ls p f c) =  P.show c P.++ "Votes = [], Invalid Votes = " P.++ show_list_ballot ls P.++ ", Margin = " P.++ show_marg m
-                                    P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"  
-                                    P.++ P.unlines (P.map (\x -> P.show x P.++ " ---> " P.++ if (p x) P.== True then "Winner" else "Loser") (c2hl cand_all)) 
-                                    P.++ "----------------------------------------------------------------------------------------------------------------------------------------------------\n\n\n"
+  show (Fin m ls p f c) =  P.show c P.++ "V = [], I = " P.++ show_list_ballot ls P.++ ", M = " P.++ show_marg m
+                                    P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"
                                     P.++ (P.unlines P.$ P.map (show_cand f) (c2hl cand_all))
 
 
