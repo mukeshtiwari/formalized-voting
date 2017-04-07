@@ -11,8 +11,11 @@ cand_all =
 cand_all = Cons A (Cons B (Cons C (Cons D Nil)))" (Double quotes are for clarity). 
 
 Now run 
+
 > make runmain
 >./Main
+
 If you want to re-run the program then run 
+
 > make cleanlib
 > make cleanmain
