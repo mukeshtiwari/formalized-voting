@@ -86,7 +86,7 @@ show_list_ballot :: List Ballot -> P.String
 show_list_ballot ls = P.show (P.map show_ballot (c2hl ls))
 
 show_marg :: (Cand -> Cand -> Z) -> P.String
-show_marg m = "[" P.++ P.unwords (P.map (\(x, y) -> P.show x P.++ P.show y P.++ ":" P.++ P.show (haskZ (m x y))) [(a, b) | a <- (c2hl cand_all), b <- (c2hl cand_all), a P./= b]) P.++ "]"
+show_marg m = "[" P.++ P.unwords (P.map (\(x, y) -> P.show x P.++ P.show y P.++ ":" P.++ P.show (haskZ (m x y))) [(a, b) | a <- (c2hl cand_all), b <- (c2hl cand_all), b P.> a]) P.++ "]"
 
 instance P.Show Count where
   show (Ax ls m) = ""
