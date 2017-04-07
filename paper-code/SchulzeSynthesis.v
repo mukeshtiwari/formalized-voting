@@ -766,4 +766,4 @@ Section Schulze.
   End Count.
 
 End Schulze.
-Check final_count.
+
