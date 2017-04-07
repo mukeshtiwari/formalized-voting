@@ -17,7 +17,6 @@ deriving instance (P.Eq Nat)
 deriving instance (P.Ord Nat)
 deriving instance (P.Show a, P.Show b) => P.Show (Sum a b)
 deriving instance (P.Show a, P.Show b) => P.Show (Prod a b)
-  -- show (Pair a b) = "(" P.++ P.show a P.++ ", " P.++ P.show b ")"
 
 deriving instance (P.Show a) => P.Show (List a)
 deriving instance (P.Show Comparison)
@@ -25,7 +24,6 @@ deriving instance (P.Show Sumbool)
 deriving instance (P.Show a) => P.Show (Sumor a)
 deriving instance (P.Show Positive)
 deriving instance (P.Show Z)
-
 
 haskInt :: Nat -> P.Int
 haskInt O = 0
@@ -88,11 +86,15 @@ show_list_ballot ls = P.show (P.map show_ballot (c2hl ls))
 show_marg :: (Cand -> Cand -> Z) -> P.String
 show_marg m = "[" P.++ P.unwords (P.map (\(x, y) -> P.show x P.++ P.show y P.++ ":" P.++ P.show (haskZ (m x y))) [(a, b) | a <- (c2hl cand_all), b <- (c2hl cand_all), b P.> a]) P.++ "]"
 
+bool_b :: List Ballot -> P.Bool
+bool_b Nil = P.True
+bool_b _ = P.False
+
 instance P.Show Count where
   show (Ax ls m) = ""
-  show (Cvalid u us m nm inbs c) = P.show c P.++ "V = [" P.++ show_ballot u P.++ ",....]" P.++ ", I = " P.++ show_list_ballot inbs  P.++ ", M = " P.++ show_marg m
+  show (Cvalid u us m nm inbs c) = P.show c P.++ "V = [" P.++ show_ballot u P.++ (if bool_b us P.== P.True then "]" else ",....]") P.++ ", I = " P.++ show_list_ballot inbs  P.++ ", M = " P.++ show_marg m
                                       P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"
-  show (Cinvalid u us m inbs c) = P.show c P.++ "I = [" P.++ show_ballot u P.++ ",....], I = " P.++ show_list_ballot inbs P.++ ", M = " P.++ show_marg m
+  show (Cinvalid u us m inbs c) = P.show c P.++ "I = [" P.++ show_ballot u P.++ (if bool_b us P.== P.True then "]" else ",....]") P.++ ", I = " P.++ show_list_ballot inbs P.++ ", M = " P.++ show_marg m
                                       P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"
   show (Fin m ls p f c) =  P.show c P.++ "V = [], I = " P.++ show_list_ballot ls P.++ ", M = " P.++ show_marg m
                                     P.++ "\n----------------------------------------------------------------------------------------------------------------------------------------------------\n"
