@@ -392,33 +392,28 @@ Section Schulze.
     Qed.
     
     Lemma L15 (c : cand) :
-      (forall d, M (length cand_all) d c <= M (length cand_all) c d) ->
-      forall d : cand, existsT (k : Z),
-      ((PathT k c d) *
-       (existsT (f : (cand * cand) -> bool),
-        f (d, c) = true /\ coclosed (k + 1) f))%type.
+      (forall d, M (length cand_all) d c <= M (length cand_all) c d) -> wins_type c.
     Proof.
-      intros. specialize (H d). remember (M (length cand_all) d c) as s.
-      exists s. apply Z.le_ge in H. apply L10 in H. split. auto.
+      unfold wins_type. intros. specialize (H d). remember (M (length cand_all) c d) as s.
+      exists s. assert (H1 : M (length cand_all) c d >= s) by omega. clear Heqs.
+      apply L10 in H1. split. auto.
       exists (fun x => M (length cand_all) (fst x) (snd x) <=? s). simpl in *. split.
-      apply Z.leb_le. omega.    
-      unfold coclosed. intros. destruct x as (x, z). simpl in *.
-      apply Z.leb_le in H0. unfold W. apply andb_true_iff. split.
+      apply Z.leb_le. omega. unfold coclosed. intros. destruct x as (x, z).
+      simpl in *. apply Z.leb_le in H0. unfold W. apply andb_true_iff. split.
       unfold marg_lt. simpl. apply Z.ltb_lt.
-      assert (marg x z <= s -> marg x z < s + 1) by omega.
-      apply H1. clear H1. clear Heqs.
       induction (length cand_all). simpl in *. auto.
-      simpl in H0. apply Z.max_lub_iff in H0.
-      destruct H0. specialize (IHn H0). auto.    
-      apply forallb_forall. intros y Hy. simpl in *.
+      simpl in H0. omega. simpl in H0. apply Z.max_lub_iff in H0.
+      destruct H0. simpl in H. apply Z.max_lub_iff in H. destruct H.
+      apply IHn; assumption.   
+      apply forallb_forall.  intros y Hy. simpl in *.
       apply orb_true_iff. unfold marg_lt. simpl.
       assert (marg x y <= s \/ marg x y >= s + 1) by omega.
-      destruct H1. left. apply Z.ltb_lt. omega.
+      destruct H2. left. apply Z.ltb_lt. omega.
       right. apply Z.leb_le.
       assert (M (length cand_all) y z <= s \/ M (length cand_all) y z >= s + 1) by omega.
-      destruct H2. auto.
-      apply L1 in H2. pose proof (cons _ _ _ _ H1 H2).
-      apply L2 in H3. destruct H3 as [n H3].
+      destruct H3. auto.
+      apply L1 in H3. pose proof (cons _ _ _ _ H2 H3).
+      apply L2 in H4. destruct H4 as [n H4].
       pose proof (L4 x z n). omega.
     Defined.
     
@@ -776,4 +771,4 @@ Section Schulze.
   End Count.
 
 End Schulze.
-
+Check final_count.
