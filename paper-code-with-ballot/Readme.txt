@@ -13,4 +13,6 @@ cand_all = Cons A (Cons B (Cons C (Cons D Nil)))
 Now run 
 > ghc Main.hs
 >./Main
-
+If you want to re-run the program then run 
+> make clean
+> rm -rf *.hi *.o Main
