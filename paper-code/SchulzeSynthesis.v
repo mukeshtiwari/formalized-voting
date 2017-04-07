@@ -551,38 +551,33 @@ Section Schulze.
     Qed.
     
     Lemma L18 (c : cand) :
-      (exists d, M (length cand_all) c d < M (length cand_all) d c) ->
-      (existsT (k : Z) (d : cand),
-       ((PathT k d c) *
-        (existsT (f : (cand * cand) -> bool),
-         f (c, d) = true /\ coclosed k f))%type).
+      (exists d, M (length cand_all) c d < M (length cand_all) d c) -> loses_type c.
     Proof.
-      intros.
+      unfold loses_type. intros.
       pose proof
            (constructive_indefinite_ground_description
               _ f g L17 (constructive_prop c) (constructive_deci_cand c) H).
       destruct X as [d X]. unfold constructive_prop in X.
-      remember (M (length cand_all) c d) as s.
-      assert (s + 1 <= M (length cand_all) d c) by omega.
-      exists (s + 1), d. split. apply Z.le_ge in H0.
-      apply L10 in H0. auto.
-      exists (fun x => M (length cand_all) (fst x) (snd x) <? s + 1).  
+      remember (M (length cand_all) d c) as s. exists s, d.
+      split. assert (H1 : M (length cand_all) d c >= s) by omega.
+      apply L10 in H1. auto.
+      exists (fun x => M (length cand_all) (fst x) (snd x) <? s).  
       simpl in *. split. apply Z.ltb_lt. omega.
       unfold coclosed. intros x; destruct x as (x, z); simpl in *.
-      intros. apply Z.ltb_lt in H1. unfold W.
+      intros. apply Z.ltb_lt in H0. unfold W.
       apply andb_true_iff. split. unfold marg_lt. simpl. apply Z.ltb_lt.
-      clear H. clear Heqs. clear X. clear H0.
+      clear H. clear Heqs. clear X.
       induction (length cand_all). simpl in *. omega.
-      simpl in H1. apply Z.max_lub_lt_iff in H1. destruct H1. apply IHn. auto.
+      simpl in H0. apply Z.max_lub_lt_iff in H0. destruct H0. apply IHn. auto.
       apply forallb_forall. intros y Hy.
       apply orb_true_iff. unfold marg_lt. simpl.
-      assert (marg x y < s + 1 \/ marg x y >= s + 1) by omega.
-      destruct H2. left. apply Z.ltb_lt. auto.
+      assert (marg x y < s \/ marg x y >= s) by omega.
+      destruct H1. left. apply Z.ltb_lt. auto.
       right. apply Z.ltb_lt.
-      assert (M (length cand_all) y z < s + 1 \/ M (length cand_all) y z >= s + 1) by omega.
-      destruct H3. auto.
-      apply L1 in H3.  pose proof (Evote.cons _ _ _ _ H2 H3).
-      apply L2 in H4. destruct H4 as [n H4].
+      assert (M (length cand_all) y z < s \/ M (length cand_all) y z >= s) by omega.
+      destruct H2. auto.
+      apply L1 in H2.  pose proof (Evote.cons _ _ _ _ H1 H2).
+      apply L2 in H3. destruct H3 as [n H3].
       pose proof (L4 x z n). omega.
     Defined.
     
