@@ -8,7 +8,7 @@ It will generated Haskell library Lib.hs for counting. Go to line 439 in Lib.hs,
 cand_all =
   Prelude.error "AXIOM TO BE REALIZED"" by 
 "cand_all :: List Cand
-cand_all = Cons A (Cons B (Cons C (Cons D Nil)))"
+cand_all = Cons A (Cons B (Cons C (Cons D Nil)))" (Double quotes are for clarity). 
 
 Now run 
 > make runmain
