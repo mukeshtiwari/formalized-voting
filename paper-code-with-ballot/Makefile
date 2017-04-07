@@ -1,7 +1,4 @@
-all : Lib.hs
-
-#Main : Lib.hs Derivation.hs Main.hs
-#	ghc -O2 Main.hs
+extractlib : Lib.hs
 
 Lib.hs : Extraction.vo
 	@coqc Extraction.v
@@ -13,6 +10,14 @@ SchulzeSynthesis.vo : ListLemma.v
 	@coqc ListLemma.v
 
 
-clean:
+cleanlib:
 	@rm Lib.hs *.vo *.glob 2>/dev/null
 
+
+runmain : Main
+
+Main : Lib.hs Derivation.hs Main.hs
+	ghc -O2 Main.hs
+
+cleanmain : 
+	@rm -rf *.hi *.o Main 2>/dev/null

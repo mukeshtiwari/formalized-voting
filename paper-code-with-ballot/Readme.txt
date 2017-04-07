@@ -1,5 +1,5 @@
 Run the following on terminal.
-> make all
+> make extractlib
 It will generated Haskell library for counting. Go to line 439,replace 
 type Cand = () 
 with 
@@ -11,8 +11,8 @@ cand_all :: List Cand
 cand_all = Cons A (Cons B (Cons C (Cons D Nil)))
 
 Now run 
-> ghc Main.hs
+> make runmain
 >./Main
 If you want to re-run the program then run 
-> make clean
-> rm -rf *.hi *.o Main
+> make cleanlib
+> make cleanmain
