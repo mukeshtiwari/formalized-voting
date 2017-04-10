@@ -643,6 +643,9 @@ Section Schulze.
     (* ballot is valid if foreach candidate there is number greater than zero *)
     Definition ballot_valid (p : ballot) : Prop :=
       forall c : cand, (p c > 0)%nat.
+
+    Definition ballot_invalid (p : ballot) : Prop :=
+      exists c : cand, p c = 0%nat.
     
     Inductive Node : Type :=
     | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
@@ -650,11 +653,15 @@ Section Schulze.
     
     (* earlier c d p means that c occurs earlier in the ballot p *)
     Definition earlier (c d : cand) (p : ballot) : Prop :=
-      (p c > 0)%nat /\ (p d > 0)%nat /\ (p c < p d)%nat.
+     (p c < p d)%nat.
+
+    (* later c d p means that c occurs later than d in ballot p *)
+    Definition later (c d : cand) (p : ballot) : Prop :=
+      (p c > p d)%nat.
     
     (* equal c d p means that both c and d have same rank/preference in ballot p *)
     Definition equal (c d : cand) (p : ballot) : Prop :=
-      (p c > 0)%nat /\ (p d > 0)%nat /\ (p c = p d)%nat.
+      (p c = p d)%nat.
     
     Theorem in_decidable :
       forall (b : ballot) (l : list cand),
@@ -669,31 +676,48 @@ Section Schulze.
     Qed.
     
     (* each ballot is either valid or invalid *)
-    Lemma valid_or_invalid_ballot : forall b : ballot, {ballot_valid b} + {~ballot_valid b}.
+    Lemma valid_or_invalid_ballot : forall b : ballot, {(forall c, (b c > 0)%nat)} + {~(forall c, (b c > 0)%nat)}.
     Proof.
       intros b. pose proof in_decidable b cand_all.
       destruct H; [left | right]; firstorder. 
     Qed.
+
+    Lemma ballot_invalid_not_ballot_valid : forall b : ballot, ballot_invalid b <-> ~(ballot_valid b).
+    Proof.
+      unfold ballot_invalid, not, ballot_valid; split; intros.
+      destruct H. specialize (H0 x). omega.
+      
+      
+      
+      
+            
+      
+    
     
     (* null tally *)
     Definition nty (c d : cand) := 0%Z.
-    
-    Definition incdec (c d : cand) (t: cand -> cand -> Z)
+   
+
+    Definition increment (c d : cand) (t : cand -> cand -> Z)
                (nt : cand -> cand -> Z) : Prop :=
-      (nt c d = t c d + 1)%Z /\
-      (nt d c = t d c - 1)%Z.
+      nt c d = t c d + 1.
+
+    Definition decrement (c d : cand) (t : cand -> cand -> Z)
+               (nt : cand -> cand -> Z) : Prop :=
+      nt c d = t c d - 1.
     
     Definition nochange (c d : cand) (t : cand -> cand -> Z)
                (nt : cand -> cand -> Z) : Prop :=
       nt c d = t c d.
     
-    
+    (*
     Inductive Count (bs : list ballot) : Node -> Type :=
     | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
     | cvalid u us m nm inbs :
         Count bs (state (u :: us, inbs) m) -> ballot_valid u -> 
-        (forall c d : cand, (earlier c d u -> incdec c d m nm) /\
-                       (equal c d u -> nochange c d m nm)) ->
+        (forall c d : cand, (earlier c d u -> increment c d m nm) /\
+                       (equal c d u -> nochange c d m nm) /\
+                       (later c d u -> decrement c d m nm)) ->
         Count bs (state (us, inbs) nm)
     | cinvalid u us m inbs :
         Count bs (state (u :: us, inbs) m) -> ~(ballot_valid u) ->
@@ -703,34 +727,77 @@ Section Schulze.
         (forall c, w c = true <-> (exists x, d c = inl x)) ->
         (forall c, w c = false <-> (exists x, d c = inr x)) ->
         Count bs (winners w).
+     *)
     
-    Definition incdect (p : ballot) (m : cand -> cand -> Z) :
-      cand -> cand -> Z :=
-      fun c d =>
-        match nat_compare_alt (p c) (p d) with
-        | Lt => (m c d + 1)%Z
-        | Eq => m c d
-        | Gt => (m c d - 1)%Z
-        end.
+    Inductive Count (bs : list ballot) : Node -> Type :=
+    | ax us m : us = bs -> m = nty -> Count bs (state (us, []) m)
+    | cvalid u us m nm inbs :
+        Count bs (state (u :: us, inbs) m) -> (forall c, (u c > 0)%nat) -> 
+        (forall c d : cand, ((u c < u d)%nat -> nm c d = m c d + 1) /\
+                       ((u c = u d)%nat -> nm c d = m c d) /\
+                       ((u c > u d)%nat -> nm c d = m c d - 1)) ->
+        Count bs (state (us, inbs) nm)
+    | cinvalid u us m inbs :
+        Count bs (state (u :: us, inbs) m) -> ~(forall c, (u c > 0)%nat) ->
+        Count bs (state (us, u :: inbs) m)
+    | fin m inbs w (d : (forall c, (wins_type m c) + (loses_type m c))):
+        Count bs (state ([], inbs) m) ->
+        (forall c, w c = true <-> (exists x, d c = inl x)) ->
+        (forall c, w c = false <-> (exists x, d c = inr x)) ->
+        Count bs (winners w).
+
+ 
+
+    Definition incdect (p : ballot) (m : cand -> cand -> Z) : cand -> cand -> Z :=
+      fun c d =>  if (Nat.ltb (p c) (p d))%nat then (m c d + 1)%Z
+               else (if (Nat.ltb (p d) (p c))%nat then (m c d -1)%Z
+                     else m c d).
     
-    
+    (*
     Lemma incdec_proof : forall m (p : ballot) (c d : cand),
-      (earlier c d p -> incdec c d m (incdect p m)) /\
-      (equal c d p -> nochange c d m (incdect p m)).
+        (earlier c d p -> increment c d m (incdect p m)) /\
+        (later c d p -> decrement c d m (incdect p m)) /\
+        (equal c d p -> nochange c d m (incdect p m)).
     Proof.
       intros m p c d. split; intros.
-      unfold earlier in H. unfold incdec. unfold incdect.
-      destruct H as [H1 [H2 H3]]. split.
-      unfold nat_compare_alt. destruct (lt_eq_lt_dec (p c) (p d)) eqn:H.
-      destruct s. auto. omega. omega.
-      unfold nat_compare_alt. destruct (lt_eq_lt_dec (p d) (p c)) eqn:H.
-      destruct s. omega. omega. auto.
-      unfold equal in H. destruct H as [H1 [H2 H3]].
-      unfold nochange, incdect, nat_compare_alt.
-      rewrite H3. destruct (lt_eq_lt_dec (p d) (p d)) eqn:H.
-      destruct s; omega. omega.
+      unfold earlier in H. unfold increment, incdect.
+      destruct (p c <? p d)%nat eqn: H1. omega.
+      destruct (p d <? p c)%nat eqn: H2. apply Nat.ltb_lt in H2.
+      apply Nat.ltb_ge in H1. omega.
+      apply Nat.ltb_ge in H2. apply Nat.ltb_ge in H1. omega.
+      split; intros. unfold decrement, incdect. 
+      destruct (p c <? p d)%nat eqn: H1. unfold later in H.
+      apply Nat.ltb_lt in H1. omega. unfold later in H.
+      apply Nat.ltb_ge in H1. destruct (p d <? p c)%nat eqn: H2. apply Nat.ltb_lt in H2.
+      apply Nat.ltb_ge in H1. omega. apply Nat.ltb_ge in H2. omega.
+      unfold nochange, incdect. unfold equal in H.
+      destruct (p c <? p d)%nat eqn:H1. apply Nat.ltb_lt in H1. omega.
+      apply Nat.ltb_ge in H1. destruct (p d <? p c)%nat eqn: H2.
+      apply Nat.ltb_lt in H2. omega. omega.
+    Qed. *)
+
+    Lemma incdec_proof : forall m (p : ballot) (c d : cand),
+        ((p c < p d)%nat -> incdect p m c d = m c d + 1) /\
+        ((p c = p d)%nat -> incdect p m c d = m c d) /\
+        ((p c > p d)%nat -> incdect p m c d = m c d - 1).
+    Proof.
+      intros m p c d. split; intros; unfold incdect.
+      destruct (p c <? p d)%nat eqn: H1. omega.
+      destruct (p d <? p c)%nat eqn: H2. apply Nat.ltb_lt in H2.
+      apply Nat.ltb_ge in H1. omega.
+      apply Nat.ltb_ge in H2. apply Nat.ltb_ge in H1. omega.
+      split; intros. 
+      destruct (p c <? p d)%nat eqn: H1.
+      apply Nat.ltb_lt in H1. omega.
+      apply Nat.ltb_ge in H1. destruct (p d <? p c)%nat eqn: H2. apply Nat.ltb_lt in H2.
+      apply Nat.ltb_ge in H1. omega. apply Nat.ltb_ge in H2. omega.
+      unfold incdect.
+      destruct (p c <? p d)%nat eqn:H1. apply Nat.ltb_lt in H1. omega.
+      apply Nat.ltb_ge in H1. destruct (p d <? p c)%nat eqn: H2.
+      apply Nat.ltb_lt in H2. omega. apply Nat.ltb_ge in H2. omega.
     Qed.
     
+      
     Lemma extract_prog_gen : forall bs u inbs m,
         Count bs (state (u, inbs) m) -> existsT i m, (Count bs (state ([], i) m)).
     Proof.
@@ -742,7 +809,7 @@ Section Schulze.
       specialize (IHu (a :: inbs) m X0).
       destruct IHu as [Hinv [Hmar H3]].
       exists Hinv, Hmar. assumption.
-      intros. pose proof (cvalid bs a u m (incdect a m) inbs X b (incdec_proof m a)).
+      intros. pose proof (cvalid bs a u m (incdect a m) inbs X g1 (incdec_proof m a)).
       specialize (IHu inbs (incdect a m) X0). destruct IHu as [Hinv [Hm H]].
       exists Hinv, Hm. assumption.
     Defined.
@@ -751,6 +818,7 @@ Section Schulze.
       forall (bs : list ballot), existsT i m, (Count bs (state ([], i) m)). 
     Proof.
       intros bs.
+      Check extract_prog_gen.
       pose proof (extract_prog_gen bs bs [] nty (ax bs bs nty eq_refl eq_refl)).
       destruct X as [i [m Hc]].
       exists i, m. assumption.
