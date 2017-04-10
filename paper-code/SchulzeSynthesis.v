@@ -644,8 +644,6 @@ Section Schulze.
     Definition ballot_valid (p : ballot) : Prop :=
       forall c : cand, (p c > 0)%nat.
 
-    Definition ballot_invalid (p : ballot) : Prop :=
-      exists c : cand, p c = 0%nat.
     
     Inductive Node : Type :=
     | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
@@ -682,10 +680,11 @@ Section Schulze.
       destruct H; [left | right]; firstorder. 
     Qed.
 
+    (*
     Lemma ballot_invalid_not_ballot_valid : forall b : ballot, ballot_invalid b <-> ~(ballot_valid b).
     Proof.
       unfold ballot_invalid, not, ballot_valid; split; intros.
-      destruct H. specialize (H0 x). omega.
+      destruct H. specialize (H0 x). omega. *)
       
       
       
@@ -697,7 +696,7 @@ Section Schulze.
     (* null tally *)
     Definition nty (c d : cand) := 0%Z.
    
-
+    (*
     Definition increment (c d : cand) (t : cand -> cand -> Z)
                (nt : cand -> cand -> Z) : Prop :=
       nt c d = t c d + 1.
@@ -710,7 +709,7 @@ Section Schulze.
                (nt : cand -> cand -> Z) : Prop :=
       nt c d = t c d.
     
-    (*
+   
     Inductive Count (bs : list ballot) : Node -> Type :=
     | ax us t : us = bs -> t = nty -> Count bs (state (us, []) t)
     | cvalid u us m nm inbs :
