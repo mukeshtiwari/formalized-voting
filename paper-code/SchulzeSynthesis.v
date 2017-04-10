@@ -648,7 +648,8 @@ Section Schulze.
     Inductive Node : Type :=
     | state : (list ballot * list ballot)  -> (cand -> cand -> Z) -> Node
     | winners : (cand -> bool) ->  Node.
-    
+
+    (*
     (* earlier c d p means that c occurs earlier in the ballot p *)
     Definition earlier (c d : cand) (p : ballot) : Prop :=
      (p c < p d)%nat.
@@ -660,6 +661,7 @@ Section Schulze.
     (* equal c d p means that both c and d have same rank/preference in ballot p *)
     Definition equal (c d : cand) (p : ballot) : Prop :=
       (p c = p d)%nat.
+     *)
     
     Theorem in_decidable :
       forall (b : ballot) (l : list cand),
