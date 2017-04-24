@@ -684,6 +684,8 @@ Section Schulze.
 
     (* for every list of incoming ballots, we can progress the count to a state where all
      ballots are processed *)
+
+    (*
     Lemma all_ballots_counted:
       forall (bs : list ballot), existsT i m, (Count bs (partial ([], i) m)).
     Proof.
@@ -691,11 +693,16 @@ Section Schulze.
       apply partial_count_all_counted with (u := bs) (inbs := []) (m := fun x y => 0%Z).
       apply ax. trivial.
       intros c d. trivial.
-    Defined.
+      Show Proof.
+    Defined. *)
 
+    Definition all_ballots_counted (bs : list ballot) :
+      existsT i m, Count bs (partial ([], i) m) :=
+      partial_count_all_counted _ _  _ _ (ax _ _ _ eq_refl (fun _ _ : cand => eq_refl)).                                                                   
 
     (* The main theorem: for every list of ballots, we can find a boolean function that decides
      winners, together with evidences of the correctness of this determination *)
+
     (*
     Theorem schulze_winners: forall (bs : list ballot),
         existsT (f : cand -> bool) (_ : Count bs (winners f)), True.
