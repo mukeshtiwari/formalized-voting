@@ -1,0 +1,98 @@
+Source files for the paper 
+
+  Schulze Voting as Evidence Carrying Computation
+
+by Dirk Pattinson and Mukesh Tiwari, The Australian National
+University.
+
+
+Dependencies: 
+
+- The formal proofs were developed with the Coq proof assistant. We
+  have used Coq version 8.5pl2 (August 2016). 
+
+- The extracted Haskell code was compliled under ghc version 7.6.3.
+
+- The randomly generated ballots used in the benchmarks were generated
+  using perl perl 5, version 18, subversion 2 (v5.18.2) although any
+  reasonably recent version of perl should do.
+
+The code was developed and tested under Linux and MacOs.
+
+
+Files:
+
+- SchulzeSynthesis.v contains the formalisation reported in the
+  paper. The paper and the file reflect each other's structure, and
+  the paper is sectioned using comments of the form (** Section 2:
+  Specification of Schulze Voting **) to help navigation.
+
+- ListLemma.v contains auxiliary material not directly related to
+  vote counting.
+
+- Extraction.v defines the extraction of the development into
+  Haskell where all Coq data structures are extracted as is.
+
+- ExtractionNative.v defines the exraction of the development where
+  Coq naturals have been extracted into Haskell integers.
+
+- Derivation.hs and DerivationNative.hs contain wrapper functions
+  that pretty-print program results
+
+- Main.hs and MainNative.hs contain functions that read and count
+  ballots and output the scrutiny sheet.
+
+- rand.pl takes one integer parameter and generates random ballots.
+  These ballots are all valid according to the definition of the
+  paper.
+
+- Makefile: used to generate the executables.
+  in the paper.
+
+- example-votes.txt: the ballots used in the transcript presented in
+  the paper.
+
+
+Inspecting the Proofs.
+
+- you will probably want to compile ListLemma.v and the run your
+  favourite Coq interface on the file SchulzeSynthesis.v.
+
+
+Running the extracted code:
+
+- The Coq development is instantiated with four candidates, 
+   A, B, C, and D.  See below under "Rolling your own" on how to
+   change this.
+
+- for the program that extracts the entire Coq development as is,
+  run  "make Main".
+
+- for the program that extracts the entire Coq development and
+  extracts Coq naturals to Haskell integers, run "make MainNative".
+
+- to reproduce the example transcript in the paper, run "Main <
+  example-votes.txt" (or MainNative < example-votes.txt")
+
+- to reproduce the benchmarks reported in the paper, run "make
+  bench" for the first set of benchmarks (extraction as is), or
+  "make benchnative" for the benchmarks where Coq naturals are
+  extracted as Haskell integers.
+
+
+Rolling your own:
+
+- The type of candidates is instantiated to a given inductive type
+  containing for candidates at the very end of the file
+  SchulzeSynthesis.v. Replace this inductive type with any finite
+  inductive type. The proofs of the lemmas are independent of the
+  number of  constructors. Instantiate the variable cand_all
+  appropriately: cand_all is a list containing all inhabitants of
+  the type cand.
+
+- See the file "example-votes.txt" for an example of the format of
+  votes. You need to change the names of the candidates accordingly.
+
+- to be able to read ballots, you need to change the definition of
+  the function "balfun" in Main.hs (respectively MainNative.hs).
+
