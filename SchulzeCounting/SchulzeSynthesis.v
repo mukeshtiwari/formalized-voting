@@ -666,22 +666,43 @@ Section Schulze.
 
     (* every partial state of vote tallying can be progressed to a state where
        the margin function is fully constructed, i.e. all ballots are counted *)
+
+    (*
     Lemma partial_count_all_counted: forall bs u inbs m,
         Count bs (partial (u, inbs) m) -> existsT i m, (Count bs (partial ([], i) m)).
     Proof.
-      intros bs. induction u as [| u us IHus].
-      intros inbs m HCount. exists inbs, m. auto.
+      intros bs. induction u as [| u us IHus]. Show Proof.
+      Check list_rect.
+      intros inbs m HCount. Show Proof. Check list_rect. exists inbs, m. auto. Show Proof.
       (* case uncounted ballots of the from u::us *)
       destruct (ballot_valid_dec u) as [Hv | Hi];
-        swap 1 2. intros inbs m HCount.
+        swap 1 2. Show Proof.  intros inbs m HCount.
       apply IHus with (inbs := u::inbs) (m := m). apply cinvalid. assumption.
-      assumption.
-      intros inbs m Hcount.
-      apply IHus with (inbs := inbs) (m := update_marg u m).
-      apply cvalid with (u := u) (m := m). assumption. assumption.
+      assumption. Show Proof.
+      intros inbs m Hcount. Show Proof.
+      apply IHus with (inbs := inbs) (m := update_marg u m). Show Proof.
+      apply cvalid with (u := u) (m := m). Show Proof. assumption. assumption.
       apply update_marg_corr.
+      Show Proof.
     Defined.
+     *)
 
+    Definition partial_count_all_counted bs :
+      forall u inbs m, Count bs (partial (u, inbs) m) -> existsT i m, (Count bs (partial ([], i) m)) :=
+      list_rect _
+                (fun inbs m Hcount => existT _ inbs (existT _ m Hcount))
+                (fun t ts IHus =>
+                   match ballot_valid_dec t with
+                   | left Hv =>
+                     fun inbs m Hcount =>
+                       IHus inbs (update_marg _ m)
+                            (cvalid bs t ts m (update_marg _ m) inbs Hcount Hv
+                                    (update_marg_corr m _)) 
+                   | right Hi =>
+                     fun inbs m Hcount =>
+                       IHus (t :: inbs) m (cinvalid bs t ts m inbs Hcount Hi)
+                   end).
+    
     (* for every list of incoming ballots, we can progress the count to a state where all
      ballots are processed *)
 
