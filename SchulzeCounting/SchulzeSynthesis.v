@@ -706,19 +706,6 @@ Section Schulze.
     
       
      
-      list_rect _
-                (fun inbs m Hcount => existT _ inbs (existT _ m Hcount))
-                (fun t ts IHus =>
-                   match ballot_valid_dec t with
-                   | left Hv =>
-                     fun inbs m Hcount =>
-                       IHus inbs (update_marg _ m)
-                            (cvalid bs t ts m (update_marg _ m) inbs Hcount Hv
-                                    (update_marg_corr m _)) 
-                   | right Hi =>
-                     fun inbs m Hcount =>
-                       IHus (t :: inbs) m (cinvalid bs t ts m inbs Hcount Hi)
-                   end).
    
     
     (* for every list of incoming ballots, we can progress the count to a state where all
