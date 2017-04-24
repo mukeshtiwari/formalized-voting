@@ -553,8 +553,6 @@ Section Schulze.
 
   Section Count.
 
-    (*** Section 4: Schulze Counting as Inductive Type **)
-
     (* votes put numbers next to candidates when filling in a ballot. We understand
        zero next to a candidates name as a preference that hasn't been filled in *)
     Definition ballot := cand -> nat.
@@ -698,15 +696,26 @@ Section Schulze.
 
     (* The main theorem: for every list of ballots, we can find a boolean function that decides
      winners, together with evidences of the correctness of this determination *)
+    (*
     Theorem schulze_winners: forall (bs : list ballot),
-        existsT (f : cand -> bool) (p : Count bs (winners f)), True.
+        existsT (f : cand -> bool) (_ : Count bs (winners f)), True.
     Proof.
-      intros. pose proof (all_ballots_counted bs). destruct X as [bs' [m X]].
+      intros.  pose proof (all_ballots_counted bs). destruct X as [bs' [m X]].
       pose proof (fin bs m bs' (c_wins m) (wins_loses_type_dec m) X (c_wins_true_type m)
-                      (c_wins_false_type m)).
-      exists (c_wins m), X0. apply I.
-    Defined.
+                      (c_wins_false_type m)). Show Proof.
+      exists (c_wins m), X0. Show Proof. apply I.
+      Show Proof.
+    Defined. *)
 
+    
+    Definition schulze_winners (bs : list ballot) :
+      existsT (f : cand -> bool) (p : Count bs (winners f)), True :=
+      let (i, t) := all_ballots_counted bs in
+      let (m, p) := t in
+      existT _ (c_wins m) (existT _ (fin _ _ _ _ (wins_loses_type_dec m) p
+                                         (c_wins_true_type m) (c_wins_false_type m)) I).
+    
+      
   End Count.
 
 End Schulze.
