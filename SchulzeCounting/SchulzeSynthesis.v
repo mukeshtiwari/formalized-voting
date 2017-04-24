@@ -687,8 +687,25 @@ Section Schulze.
     Defined.
      *)
 
-    Definition partial_count_all_counted bs :
-      forall u inbs m, Count bs (partial (u, inbs) m) -> existsT i m, (Count bs (partial ([], i) m)) :=
+    Definition partial_count_all_counted bs : forall u inbs m,
+        Count bs (partial (u, inbs) m) ->  existsT i m, (Count bs (partial ([], i) m)) :=
+      fix F u {struct u} :=
+        match u with
+        | [] =>
+          fun inbs m Hc =>
+            existT _ inbs (existT _ m Hc)
+        | h :: t =>
+          fun inbs m Hc =>
+            match ballot_valid_dec h with
+            | left Hv =>
+              F t inbs (update_marg h m)
+                (cvalid bs h t m (update_marg h m) inbs Hc Hv (update_marg_corr m h))
+            | right Hi =>  F t (h :: inbs) m (cinvalid bs h t m inbs Hc Hi)
+            end
+        end.
+    
+      
+     
       list_rect _
                 (fun inbs m Hcount => existT _ inbs (existT _ m Hcount))
                 (fun t ts IHus =>
@@ -702,6 +719,7 @@ Section Schulze.
                      fun inbs m Hcount =>
                        IHus (t :: inbs) m (cinvalid bs t ts m inbs Hcount Hi)
                    end).
+   
     
     (* for every list of incoming ballots, we can progress the count to a state where all
      ballots are processed *)
