@@ -698,7 +698,9 @@ Section Schulze.
 
     Definition all_ballots_counted (bs : list ballot) :
       existsT i m, Count bs (partial ([], i) m) :=
-      partial_count_all_counted _ _  _ _ (ax _ _ _ eq_refl (fun _ _ : cand => eq_refl)).                                                                   
+      partial_count_all_counted bs bs [] (fun _ _ : cand => 0)
+                                (ax bs bs (fun _ _ : cand => 0) eq_refl
+                                    (fun _ _ : cand => eq_refl)).
 
     (* The main theorem: for every list of ballots, we can find a boolean function that decides
      winners, together with evidences of the correctness of this determination *)
