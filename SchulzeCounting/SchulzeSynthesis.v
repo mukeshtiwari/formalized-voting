@@ -133,18 +133,59 @@ Section Schulze.
        c and d can be joined by a type-level path of this strength *)
     Lemma iterated_marg_patht: forall n s c d, M n c d >= s -> PathT s c d.
     Proof.
+      
+      refine (fix F n s c d :=
+                match n as m return (M m c d >= s -> PathT s c d) with
+                | O =>
+                  fun Hm : M 0 c d >= s => unitT s c d Hm
+                | S n' =>
+                  fun Hm : M (S n') c d >= s =>
+                    let cm := M n' c d ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) in
+                    match
+                      cm as cv
+                      return
+                      (match cv with
+                       | Eq => M n' c d
+                       | Lt => maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all)
+                       | Gt => M n' c d
+                       end >= s -> PathT s c d)
+                    with
+                    | Eq => fun Heq : M n' c d >= s => F n' s c d Heq
+                    | Lt =>
+                      fun Hlt : maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) >= s =>
+                        match max_of_nonempty_list_type cand cand_all cand_not_nil dec_cand s _ Hlt with
+                        | existT _ x (conj H1 H2) => _
+                        end
+                    | Gt => fun Hgt : M n' c d >= s =>  F n' s c d Hgt
+                    end Hm
+                end).
+      apply z_min_lb in H2. destruct H2 as [H2 H3].
+      specialize (F _ _ _ _ H3).
+      specialize (consT _ _ _ _ H2 F). auto.
+      Show Proof.
+      
       induction n; simpl; intros. constructor. auto.
       unfold Z.max in H.
       destruct
         (M n c d
            ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all)).
-      apply IHn. assumption.
+      apply IHn. assumption. 
       apply max_of_nonempty_list_type in H. destruct H as [x [H1 H2]].
       apply z_min_lb in H2. destruct H2.
       specialize (IHn _ _ _ H0). specialize (consT _ _ _ _ H IHn). auto.
       apply cand_not_nil. apply dec_cand. apply IHn. assumption.
+      Show Proof.
     Defined.
 
+
+
+    max_of_nonempty_list_type
+     : forall (A : Type) (l : list A),
+       l <> [] ->
+       (forall x y : A, {x = y} + {x <> y}) ->
+       forall (s : Z) (f : A -> Z), maxlist (map f l) >= s
+
+    
     (* as type level paths induce prop-level paths, the same as above also holds for prop-level
        paths *)
     Lemma iterated_marg_path: forall (n : nat) (s : Z) (c d : cand),
@@ -512,12 +553,33 @@ Section Schulze.
     (* decidability of type-level winning *)
     Lemma wins_loses_type_dec : forall c, (wins_type c) + (loses_type c).
     Proof.
-      intros c. destruct (c_wins c) eqn:c_wins_val. left.
+      
+      refine (fun c =>
+                (match c_wins c as b return (c_wins c = b -> (wins_type c) + (loses_type c)) with
+                 | true =>
+                   fun H : c_wins c = true =>
+                      inl
+                        (iterated_marg_wins_type
+                           c (wins_prop_iterated_marg
+                                c (fun d : cand =>
+                                     (let Ht1 := proj1 (forallb_forall _ cand_all) H d _ in
+                                      let Ht2 := Z.le_ge _ _ (Zle_bool_imp_le _ _ Ht1) in
+                                      let Ht3 := iterated_marg_path _ _  c d Ht2 in
+                                      let s := M (length cand_all) d c in
+                                      ex_intro _ s (conj Ht3 _)))))
+                 | false =>  _
+                 end) eq_refl).
+    
+      intros.  apply path_iterated_marg in H0. clear Ht3. 
+      destruct H0 as [n H0]. apply Z.ge_le in H0.
+      pose proof (iterated_marg_fp d c n). 
+      
+      intros c. case_eq  (c_wins c). intros c_wins_val.  left.
       unfold wins_type. apply  iterated_marg_wins_type. apply wins_prop_iterated_marg. intros d.
-      pose proof (proj1 (forallb_forall _ cand_all) c_wins_val d (cand_fin d)).
-      simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H.
-      remember (M (length cand_all) d c) as s. apply iterated_marg_path in H.
-      exists s. split. assumption.
+      pose proof (proj1 (forallb_forall _ cand_all) c_wins_val d (cand_fin d)).  Show Proof.
+      simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H. Show Proof.
+      remember (M (length cand_all) d c) as s. apply iterated_marg_path in H. Show Proof.
+      exists s. split. assumption. Show Proof.
       intros. rewrite Heqs. apply  path_iterated_marg in H0. destruct H0 as [n H0].
       apply Z.ge_le in H0. pose proof (iterated_marg_fp d c n). omega.
       right. apply iterated_marg_loses_type. unfold c_wins in c_wins_val.
@@ -603,7 +665,7 @@ Section Schulze.
     (* for finite lists and decidable predicates, existential quantifiers are equivalent
       to negated universal quantifiers. This holds more generally, but the formulation
       below suffices for our purposes. *)
-    Definition forall_exists_fin_dec: forall (A : Type) (l : list A) (f : A -> nat),
+    Definition forall_exists_fin_dec : forall (A : Type) (l : list A) (f : A -> nat),
         {forall x, In x l -> f x > 0} + {exists x, In x l /\ f x = 0} := 
       fun (A : Type) =>
         fix F l f {struct l} :=
@@ -618,20 +680,20 @@ Section Schulze.
             | left Fl =>
               left (fun x H =>
                       match H with
-                      |or_introl H1 =>
-                       match zerop (f x) with
-                       | left e =>
-                         False_ind (f x > 0) ((eq_ind h (fun v : A => f v <> 0) n x H1) e)
-                       | right r => r
-                       end
-                      |or_intror H2 => Fl x H2
+                      | or_introl H1 =>
+                        match zerop (f x) with
+                        | left e =>
+                          False_ind (f x > 0) ((eq_ind h (fun v : A => f v <> 0) n x H1) e)
+                        | right r => r
+                        end
+                      | or_intror H2 => Fl x H2
                       end)
             | right Fr =>
               right
                 match Fr with
                 | ex_intro _ x (conj Frl Frr) =>
                   ex_intro _ x (conj (in_cons h x t Frl) Frr)
-                end 
+                end
             end
           end
         end.
@@ -764,7 +826,7 @@ Section Schulze.
       exists (c_wins m), X0. Show Proof. apply I.
       Show Proof.
     Defined. *)
-
+    
     
     Definition schulze_winners (bs : list ballot) :
       existsT (f : cand -> bool) (p : Count bs (winners f)), True :=
