@@ -603,34 +603,53 @@ Section Schulze.
     (* for finite lists and decidable predicates, existential quantifiers are equivalent
       to negated universal quantifiers. This holds more generally, but the formulation
       below suffices for our purposes. *)
-    Lemma forall_exists_fin_dec: forall A: Type, forall l: list A, forall f: A -> nat,
-            {forall x, In x l -> f x > 0} + {exists x, In x l /\ f x = 0}.
-    Proof.
-      intros A l. induction l as [| e es IHl]. intro f. left. intro x. intro H. inversion H.
-      (* step case *)
-      intro f.
-      destruct (Nat.eq_dec (f e) 0).
-      right. exists e. split. simpl. left. trivial.  assumption.
-      specialize (IHl f).
-      destruct IHl as [Hforall | Hexists].
-      left.
-      intros x Hin. apply in_inv in Hin. destruct Hin as [H1 | H2]. subst. omega.
-      apply Hforall. trivial.
-      right. destruct Hexists as [x Hx]. exists x.
-      split. simpl. right. intuition. intuition.
-    Qed.
-
+    Definition forall_exists_fin_dec: forall (A : Type) (l : list A) (f : A -> nat),
+        {forall x, In x l -> f x > 0} + {exists x, In x l /\ f x = 0} := 
+      fun (A : Type) =>
+        fix F l f {struct l} :=
+        match l with
+        | [] => left (fun (x : A) (H : In x []) => match H with end)
+        | h :: t =>
+          match Nat.eq_dec (f h) 0 with
+          | left e =>
+            right (ex_intro _  h (conj (in_eq h t) e))
+          | right n =>
+            match F t f with
+            | left Fl =>
+              left (fun x H =>
+                      match H with
+                      |or_introl H1 =>
+                       match zerop (f x) with
+                       | left e =>
+                         False_ind (f x > 0) ((eq_ind h (fun v : A => f v <> 0) n x H1) e)
+                       | right r => r
+                       end
+                      |or_intror H2 => Fl x H2
+                      end)
+            | right Fr =>
+              right
+                match Fr with
+                | ex_intro _ x (conj Frl Frr) =>
+                  ex_intro _ x (conj (in_cons h x t Frl) Frr)
+                end 
+            end
+          end
+        end.
+            
     (* we can decide whether a given ballot is valid, i.e. has only non-zero entries, or
      is invalid, i.e. contains at least one zero entry *)
-    Lemma ballot_valid_dec: forall b: ballot, {forall c, b c > 0} + {exists c, b c = 0}.
-    Proof.
-      intros b.
-      specialize (forall_exists_fin_dec cand cand_all).
-      intro L. specialize (L b). destruct L as [Lforall | Lexists].
-      left.
-      intro c. apply Lforall. apply cand_fin.
-      right. destruct Lexists as [x L]. exists x. destruct L as [L1 L2]. assumption.
-    Qed.
+    Definition ballot_valid_dec : forall b : ballot, {forall c, b c > 0} + {exists c, b c = 0} :=
+      fun b => let H := forall_exists_fin_dec cand cand_all in
+            match H b with
+            | left Lforall => left
+                               (fun c : cand => Lforall c (cand_fin c))
+            | right Lexists => right
+                                match Lexists with
+                                | ex_intro _ x (conj _ L) =>
+                                  ex_intro (fun c : cand => b c = 0) x L
+                                end
+            end.
+    
     Open Scope Z_scope.
 
     (* update margin function to account for preferences recorded in a single ballot *)
@@ -641,15 +660,18 @@ Section Schulze.
                      then (m c d -1)%Z
                      else m c d).
 
+   
+    
     (* correctness of update_marg above *)
     Lemma update_marg_corr: forall m (p : ballot) (c d : cand),
         ((p c < p d)%nat -> update_marg p m c d = m c d + 1) /\
         ((p c = p d)%nat -> update_marg p m c d = m c d) /\
         ((p c > p d)%nat -> update_marg p m c d = m c d - 1).
     Proof.
-      intros m p c d. split; intros; unfold update_marg.
-      destruct (p c <? p d)%nat eqn: H1. omega.
-      destruct (p d <? p c)%nat eqn: H2. apply Nat.ltb_lt in H2.
+      intros m p c d.
+      split; intros; unfold update_marg.
+      destruct (p c <? p d)%nat eqn: H1. Show Proof. omega.
+      destruct (p d <? p c)%nat eqn: H2. Show Proof. apply Nat.ltb_lt in H2.
       apply Nat.ltb_ge in H1. omega.
       apply Nat.ltb_ge in H2. apply Nat.ltb_ge in H1. omega.
       split; intros.
@@ -667,7 +689,7 @@ Section Schulze.
     (* every partial state of vote tallying can be progressed to a state where
        the margin function is fully constructed, i.e. all ballots are counted *)
 
-    (*
+   (*
     Lemma partial_count_all_counted: forall bs u inbs m,
         Count bs (partial (u, inbs) m) -> existsT i m, (Count bs (partial ([], i) m)).
     Proof.
@@ -685,8 +707,9 @@ Section Schulze.
       apply update_marg_corr.
       Show Proof.
     Defined.
-     *)
+    *)
 
+       
     Definition partial_count_all_counted bs : forall u inbs m,
         Count bs (partial (u, inbs) m) ->  existsT i m, (Count bs (partial ([], i) m)) :=
       fix F u {struct u} :=
@@ -703,7 +726,7 @@ Section Schulze.
             | right Hi =>  F t (h :: inbs) m (cinvalid bs h t m inbs Hc Hi)
             end
         end.
-    
+  
       
      
    
