@@ -1,4 +1,3 @@
-
 Require Import Notations.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.Le.
@@ -22,7 +21,7 @@ Fixpoint all_pairs {A: Type} (l: list A): list (A * A) :=
   match l with
   | [] => []
   | c::cs => (c, c) :: (all_pairs cs)
-                   ++  (map (fun x => (c, x)) cs) 
+                   ++  (map (fun x => (c, x)) cs)
                    ++ (map (fun x => (x, c)) cs)
   end.
 
@@ -34,7 +33,7 @@ Fixpoint maxlist (l : list Z) : Z :=
   | h :: t => Z.max h (maxlist t)
   end.
 
-(* give two numbers m and n with proof that m < n then it return the 
+(* give two numbers m and n with proof that m < n then it return the
    proof that maximum of m and n is n *)
 Lemma max_two_integer : forall (m n : Z), m < n -> Z.max m n = n.
 Proof.
@@ -64,7 +63,7 @@ Proof.
   rewrite map_cons in H0. pose proof (exists_last n). destruct X as [l1 [x l2]].
   assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
   { destruct l1. simpl in l2. rewrite l2. simpl. auto.
-    rewrite l2. simpl. auto. }    
+    rewrite l2. simpl. auto. }
   rewrite H2 in H0. pose proof (max_two_integer _ _ l0). rewrite H3 in H0.
   specialize (IHl n H0). destruct IHl. exists x0. intuition.
   destruct H0 as [x [H2 H3]].
@@ -76,7 +75,7 @@ Proof.
   rewrite map_cons. pose proof (exists_last n). destruct X as [l1 [x0 H4]].
   assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
   { destruct l1. simpl in H4. rewrite H4. simpl. auto.
-    rewrite H4. simpl. auto. }    
+    rewrite H4. simpl. auto. }
   rewrite H0. unfold Z.max. destruct (f a ?= maxlist (map f l)) eqn:Ht.
   destruct H2. subst. auto. pose proof (proj1 (Z.compare_eq_iff _ _) Ht).
   specialize (IHl n H2). rewrite H5. auto.
@@ -87,7 +86,7 @@ Proof.
   pose proof (proj1 (Z.compare_gt_iff _ _) Ht).  omega.
 Qed.
 
-(* minimum of two integers m and n is >= s then both numbers are 
+(* minimum of two integers m and n is >= s then both numbers are
    >= s *)
 Lemma z_min_lb : forall m n s, Z.min m n >= s <-> m >= s /\ n >= s.
 Proof.
@@ -130,7 +129,7 @@ Proof.
   intros A n. induction n; intros. unfold covers in H1. rewrite H in H0.
   unfold covers in H2. pose proof (proj1 (length_zero_iff_nil c) H).
   rewrite H3 in H2. simpl in H2. pose proof (exists_list _ _ _ H0).
-  destruct H4 as [a [ls H4]]. rewrite H4 in H2. specialize (H2 a (in_eq a ls)). inversion H2.  
+  destruct H4 as [a [ls H4]]. rewrite H4 in H2. specialize (H2 a (in_eq a ls)). inversion H2.
   rewrite H in H0. pose proof (exists_list _ _ _ H0).
   destruct H3 as [l0 [ls H3]].
   pose proof (in_dec H1 l0 ls). destruct H4.
@@ -145,7 +144,7 @@ Proof.
   rewrite <- app_length in H7.
   assert ((length ls > length (l1 ++ l2))%nat).
   { rewrite H7. rewrite H3 in H0. simpl in H0. omega. }
-  specialize (IHn (l1 ++ l2) H1 H7 ls H).  
+  specialize (IHn (l1 ++ l2) H1 H7 ls H).
   assert (covers A (l1 ++ l2) ls).
   { unfold covers. intros x Hin.
     specialize (not_equal_elem _ x l0 ls Hin n0); intros.
@@ -159,7 +158,7 @@ Proof.
   exists a, (l0 :: l11), l22, l33.  simpl. rewrite H10 in H3. assumption.
 Qed.
 
-(* if maximum of two numbers m, n >= s then either m >= s or 
+(* if maximum of two numbers m, n >= s then either m >= s or
    n >= s *)
 Lemma z_max_lb : forall m n s, Z.max m n >= s <-> m >= s \/ n >= s.
 Proof.
@@ -182,21 +181,22 @@ Proof.
   exists (S p). omega. exists 1%nat. omega.
 Qed.
 
-(* if forallb f l returns false then existance of element x in list l 
-   such that f x = false, and if x is in list l and f x = false then 
-   forallb f l will evaluate to false *) 
-Lemma forallb_false : forall (A : Type) (f : A -> bool) (l : list A), 
+(* if forallb f l returns false then existance of element x in list l
+   such that f x = false, and if x is in list l and f x = false then
+   forallb f l will evaluate to false *)
+Lemma forallb_false : forall (A : Type) (f : A -> bool) (l : list A),
     forallb f l = false <-> (exists x, In x l /\ f x = false).
 Proof.
   intros A f l. split. intros H. induction l. simpl in H. inversion H.
   simpl in H. apply andb_false_iff in H. destruct H.
   exists a. split. simpl. left. auto. assumption.
   pose proof IHl H. destruct H0. exists x. destruct  H0 as [H1 H2].
-  split. simpl. right. assumption. assumption.  
+  split. simpl. right. assumption. assumption.
   intros. destruct H as [x [H1 H2]]. induction l. inversion H1.
   simpl. apply andb_false_iff. simpl in H1. destruct H1.
   left. congruence. right. apply IHl. assumption.
 Qed.
+
 
 (*  Shows the type level existence of element x in list l >=  s if maximum element of
    list l >= s *)
@@ -204,6 +204,45 @@ Lemma max_of_nonempty_list_type :
   forall (A : Type) (l : list A) (H : l <> nil) (H1 : forall x y : A, {x = y} + {x <> y})
     (s : Z) (f : A -> Z), maxlist (map f l) >= s -> existsT (x:A), In x l /\ f x >= s.
 Proof.
+  (*
+  intros A.
+  assert (Hm : forall (a b : A) (l : list A) (f : A -> Z),
+             maxlist (f a :: map f (b :: l)) = Z.max (f a) (maxlist (map f (b :: l)))) by auto.
+  refine (fix F l {struct l} :=
+            match
+              l as l0
+              return
+              (l0 <> [] ->
+               (forall x y : A, {x = y} + {x <> y}) ->
+               forall (s : Z) (f : A -> Z), maxlist (map f l0) >= s -> existsT x : A, In x l0 /\ f x >= s)
+            with
+            | [] =>
+              fun H _ _ _ _ =>
+                match H eq_refl with
+                end
+            | h :: t =>  
+                match t with
+                | [] =>  fun H1 H2 s f H3 => existT _  h (conj (in_eq h []) H3)
+                | h1 :: t1 =>
+                  match t1 with
+                  | [] =>
+                    fun H1 H2 s f H3 =>
+                      let Hmax := (Z_ge_lt_dec (f h) (maxlist (map f [h1]))) in
+                      match Hmax with
+                      | left e =>
+                        existT _ h (conj (in_eq h _) _)
+                      | right r => existT _ h1  _
+                      end
+                  | h2 :: t2 =>
+                    fun H1 H2 s f H3 =>
+                      let Hmax := (Z_ge_lt_dec (f h) (maxlist (map f (h1 :: h2 :: t2)))) in
+                      _
+                  end
+                end
+            end).
+  leave it for the moment
+  *)
+
   induction l; intros. specialize (H eq_refl). inversion H.
   pose proof (list_eq_dec H1 l []). destruct H2.
   exists a. subst. intuition.
@@ -224,7 +263,8 @@ Proof.
   specialize (IHl n H1 s f H0). destruct IHl. exists x0. intuition.
 Defined.
 
-(* if forallb f l returns false then type level existance of element x in list l 
+
+(* if forallb f l returns false then type level existance of element x in list l
    such that f x = false *)
 Lemma forallb_false_type : forall (A : Type) (f : A -> bool) (l : list A),
     forallb f l = false -> existsT x, In x l /\ f x = false.

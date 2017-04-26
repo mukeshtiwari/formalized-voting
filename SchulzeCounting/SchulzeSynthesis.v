@@ -166,7 +166,7 @@ Section Schulze.
     
     (* as type level paths induce prop-level paths, the same as above also holds for prop-level
        paths *)
-    Lemma iterated_marg_path: forall (n : nat) (s : Z) (c d : cand),
+    Lemma iterated_marg_path : forall (n : nat) (s : Z) (c d : cand),
         M n c d >= s -> Path s c d.
     Proof.
       intros n s c d Hm. apply path_equivalence. apply iterated_marg_patht with (n := n).
@@ -175,7 +175,7 @@ Section Schulze.
 
     (* existence of a a path between c and d of strength s gives an interate of the
        iterated margin function with value at least s *)
-    Lemma path_iterated_marg: forall (s : Z) (c d : cand),
+    Lemma path_iterated_marg : forall (s : Z) (c d : cand),
         Path s c d -> exists n, M n c d >= s.
     Proof.
       intros s c d H. induction H.
