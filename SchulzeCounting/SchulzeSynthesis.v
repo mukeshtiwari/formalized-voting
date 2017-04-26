@@ -131,59 +131,37 @@ Section Schulze.
     (* partial correctness of iterated margin function: if the strength M n c d
        of the strongest path of length <= n+1 between c and d is at least s, then
        c and d can be joined by a type-level path of this strength *)
-    Lemma iterated_marg_patht: forall n s c d, M n c d >= s -> PathT s c d.
-    Proof.
-      
-      refine (fix F n s c d :=
-                match n as m return (M m c d >= s -> PathT s c d) with
-                | O =>
-                  fun Hm : M 0 c d >= s => unitT s c d Hm
-                | S n' =>
-                  fun Hm : M (S n') c d >= s =>
-                    let cm := M n' c d ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) in
-                    match
-                      cm as cv
-                      return
-                      (match cv with
-                       | Eq => M n' c d
-                       | Lt => maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all)
-                       | Gt => M n' c d
-                       end >= s -> PathT s c d)
-                    with
-                    | Eq => fun Heq : M n' c d >= s => F n' s c d Heq
-                    | Lt =>
-                      fun Hlt : maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) >= s =>
-                        match max_of_nonempty_list_type cand cand_all cand_not_nil dec_cand s _ Hlt with
-                        | existT _ x (conj H1 H2) => _
-                        end
-                    | Gt => fun Hgt : M n' c d >= s =>  F n' s c d Hgt
-                    end Hm
-                end).
-      apply z_min_lb in H2. destruct H2 as [H2 H3].
-      specialize (F _ _ _ _ H3).
-      specialize (consT _ _ _ _ H2 F). auto.
-      Show Proof.
-      
-      induction n; simpl; intros. constructor. auto.
-      unfold Z.max in H.
-      destruct
-        (M n c d
-           ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all)).
-      apply IHn. assumption. 
-      apply max_of_nonempty_list_type in H. destruct H as [x [H1 H2]].
-      apply z_min_lb in H2. destruct H2.
-      specialize (IHn _ _ _ H0). specialize (consT _ _ _ _ H IHn). auto.
-      apply cand_not_nil. apply dec_cand. apply IHn. assumption.
-      Show Proof.
-    Defined.
-
-
-
-    max_of_nonempty_list_type
-     : forall (A : Type) (l : list A),
-       l <> [] ->
-       (forall x y : A, {x = y} + {x <> y}) ->
-       forall (s : Z) (f : A -> Z), maxlist (map f l) >= s
+    Definition iterated_marg_patht : forall n s c d, M n c d >= s -> PathT s c d :=
+      fix F n s c d :=
+        match n as m return (M m c d >= s -> PathT s c d) with
+        | O =>
+          fun Hm : M 0 c d >= s => unitT s c d Hm
+        | S n' =>
+          fun Hm : M (S n') c d >= s =>
+            let cm := M n' c d ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) in
+            match
+              cm as cv
+              return
+              (match cv with
+               | Eq => M n' c d
+               | Lt => maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all)
+               | Gt => M n' c d
+               end >= s -> PathT s c d)
+            with
+            | Eq => fun Heq : M n' c d >= s => F n' s c d Heq
+            | Lt =>
+              fun Hlt : maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) >= s =>
+                match max_of_nonempty_list_type cand cand_all cand_not_nil dec_cand s _ Hlt with
+                | existT _ x (conj H1 H2) =>
+                  match proj1 (z_min_lb _ _ _) H2 with
+                  | conj H3 H4 => (consT s c x d H3  (F n' s x d H4))
+                  end
+                end
+            | Gt => fun Hgt : M n' c d >= s =>  F n' s c d Hgt
+            end Hm
+        end.
+            
+   
 
     
     (* as type level paths induce prop-level paths, the same as above also holds for prop-level
