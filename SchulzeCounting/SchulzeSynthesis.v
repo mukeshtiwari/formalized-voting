@@ -387,7 +387,11 @@ Section Schulze.
                                                   M (length cand_all) d c <= M (length cand_all) c d) ->
                                               wins_type c.
     Proof.
-      unfold wins_type. intros. specialize (H d). remember (M (length cand_all) c d) as s.
+      refine (fun H d=>
+                let s := M (length cand_all) c d in _).
+      specialize (H d). exists s.
+      
+      unfold wins_type. Show Proof.  intros.  specialize (H d). remember (M (length cand_all) c d) as s.
       (* s is the strength of the strongest path from c to d *)
       exists s. assert (H1 : M (length cand_all) c d >= s) by omega. clear Heqs.
       apply iterated_marg_patht in H1. split. auto.
@@ -531,7 +535,7 @@ Section Schulze.
     (* decidability of type-level winning *)
     Lemma wins_loses_type_dec : forall c, (wins_type c) + (loses_type c).
     Proof.
-      
+      (*
       refine (fun c =>
                 (match c_wins c as b return (c_wins c = b -> (wins_type c) + (loses_type c)) with
                  | true =>
@@ -546,18 +550,18 @@ Section Schulze.
                                       let s := M (length cand_all) d c in
                                       ex_intro _ s (conj Ht3 _)))))
                  | false =>  _
-                 end) eq_refl).
+                 end) eq_refl). 
     
       intros.  apply path_iterated_marg in H0. clear Ht3. 
       destruct H0 as [n H0]. apply Z.ge_le in H0.
-      pose proof (iterated_marg_fp d c n). 
+      pose proof (iterated_marg_fp d c n). *) 
       
-      intros c. case_eq  (c_wins c). intros c_wins_val.  left.
+      intros c. destruct (c_wins c) eqn : c_wins_val.  left.
       unfold wins_type. apply  iterated_marg_wins_type. apply wins_prop_iterated_marg. intros d.
-      pose proof (proj1 (forallb_forall _ cand_all) c_wins_val d (cand_fin d)).  Show Proof.
-      simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H. Show Proof.
-      remember (M (length cand_all) d c) as s. apply iterated_marg_path in H. Show Proof.
-      exists s. split. assumption. Show Proof.
+      pose proof (proj1 (forallb_forall _ cand_all) c_wins_val d (cand_fin d)).
+      simpl in H. apply Zle_bool_imp_le in H. apply Z.le_ge in H.
+      remember (M (length cand_all) d c) as s. apply iterated_marg_path in H.
+      exists s. split. assumption.
       intros. rewrite Heqs. apply  path_iterated_marg in H0. destruct H0 as [n H0].
       apply Z.ge_le in H0. pose proof (iterated_marg_fp d c n). omega.
       right. apply iterated_marg_loses_type. unfold c_wins in c_wins_val.
