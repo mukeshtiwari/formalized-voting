@@ -502,10 +502,10 @@ Section Schulze.
                        F t
                          match H with
                          | ex_intro _ a (conj (or_introl e) Hpa) =>
-                           (fun r0 : ~ P a => False_ind (exists a1 : A, In a1 t /\ P a1) (r0 Hpa))
-                             (eq_ind h (fun h0 : A => ~ P h0) r a e)
-                         | ex_intro _ a (conj (or_intror r0 as Hin) Hpa as a0) =>
-                           ex_intro _ a (conj r0 Hpa)
+                           (fun rr : ~ P a => False_ind (exists a1 : A, In a1 t /\ P a1) (rr Hpa))
+                             (eq_ind h (fun hh : A => ~ P hh) r a e)
+                         | ex_intro _ a (conj (or_intror rr as Hin) Hpa as a0) =>
+                           ex_intro _ a (conj rr Hpa)
                          end
                      end
         end.
@@ -514,16 +514,31 @@ Section Schulze.
     Corollary reify_opponent (c: cand):
       (exists  d, M  (length cand_all) c d < M (length cand_all) d c) ->
       (existsT d, M  (length cand_all) c d < M (length cand_all) d c).
-    Proof.
-      intros Hex.
-      assert (Hdec: forall d,
-                 {  M (length cand_all) c d < M (length cand_all) d c } +
-                 {~(M (length cand_all) c d < M (length cand_all) d c)} ).
-      intro d. destruct (Z_lt_ge_bool (M (length cand_all) c d) (M (length cand_all) d c)) as [b  P].
-      destruct b. left. assumption. right. intro H. omega.
-      apply exists_fin_reify with (l := cand_all). assumption.
-      destruct Hex as [d Hex]. exists d. split. apply cand_fin. assumption.
-    Qed.
+      refine (fun Hex  =>
+         (fun Hdec : forall d : cand,
+              {M (length cand_all) c d < M (length cand_all) d c} +
+              {~ M (length cand_all) c d < M (length cand_all) d c} =>
+            exists_fin_reify
+              _  Hdec cand_all
+              match Hex with
+              | ex_intro _ d Hex0 =>
+                ex_intro _ d (conj (cand_fin d) Hex0)
+              end)
+           (fun d : cand =>
+              let s := Z_lt_ge_bool (M (length cand_all) c d) (M (length cand_all) d c) in
+              let (b, P) := s in
+              (if b as bt
+                  return
+                  ((if bt
+                    then M (length cand_all) c d < M (length cand_all) d c
+                    else M (length cand_all) c d >= M (length cand_all) d c) ->
+                   {M (length cand_all) c d < M (length cand_all) d c} +
+                   {~ M (length cand_all) c d < M (length cand_all) d c})
+               then fun Pt => left Pt
+               else fun Pf => right (fun H => Pf H)) P)).
+    Defined.
+    
+    
 
     (* reconstructon of the losing condition type-level losing from interated
        margin function *)
