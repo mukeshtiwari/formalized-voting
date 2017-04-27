@@ -387,18 +387,48 @@ Section Schulze.
                                                   M (length cand_all) d c <= M (length cand_all) c d) ->
                                               wins_type c.
     Proof.
-      refine (fun H d=>
-                let s := M (length cand_all) c d in _).
-      specialize (H d). exists s.
+
+      (*
+      refine
+        (fun H d =>
+           (fun Hd =>
+              let s := M (length cand_all) c d in
+              let Heqs := eq_refl in 
+              let r := M (length cand_all) d c in
+              let Heqr := eq_refl in 
+              let Ht := (iterated_marg_patht
+                        (length cand_all) s c d
+                        (Z.le_ge s (M (length cand_all) c d)
+                                 (Z.eq_le_incl s (M (length cand_all) c d) Heqs))) in
+              existT _ s
+                     (Ht,
+                      existT _ (fun x => M (length cand_all) (fst x) (snd x) <=? r)
+                            (conj _ _) )) (H d)).
+      refine ((fun n m : Z => proj2 (Z.leb_le n m)) (M (length cand_all) d c) r (Z.le_refl r)).
+      refine (fun (x : cand * cand) Hx =>
+                let Hx1 := proj1 (Z.leb_le _ _) Hx  in 
+                (fun b1 b2 : bool => proj2 (andb_true_iff b1 b2))
+                  (marg_lt (s + 1) x)
+                  (forallb
+                     (fun m : cand =>
+                        marg_lt (s + 1) (fst x, m) ||
+                        (M (length cand_all) (fst (m, snd x)) (snd (m, snd x)) <=? r))
+                    cand_all) (conj _ _)).
+       hold this for moment *)
       
-      unfold wins_type. Show Proof.  intros.  specialize (H d). remember (M (length cand_all) c d) as s.
+      
+      
+      unfold wins_type. Show Proof.  intros.  specialize (H d).
+      remember (M (length cand_all) c d) as s. Show Proof.
       (* s is the strength of the strongest path from c to d *)
-      exists s. assert (H1 : M (length cand_all) c d >= s) by omega. clear Heqs.
-      apply iterated_marg_patht in H1. split. auto.
-      remember (M (length cand_all) d c) as r eqn:Heq.
+      apply Z.eq_le_incl in Heqs. apply Z.le_ge in Heqs. Show Proof.
+      exists s. assert (H1 : M (length cand_all) c d >= s) by omega.
+      clear Heqs.
+      apply iterated_marg_patht in H1. split. auto. Show Proof.
+      remember (M (length cand_all) d c) as r eqn:Heq. Show Proof.
       (* r is the strongest path in the opposite direction, r for reverse *)
       exists (fun x => M (length cand_all) (fst x) (snd x) <=? r). simpl in *. split.
-      apply Z.leb_le. omega. unfold coclosed. intros x Hx. destruct x as (x, z).
+      apply Z.leb_le. omega. Show Proof. (*unfold coclosed. *) intros x Hx. destruct x as (x, z).
       simpl in *. apply Z.leb_le in Hx. unfold W. apply andb_true_iff. split.
       unfold marg_lt. simpl. apply Z.ltb_lt. clear Heq.
       induction (length cand_all). simpl in *. omega.
@@ -451,21 +481,36 @@ Section Schulze.
 
     (* existential quantifiers over finite lists can be reified into Sigma-types for
        decidable properties *)
-    Lemma exists_fin_reify {A: Type} (P: A -> Prop): (forall a: A, {P a} + {~(P a)}) ->
+    Definition exists_fin_reify {A: Type} (P: A -> Prop): (forall a: A, {P a} + {~(P a)}) ->
                                                  forall l: list A,
-                                                   (exists a, In a l /\ P a) -> existsT a, P a.
-    Proof.
-      intros Pdec l. induction l as [| x xs IHl].
-      intros H. assert (Hf: False). destruct H as [a Ha]. destruct Ha as [Hin Ha].
-      inversion Hin. elim Hf. intro H.
-      destruct (Pdec x) as [HPx | HnPx]. exists x. assumption.
-      apply IHl.
-      destruct H as [a Ha]. exists a. destruct Ha as [Hin HPa]. split.
-      apply in_inv in Hin. destruct Hin as [Heq | Hin]. rewrite <- Heq in HPa.
-      apply HnPx in HPa. elim HPa. assumption. assumption.
-    Qed.
-
-    (* reification of candidates given propositional existence *)
+                                                   (exists a, In a l /\ P a) -> existsT a, P a :=
+      fun Pdec =>
+        fix F l {struct l} :=
+        match l  as m return ((exists a : A, In a m /\ P a) -> existsT a : A, P a) with
+        | [] =>
+          fun H : exists a : A, In a [] /\ P a =>
+            (fun Hf : False => (fun X : existsT a : A,P a => X)
+                          match Hf return
+                                (existsT a : A,P a) with end)
+              match H with
+              | ex_intro _ a (conj Ha _) => (fun H1 : False => H1) match Ha return False with end
+              end
+        | h :: t => fun H =>
+                     match (Pdec h) with
+                     | left e => existT _ h e
+                     | right r =>
+                       F t
+                         match H with
+                         | ex_intro _ a (conj (or_introl e) Hpa) =>
+                           (fun r0 : ~ P a => False_ind (exists a1 : A, In a1 t /\ P a1) (r0 Hpa))
+                             (eq_ind h (fun h0 : A => ~ P h0) r a e)
+                         | ex_intro _ a (conj (or_intror r0 as Hin) Hpa as a0) =>
+                           ex_intro _ a (conj r0 Hpa)
+                         end
+                     end
+        end.
+            
+            (* reification of candidates given propositional existence *)
     Corollary reify_opponent (c: cand):
       (exists  d, M  (length cand_all) c d < M (length cand_all) d c) ->
       (existsT d, M  (length cand_all) c d < M (length cand_all) d c).
