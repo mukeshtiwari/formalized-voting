@@ -138,14 +138,16 @@ Section Schulze.
           fun Hm : M 0 c d >= s => unitT s c d Hm
         | S n' =>
           fun Hm : M (S n') c d >= s =>
-            let cm := M n' c d ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) in
+            let t1 := M n' c d in
+            let t2 := maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) in
+            let cm := t1 ?= t2  in
             match
               cm as cv
               return
               (match cv with
-               | Eq => M n' c d
-               | Lt => maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all)
-               | Gt => M n' c d
+               | Eq => t1
+               | Lt => t2
+               | Gt => t1
                end >= s -> PathT s c d)
             with
             | Eq => fun Heq : M n' c d >= s => F n' s c d Heq
@@ -387,7 +389,6 @@ Section Schulze.
                                                   M (length cand_all) d c <= M (length cand_all) c d) ->
                                               wins_type c.
     Proof.
-
       (*
       refine
         (fun H d =>
@@ -414,38 +415,44 @@ Section Schulze.
                         marg_lt (s + 1) (fst x, m) ||
                         (M (length cand_all) (fst (m, snd x)) (snd (m, snd x)) <=? r))
                     cand_all) (conj _ _)).
-       hold this for moment *)
+       *)
       
-      
-      
-      unfold wins_type. Show Proof.  intros.  specialize (H d).
-      remember (M (length cand_all) c d) as s. Show Proof.
-      (* s is the strength of the strongest path from c to d *)
-      apply Z.eq_le_incl in Heqs. apply Z.le_ge in Heqs. Show Proof.
-      exists s. assert (H1 : M (length cand_all) c d >= s) by omega.
-      clear Heqs.
-      apply iterated_marg_patht in H1. split. auto. Show Proof.
-      remember (M (length cand_all) d c) as r eqn:Heq. Show Proof.
-      (* r is the strongest path in the opposite direction, r for reverse *)
-      exists (fun x => M (length cand_all) (fst x) (snd x) <=? r). simpl in *. split.
-      apply Z.leb_le. omega. Show Proof. (*unfold coclosed. *) intros x Hx. destruct x as (x, z).
-      simpl in *. apply Z.leb_le in Hx. unfold W. apply andb_true_iff. split.
-      unfold marg_lt. simpl. apply Z.ltb_lt. clear Heq.
-      induction (length cand_all). simpl in *. omega.
-      apply IHn. simpl in Hx. apply Z.max_lub_iff in Hx. intuition.
-      apply forallb_forall.  intros y Hy. simpl in *.
-      apply orb_true_iff. unfold marg_lt. simpl.
-      assert (A: marg x y <= s \/ marg x y >= s + 1) by omega.
-      destruct A as [A1 | A2]. left. apply Z.ltb_lt. omega.
-      right. apply Z.leb_le.
-      assert (B: M (length cand_all) y z <= r \/ M (length cand_all) y z >= r + 1) by omega.
-      destruct B as [B1 | B2]. auto.
-      apply iterated_marg_path in B2.
-      assert (A3: marg x y >= r + 1) by omega.
-      pose proof (cons _ _ _ _ A3 B2) as C.
-      apply  path_iterated_marg in C. destruct C as [n C].
-      pose proof (iterated_marg_fp x z n). omega.
+      intros H d. specialize (H d).
+      remember (M (length cand_all) c d) as s eqn:Heqs.
+      apply Z.eq_le_incl in Heqs.
+      apply Z.le_ge in Heqs. exists s.
+      pose proof (iterated_marg_patht _ _ _ _ Heqs) as Hi.
+      split.
+      - intuition.
+      - remember (M (length cand_all) d c) as r eqn:Heqr.
+        exists (fun x => M (length cand_all) (fst x) (snd x) <=? r).
+        split.
+        + apply Z.leb_le. simpl. intuition.
+        + intros x Hx. destruct x as (x, z).
+          apply Z.leb_le in Hx. apply andb_true_iff.
+          split.
+          * apply Z.ltb_lt. simpl in *.
+            clear Heqs. clear Heqr.
+            induction (length cand_all); simpl in Hx.
+            intuition.
+            apply IHn. apply Z.max_lub_iff in Hx. intuition.
+          * apply forallb_forall. intros y Hy. apply orb_true_iff.
+            simpl in *.
+            assert (A : marg x y <= s \/ marg x y > s) by omega.
+            destruct A as [A1 | A2].
+            left. apply Z.ltb_lt. simpl. omega.
+            right. apply Z.leb_le.
+            assert (B : M (length cand_all) y z <= r \/ M (length cand_all) y z >= r + 1) by omega.
+            destruct B as [B1 | B2].
+            intuition.
+            apply iterated_marg_path in B2.
+            assert (A3 : marg x y >= r + 1) by omega.
+            pose proof (cons _ _ _ _ A3 B2) as C.
+            apply  path_iterated_marg in C. destruct C as [n C].
+            pose proof (iterated_marg_fp x z n). omega.
     Defined.
+    
+     
 
     (* the type level winning condition can be reconstruced from *)
     (* propositional knowledge of winning *)
