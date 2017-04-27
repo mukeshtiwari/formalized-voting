@@ -481,9 +481,9 @@ Section Schulze.
 
     (* existential quantifiers over finite lists can be reified into Sigma-types for
        decidable properties *)
-    Definition exists_fin_reify {A: Type} (P: A -> Prop): (forall a: A, {P a} + {~(P a)}) ->
-                                                 forall l: list A,
-                                                   (exists a, In a l /\ P a) -> existsT a, P a :=
+    Definition exists_fin_reify {A: Type} (P: A -> Prop):
+      (forall a: A, {P a} + {~(P a)}) ->
+      forall l: list A, (exists a, In a l /\ P a) -> existsT a, P a :=
       fun Pdec =>
         fix F l {struct l} :=
         match l  as m return ((exists a : A, In a m /\ P a) -> existsT a : A, P a) with
@@ -509,37 +509,37 @@ Section Schulze.
                          end
                      end
         end.
-            
-            (* reification of candidates given propositional existence *)
+    
+    (* reification of candidates given propositional existence *)
     Corollary reify_opponent (c: cand):
       (exists  d, M  (length cand_all) c d < M (length cand_all) d c) ->
       (existsT d, M  (length cand_all) c d < M (length cand_all) d c).
       refine (fun Hex  =>
-         (fun Hdec : forall d : cand,
-              {M (length cand_all) c d < M (length cand_all) d c} +
-              {~ M (length cand_all) c d < M (length cand_all) d c} =>
-            exists_fin_reify
-              _  Hdec cand_all
-              match Hex with
-              | ex_intro _ d Hex0 =>
-                ex_intro _ d (conj (cand_fin d) Hex0)
-              end)
-           (fun d : cand =>
-              let s := Z_lt_ge_bool (M (length cand_all) c d) (M (length cand_all) d c) in
-              let (b, P) := s in
-              (if b as bt
-                  return
-                  ((if bt
-                    then M (length cand_all) c d < M (length cand_all) d c
-                    else M (length cand_all) c d >= M (length cand_all) d c) ->
-                   {M (length cand_all) c d < M (length cand_all) d c} +
-                   {~ M (length cand_all) c d < M (length cand_all) d c})
-               then fun Pt => left Pt
-               else fun Pf => right (fun H => Pf H)) P)).
+                (fun Hdec : forall d : cand,
+                     {M (length cand_all) c d < M (length cand_all) d c} +
+                     {~ M (length cand_all) c d < M (length cand_all) d c} =>
+                   exists_fin_reify
+                     _  Hdec cand_all
+                     match Hex with
+                     | ex_intro _ d Hex0 =>
+                       ex_intro _ d (conj (cand_fin d) Hex0)
+                     end)
+                  (fun d : cand =>
+                     let s := Z_lt_ge_bool (M (length cand_all) c d) (M (length cand_all) d c) in
+                     let (b, P) := s in
+                     (if b as bt
+                         return
+                         ((if bt
+                           then M (length cand_all) c d < M (length cand_all) d c
+                           else M (length cand_all) c d >= M (length cand_all) d c) ->
+                          {M (length cand_all) c d < M (length cand_all) d c} +
+                          {~ M (length cand_all) c d < M (length cand_all) d c})
+                      then fun Pt => left Pt
+                      else fun Pf => right (fun H => Pf H)) P)).
     Defined.
     
     
-
+    
     (* reconstructon of the losing condition type-level losing from interated
        margin function *)
     Lemma iterated_marg_loses_type (c : cand) :
@@ -881,6 +881,7 @@ Section Schulze.
   End Count.
 
 End Schulze.
+
 
 Section Candidate.
 
