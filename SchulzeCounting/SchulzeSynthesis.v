@@ -389,33 +389,7 @@ Section Schulze.
                                                   M (length cand_all) d c <= M (length cand_all) c d) ->
                                               wins_type c.
     Proof.
-      (*
-      refine
-        (fun H d =>
-           (fun Hd =>
-              let s := M (length cand_all) c d in
-              let Heqs := eq_refl in 
-              let r := M (length cand_all) d c in
-              let Heqr := eq_refl in 
-              let Ht := (iterated_marg_patht
-                        (length cand_all) s c d
-                        (Z.le_ge s (M (length cand_all) c d)
-                                 (Z.eq_le_incl s (M (length cand_all) c d) Heqs))) in
-              existT _ s
-                     (Ht,
-                      existT _ (fun x => M (length cand_all) (fst x) (snd x) <=? r)
-                            (conj _ _) )) (H d)).
-      refine ((fun n m : Z => proj2 (Z.leb_le n m)) (M (length cand_all) d c) r (Z.le_refl r)).
-      refine (fun (x : cand * cand) Hx =>
-                let Hx1 := proj1 (Z.leb_le _ _) Hx  in 
-                (fun b1 b2 : bool => proj2 (andb_true_iff b1 b2))
-                  (marg_lt (s + 1) x)
-                  (forallb
-                     (fun m : cand =>
-                        marg_lt (s + 1) (fst x, m) ||
-                        (M (length cand_all) (fst (m, snd x)) (snd (m, snd x)) <=? r))
-                    cand_all) (conj _ _)).
-       *)
+     (* rewrite it using refine tactic *)
       
       intros H d. specialize (H d).
       remember (M (length cand_all) c d) as s eqn:Heqs.
@@ -602,27 +576,6 @@ Section Schulze.
     (* decidability of type-level winning *)
     Lemma wins_loses_type_dec : forall c, (wins_type c) + (loses_type c).
     Proof.
-      (*
-      refine (fun c =>
-                (match c_wins c as b return (c_wins c = b -> (wins_type c) + (loses_type c)) with
-                 | true =>
-                   fun H : c_wins c = true =>
-                      inl
-                        (iterated_marg_wins_type
-                           c (wins_prop_iterated_marg
-                                c (fun d : cand =>
-                                     (let Ht1 := proj1 (forallb_forall _ cand_all) H d _ in
-                                      let Ht2 := Z.le_ge _ _ (Zle_bool_imp_le _ _ Ht1) in
-                                      let Ht3 := iterated_marg_path _ _  c d Ht2 in
-                                      let s := M (length cand_all) d c in
-                                      ex_intro _ s (conj Ht3 _)))))
-                 | false =>  _
-                 end) eq_refl). 
-    
-      intros.  apply path_iterated_marg in H0. clear Ht3. 
-      destruct H0 as [n H0]. apply Z.ge_le in H0.
-      pose proof (iterated_marg_fp d c n). *) 
-      
       intros c. destruct (c_wins c) eqn : c_wins_val.  left.
       unfold wins_type. apply  iterated_marg_wins_type. apply wins_prop_iterated_marg. intros d.
       pose proof (proj1 (forallb_forall _ cand_all) c_wins_val d (cand_fin d)).
@@ -781,8 +734,8 @@ Section Schulze.
     Proof.
       intros m p c d.
       split; intros; unfold update_marg.
-      destruct (p c <? p d)%nat eqn: H1. Show Proof. omega.
-      destruct (p d <? p c)%nat eqn: H2. Show Proof. apply Nat.ltb_lt in H2.
+      destruct (p c <? p d)%nat eqn: H1. omega.
+      destruct (p d <? p c)%nat eqn: H2. apply Nat.ltb_lt in H2.
       apply Nat.ltb_ge in H1. omega.
       apply Nat.ltb_ge in H2. apply Nat.ltb_ge in H1. omega.
       split; intros.
