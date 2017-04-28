@@ -432,7 +432,7 @@ Section Schulze.
           apply Z.leb_le in Hx. apply andb_true_iff.
           split.
           * apply Z.ltb_lt. simpl in *.
-            clear Heqs. clear Heqr.
+            clear Heqs. clear Heqr.  
             induction (length cand_all); simpl in Hx.
             intuition.
             apply IHn. apply Z.max_lub_iff in Hx. intuition.
@@ -800,27 +800,6 @@ Section Schulze.
     (* every partial state of vote tallying can be progressed to a state where
        the margin function is fully constructed, i.e. all ballots are counted *)
 
-   (*
-    Lemma partial_count_all_counted: forall bs u inbs m,
-        Count bs (partial (u, inbs) m) -> existsT i m, (Count bs (partial ([], i) m)).
-    Proof.
-      intros bs. induction u as [| u us IHus]. Show Proof.
-      Check list_rect.
-      intros inbs m HCount. Show Proof. Check list_rect. exists inbs, m. auto. Show Proof.
-      (* case uncounted ballots of the from u::us *)
-      destruct (ballot_valid_dec u) as [Hv | Hi];
-        swap 1 2. Show Proof.  intros inbs m HCount.
-      apply IHus with (inbs := u::inbs) (m := m). apply cinvalid. assumption.
-      assumption. Show Proof.
-      intros inbs m Hcount. Show Proof.
-      apply IHus with (inbs := inbs) (m := update_marg u m). Show Proof.
-      apply cvalid with (u := u) (m := m). Show Proof. assumption. assumption.
-      apply update_marg_corr.
-      Show Proof.
-    Defined.
-    *)
-
-       
     Definition partial_count_all_counted bs : forall u inbs m,
         Count bs (partial (u, inbs) m) ->  existsT i m, (Count bs (partial ([], i) m)) :=
       fix F u {struct u} :=
@@ -845,38 +824,15 @@ Section Schulze.
     (* for every list of incoming ballots, we can progress the count to a state where all
      ballots are processed *)
 
-    (*
-    Lemma all_ballots_counted:
-      forall (bs : list ballot), existsT i m, (Count bs (partial ([], i) m)).
-    Proof.
-      intros bs.
-      apply partial_count_all_counted with (u := bs) (inbs := []) (m := fun x y => 0%Z).
-      apply ax. trivial.
-      intros c d. trivial.
-      Show Proof.
-    Defined. *)
-
     Definition all_ballots_counted (bs : list ballot) :
       existsT i m, Count bs (partial ([], i) m) :=
       partial_count_all_counted bs bs [] (fun _ _ : cand => 0)
                                 (ax bs bs (fun _ _ : cand => 0) eq_refl
                                     (fun _ _ : cand => eq_refl)).
 
+  
     (* The main theorem: for every list of ballots, we can find a boolean function that decides
      winners, together with evidences of the correctness of this determination *)
-
-    (*
-    Theorem schulze_winners: forall (bs : list ballot),
-        existsT (f : cand -> bool) (_ : Count bs (winners f)), True.
-    Proof.
-      intros.  pose proof (all_ballots_counted bs). destruct X as [bs' [m X]].
-      pose proof (fin bs m bs' (c_wins m) (wins_loses_type_dec m) X (c_wins_true_type m)
-                      (c_wins_false_type m)). Show Proof.
-      exists (c_wins m), X0. Show Proof. apply I.
-      Show Proof.
-    Defined. *)
-    
-    
     Definition schulze_winners (bs : list ballot) :
       existsT (f : cand -> bool) (p : Count bs (winners f)), True :=
       let (i, t) := all_ballots_counted bs in
@@ -888,6 +844,7 @@ Section Schulze.
   End Count.
 
 End Schulze.
+
 
 
 Section Candidate.
