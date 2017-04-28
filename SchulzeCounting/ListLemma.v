@@ -198,70 +198,54 @@ Proof.
 Qed.
 
 
+  
 (*  Shows the type level existence of element x in list l >=  s if maximum element of
    list l >= s *)
 Lemma max_of_nonempty_list_type :
   forall (A : Type) (l : list A) (H : l <> nil) (H1 : forall x y : A, {x = y} + {x <> y})
     (s : Z) (f : A -> Z), maxlist (map f l) >= s -> existsT (x:A), In x l /\ f x >= s.
 Proof.
-  (*
   intros A.
   assert (Hm : forall (a b : A) (l : list A) (f : A -> Z),
              maxlist (f a :: map f (b :: l)) = Z.max (f a) (maxlist (map f (b :: l)))) by auto.
   refine (fix F l {struct l} :=
-            match
-              l as l0
-              return
-              (l0 <> [] ->
-               (forall x y : A, {x = y} + {x <> y}) ->
-               forall (s : Z) (f : A -> Z), maxlist (map f l0) >= s -> existsT x : A, In x l0 /\ f x >= s)
-            with
-            | [] =>
-              fun H _ _ _ _ =>
-                match H eq_refl with
-                end
-            | h :: t =>  
-                match t with
-                | [] =>  fun H1 H2 s f H3 => existT _  h (conj (in_eq h []) H3)
-                | h1 :: t1 =>
-                  match t1 with
-                  | [] =>
-                    fun H1 H2 s f H3 =>
-                      let Hmax := (Z_ge_lt_dec (f h) (maxlist (map f [h1]))) in
-                      match Hmax with
-                      | left e =>
-                        existT _ h (conj (in_eq h _) _)
-                      | right r => existT _ h1  _
-                      end
-                  | h2 :: t2 =>
-                    fun H1 H2 s f H3 =>
-                      let Hmax := (Z_ge_lt_dec (f h) (maxlist (map f (h1 :: h2 :: t2)))) in
-                      _
-                  end
-                end
-            end).
-  leave it for the moment
-  *)
+            fun H H1 s f => 
+              match l as l0 return (l = l0 -> l0 <> [] ->
+                                    maxlist (map f l0) >= s ->
+                                    existsT (x : A), In x l0 /\ f x >= s) with
+              | [] => fun _ H =>  match H eq_refl with end
+              | h :: t =>
+                fun Heq Hn =>
+                  match t as t0 return (t = t0 -> (h :: t0) <> [] ->
+                                        maxlist (map f (h :: t0)) >= s ->
+                                        existsT (x : A), In x (h :: t0) /\ f x >= s) with
+                  | [] => fun _ H1 H2 => existT _ h (conj (in_eq h []) H2)
+                  | h1 :: t1 =>
+                    let Hmax := (Z_ge_lt_dec (f h) (maxlist (map f (h1 :: t1)))) in
+                    match Hmax with
+                    | left e => fun H1 H2 H3 => _
+                    | right r => fun H1 H2 H3 => _
+                    end 
+                  end eq_refl Hn
+            end eq_refl H).
+  
+  rewrite map_cons in H3. rewrite Hm in H3.
+  apply Z.ge_le in e. pose proof (Z.max_l _ _ e) as Hmx.
+  rewrite Hmx in H3.
+  exists h. intuition.
 
-  induction l; intros. specialize (H eq_refl). inversion H.
-  pose proof (list_eq_dec H1 l []). destruct H2.
-  exists a. subst. intuition.
-  assert (Hm : {f a >= maxlist (map f l)} + {f a < maxlist (map f l)}) by
-      apply (Z_ge_lt_dec (f a) (maxlist (map f l))).
-  destruct Hm. rewrite map_cons in H0. pose proof (exists_last n).
-  destruct X as [l1 [x l2]].
-  assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
-  { destruct l1. simpl in l2. rewrite l2. simpl. auto.
-    rewrite l2. simpl. auto. }
-  pose proof (Z.ge_le _ _ g). pose proof (Z.max_l _ _ H3).
-  rewrite H2 in H0. rewrite H4 in H0. exists a. intuition.
-  rewrite map_cons in H0. pose proof (exists_last n). destruct X as [l1 [x l2]].
-  assert (maxlist (f a :: map f l) = Z.max (f a) (maxlist (map f l))).
-  { destruct l1. simpl in l2. rewrite l2. simpl. auto.
-    rewrite l2. simpl. auto. }
-  rewrite H2 in H0. pose proof (max_two_integer _ _ l0). rewrite H3 in H0.
-  specialize (IHl n H1 s f H0). destruct IHl. exists x0. intuition.
-Defined.
+  
+  rewrite map_cons in H3. rewrite Hm in H3.
+  pose proof (max_two_integer _ _ r) as Hmx.
+  rewrite Hmx in H3.
+  assert (Ht : [] <> h1 :: t1) by apply nil_cons.
+  apply not_eq_sym in Ht. 
+  rewrite <- H1 in H2, H3, Hmx, Ht.
+  specialize (F _ Ht H0 s f H3).
+  destruct F as [x [Fin Fx]]. rewrite <- H1. 
+  exists x. intuition.
+Defined.   
+   
 
 
 (* if forallb f l returns false then type level existance of element x in list l
