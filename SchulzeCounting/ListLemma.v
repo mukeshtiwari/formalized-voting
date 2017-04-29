@@ -253,14 +253,21 @@ Defined.
 Lemma forallb_false_type : forall (A : Type) (f : A -> bool) (l : list A),
     forallb f l = false -> existsT x, In x l /\ f x = false.
 Proof.
-  intros A f. induction l. simpl. intros. inversion H.
-  simpl. intros. destruct (f a) eqn:H1. destruct (forallb f l) eqn:H2.
-  inversion H. specialize (IHl eq_refl). clear H.
-  destruct IHl as [x [H3 H4]].
-  exists x. split. right. auto. assumption.
-  destruct (forallb f l) eqn:H2. exists a. split. left. auto. assumption.
-  clear H. specialize (IHl eq_refl). destruct IHl as [x [H3 H4]].
-  exists x. split. right. assumption. assumption.
-Qed.
+ 
+  refine (fun A f =>
+            fix F l :=
+            match l as l0 return (forallb f l0 = false ->
+                                  existsT x, In x l0 /\ f x = false) with
+            | [] => fun H => match (diff_true_false H) with end
+            | h :: t =>
+              fun H => match f h as v return (f h = v -> existsT x, In x (h :: t) /\ f x = false) with
+                    | false => fun H1 => existT _ h (conj (in_eq h t) H1)
+                    | true => fun H1 => _
+                    end eq_refl                             
+            end).
+ 
+  simpl in H. rewrite H1 in H. simpl in H. pose proof (F t H) as Ft.
+  destruct Ft as [x [Fin Fx]]. exists x. intuition.
+Defined.
 
 (* End of List Lemma file *)
