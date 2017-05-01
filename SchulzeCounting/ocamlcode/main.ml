@@ -13,7 +13,14 @@ let rec ocamlnat n =
   match n with
   | 0 -> O
   | _ -> S (ocamlnat (n -1))
-           
+
+let cc c =
+  match c with
+  | 'A' -> A
+  | 'B' -> B
+  | 'C' -> C
+  | 'D' -> D
+            
 let balfun l = 
    match l with
    | [(A, b1); (B, b2); (C, b3); (D, b4)] -> 
@@ -69,24 +76,31 @@ let l =
   ocamlcoq v
  *)
 
+let rec print_list_help = function
+  | [] -> print_newline; ()
+  | (h, t) :: tl -> print_char h; print_string " "; print_int t; print_list_help tl
                    
 let rec print_list = function 
     [] -> ()
-  | e::l -> match e with
-            | True -> printf "%B" true ; print_string " "; print_list l
-            | False -> printf "%B" false ; print_string " " ; print_list l
+  | e::l -> print_list_help e; print_string " "; print_list l
 
-(*       
-let _ =
- 
-  let l = read_line stdin in
-  let e = Parser.prog Lexer.lexeme (Lexing.from_string l) in
-  printf "%s" e
- (*        
-  match schulze_winners_pf e with
-  | ExistT (f, ExistT (y, _)) -> print_list (List.map f [A; B; C; D]) 
-          *)                                  
+let print_pair (h, e) =
+  print_char h; print_string " "; print_int e
+
+                         
+let read_file filename =
+  let l = open_in filename in
+  let e = Parser.prog Lexer.lexeme (Lexing.from_channel l) in
+  print_list e
+
+  (*
   
- *)
+  let w = List.map (fun x -> List.map (fun (a, b) -> (cc a, ocamlnat b)) x) e in
+  let v = List.map (fun x -> balfun x) w in
+  match schulze_winners_pf (ocamlcoq v) with
+  | ExistT (f, ExistT (y, _)) -> print_list (List.map f [A; B; C; D])
+              *)                             
   
-   
+let _ = read_file "example-votes.txt"
+
+                

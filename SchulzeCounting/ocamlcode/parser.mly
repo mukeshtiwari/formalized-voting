@@ -12,15 +12,8 @@
 
 %%
 
-prog: ds = stmts EOF {ds};
+prog: ds = separated_nonempty_list (NEWLINE, stmtone) EOF {ds};
 
-stmts:
- | {[]}
- | d = stmtline; NEWLINE; ds = stmts {d :: ds} ;
+stmtone: vs = separated_nonempty_list (SEMI, stmt) {vs};
 
-stmtline:
- | {[]}
- | v = stmtone; SEMI; vs = stmtline  {v :: vs}
-
-stmtone:
- |LPAREN; s = CAND; COMMA; n = INT; RPAREN {(s, n)} 
+stmt: LPAREN; s = CAND; COMMA; n = INT; RPAREN {(s, n)}
