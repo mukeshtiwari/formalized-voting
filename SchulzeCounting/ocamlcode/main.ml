@@ -87,10 +87,9 @@ let rec print_list = function
 let print_pair (h, e) =
   print_char h; print_string " "; print_int e
 
-                         
-let read_file filename =
-  let l = open_in filename in
-  let e = Parser.prog Lexer.lexeme (Lexing.from_channel l) in
+
+let _ = 
+  let e = Parser.prog Lexer.lexeme (Lexing.from_channel stdin) in
   print_list e
 
   (*
@@ -101,6 +100,5 @@ let read_file filename =
   | ExistT (f, ExistT (y, _)) -> print_list (List.map f [A; B; C; D])
               *)                             
   
-let _ = read_file "example-votes.txt"
 
                 
