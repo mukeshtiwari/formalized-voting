@@ -1,5 +1,5 @@
 %token <int> INT
-%token <Lib.cand> CAND
+%token <char> CAND
 %token LPAREN
 %token RPAREN
 %token COMMA
@@ -8,17 +8,19 @@
 %token EOF
 
 
-%start <(Lib.cand * int) list list> prog
+%start <(char * int) list list> prog
 
 %%
 
 prog: ds = stmts EOF {ds};
 
 stmts:
- |ds = separated_list(NEWLINE, stmtline) {ds} ;
+ | {[]}
+ | d = stmtline; NEWLINE; ds = stmts {d :: ds} ;
 
 stmtline:
- |vs = separated_list(SEMI,stmtone) {vs}
+ | {[]}
+ | v = stmtone; SEMI; vs = stmtline  {v :: vs}
 
 stmtone:
  |LPAREN; s = CAND; COMMA; n = INT; RPAREN {(s, n)} 

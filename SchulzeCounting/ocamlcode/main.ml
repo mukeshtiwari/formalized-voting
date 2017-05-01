@@ -75,18 +75,18 @@ let rec print_list = function
   | e::l -> match e with
             | True -> printf "%B" true ; print_string " "; print_list l
             | False -> printf "%B" false ; print_string " " ; print_list l
-(*
-       
+
+(*       
 let _ =
-  
-  let l = open_in stdin in
+ 
+  let l = read_line stdin in
   let e = Parser.prog Lexer.lexeme (Lexing.from_string l) in
   printf "%s" e
-         
+ (*        
   match schulze_winners_pf e with
   | ExistT (f, ExistT (y, _)) -> print_list (List.map f [A; B; C; D]) 
           *)                                  
   
-
+ *)
   
    
