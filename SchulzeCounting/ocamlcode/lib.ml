@@ -4,19 +4,22 @@ let __ = let rec f _ = Obj.repr f in Obj.repr f
 type bool =
 | True
 | False
+[@@deriving show]
 
 type nat =
 | O
 | S of nat
-         
+[@@deriving show]         
 
 type ('a, 'b) sum =
 | Inl of 'a
 | Inr of 'b
+[@@deriving show]
            
 type ('a, 'b) prod =
 | Pair of 'a * 'b
-
+[@@deriving show]
+                 
 (** val fst : ('a1, 'a2) prod -> 'a1 **)
 
 let fst = function
@@ -30,17 +33,20 @@ let snd = function
 type 'a list =
 | Nil
 | Cons of 'a * 'a list
-
+[@@deriving show]                  
+                  
 (** val length : 'a1 list -> nat **)
 
 let rec length = function
 | Nil -> O
 | Cons (_, l') -> S (length l')
 
+                    
 type comparison =
 | Eq
 | Lt
 | Gt
+[@@deriving show]
 
 (** val compOpp : comparison -> comparison **)
 
@@ -51,16 +57,17 @@ let compOpp = function
 
 type 'a sig0 =
   'a
+[@@deriving show]    
   (* singleton inductive, whose constructor was exist *)
 
 type ('a, 'p) sigT =
 | ExistT of 'a * 'p
-
+[@@deriving show]
                    
 type sumbool =
 | Left
 | Right
-
+[@@deriving show]
 
 module Nat =
  struct
@@ -97,13 +104,13 @@ type positive =
 | XI of positive
 | XO of positive
 | XH
-
+[@@deriving show]
 
 type z =
 | Z0
 | Zpos of positive
 | Zneg of positive
-
+[@@deriving show]
             
 module Pos =
  struct
@@ -384,7 +391,7 @@ let max_of_nonempty_list_type l h1 s f =
 type 'cand pathT =
 | UnitT of 'cand * 'cand
 | ConsT of 'cand * 'cand * 'cand * 'cand pathT
-
+[@@deriving show]
                                          
 type 'cand wins_type = 'cand -> (z, ('cand pathT, (('cand, 'cand) prod -> bool, __) sigT) prod) sigT
 
@@ -485,7 +492,7 @@ let wins_loses_type_dec cand_all0 dec_cand marg c =
  
     
 type 'cand ballot = 'cand -> nat
-
+[@@deriving show]
                                
 type 'cand count =
 | Ax of 'cand ballot list * ('cand -> 'cand -> z)
@@ -495,7 +502,7 @@ type 'cand count =
    * 'cand count
 | Fin of ('cand -> 'cand -> z) * 'cand ballot list * ('cand -> bool)
    * ('cand -> ('cand wins_type, 'cand loses_type) sum) * 'cand count
-
+[@@deriving show]
                                                                 
 (** val forall_exists_fin_dec : 'a1 list -> ('a1 -> nat) -> sumbool **)
 
@@ -557,7 +564,7 @@ type cand =
 | B
 | C
 | D
-
+[@@deriving show]
 
 (** val cand_all : cand list **)
 
