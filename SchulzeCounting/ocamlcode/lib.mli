@@ -3,17 +3,21 @@ type __ = Obj.t
 type bool =
 | True
 | False
+[@@deriving show]
 
 type nat =
 | O
 | S of nat
-
+[@@deriving show]
+         
 type ('a, 'b) sum =
 | Inl of 'a
 | Inr of 'b
-
+[@@deriving show]
+           
 type ('a, 'b) prod =
 | Pair of 'a * 'b
+[@@deriving show]                   
 
 val fst : ('a1, 'a2) prod -> 'a1
 
@@ -22,26 +26,31 @@ val snd : ('a1, 'a2) prod -> 'a2
 type 'a list =
 | Nil
 | Cons of 'a * 'a list
-
+[@@deriving show]
+                  
 val length : 'a1 list -> nat
 
 type comparison =
 | Eq
 | Lt
 | Gt
+[@@deriving show]
 
 val compOpp : comparison -> comparison
 
 type 'a sig0 =
   'a
+[@@deriving show]    
   (* singleton inductive, whose constructor was exist *)
 
 type ('a, 'p) sigT =
 | ExistT of 'a * 'p
-
+[@@deriving show]
+                   
 type sumbool =
 | Left
 | Right
+[@@deriving show]
 
 module Nat :
  sig
@@ -56,12 +65,14 @@ type positive =
 | XI of positive
 | XO of positive
 | XH
+[@@deriving show]
 
 type z =
 | Z0
 | Zpos of positive
 | Zneg of positive
-
+[@@deriving show]
+            
 module Pos :
  sig
   val succ : positive -> positive
@@ -128,7 +139,8 @@ val max_of_nonempty_list_type :
 type 'cand pathT =
 | UnitT of 'cand * 'cand
 | ConsT of 'cand * 'cand * 'cand * 'cand pathT
-
+[@@deriving show]
+                                         
 type 'cand wins_type = 'cand -> (z, ('cand pathT, (('cand, 'cand) prod -> bool, __) sigT) prod) sigT
 
 type 'cand loses_type =
@@ -165,7 +177,8 @@ type 'cand count =
    * 'cand count
 | Fin of ('cand -> 'cand -> z) * 'cand ballot list * ('cand -> bool)
    * ('cand -> ('cand wins_type, 'cand loses_type) sum) * 'cand count
-
+[@@deriving show]
+                                                                
 val forall_exists_fin_dec : 'a1 list -> ('a1 -> nat) -> sumbool
 
 val ballot_valid_dec : 'a1 list -> 'a1 ballot -> sumbool
@@ -187,6 +200,7 @@ type cand =
 | B
 | C
 | D
+[@@deriving show]
 
 val cand_all : cand list
 
