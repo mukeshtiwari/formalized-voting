@@ -492,7 +492,7 @@ let wins_loses_type_dec cand_all0 dec_cand marg c =
  
     
 type 'cand ballot = 'cand -> nat
-[@@deriving show]
+
                                
 type 'cand count =
 | Ax of 'cand ballot list * ('cand -> 'cand -> z)
@@ -502,7 +502,7 @@ type 'cand count =
    * 'cand count
 | Fin of ('cand -> 'cand -> z) * 'cand ballot list * ('cand -> bool)
    * ('cand -> ('cand wins_type, 'cand loses_type) sum) * 'cand count
-[@@deriving show]
+
                                                                 
 (** val forall_exists_fin_dec : 'a1 list -> ('a1 -> nat) -> sumbool **)
 
