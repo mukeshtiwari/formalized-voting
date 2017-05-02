@@ -30,9 +30,9 @@ let fst = function
 let snd = function
 | Pair (_, y) -> y
 
-type 'a list =
+type 'a coqlist =
 | Nil
-| Cons of 'a * 'a list
+| Cons of 'a * 'a coqlist
 [@@deriving show]                  
                   
 (** val length : 'a1 list -> nat **)
@@ -492,17 +492,17 @@ let wins_loses_type_dec cand_all0 dec_cand marg c =
  
     
 type 'cand ballot = 'cand -> nat
-
+[@@deriving show]
                                
 type 'cand count =
-| Ax of 'cand ballot list * ('cand -> 'cand -> z)
-| Cvalid of 'cand ballot * 'cand ballot list * ('cand -> 'cand -> z) * ('cand -> 'cand -> z)
-   * 'cand ballot list * 'cand count
-| Cinvalid of 'cand ballot * 'cand ballot list * ('cand -> 'cand -> z) * 'cand ballot list
+| Ax of 'cand ballot coqlist * ('cand -> 'cand -> z)
+| Cvalid of 'cand ballot * 'cand ballot coqlist * ('cand -> 'cand -> z) * ('cand -> 'cand -> z)
+   * 'cand ballot coqlist * 'cand count
+| Cinvalid of 'cand ballot * 'cand ballot coqlist * ('cand -> 'cand -> z) * 'cand ballot coqlist
    * 'cand count
-| Fin of ('cand -> 'cand -> z) * 'cand ballot list * ('cand -> bool)
+| Fin of ('cand -> 'cand -> z) * 'cand ballot coqlist * ('cand -> bool)
    * ('cand -> ('cand wins_type, 'cand loses_type) sum) * 'cand count
-
+[@@deriving show]
                                                                 
 (** val forall_exists_fin_dec : 'a1 list -> ('a1 -> nat) -> sumbool **)
 
