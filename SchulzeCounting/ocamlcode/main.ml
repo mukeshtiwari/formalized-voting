@@ -41,7 +41,7 @@ let _ =
   let w = List.map (fun x -> List.map (fun (a, b) -> (cc a, ocamlnat b)) x) e in
   let v = List.map (fun x -> balfun x) w in
   match schulze_winners_pf (ocamlcoq v) with
-  | ExistT (f, ExistT (y, _)) ->  Format.printf "%s\n" (show_bool (f A))
+  | ExistT (f, ExistT (y, _)) ->  Format.printf "%s\n"  (show_bool (f A))
                                         
   
 
