@@ -8,11 +8,12 @@ type bool =
 type nat =
 | O
 | S of nat
+         
 
 type ('a, 'b) sum =
 | Inl of 'a
 | Inr of 'b
-
+           
 type ('a, 'b) prod =
 | Pair of 'a * 'b
 
@@ -55,9 +56,11 @@ type 'a sig0 =
 type ('a, 'p) sigT =
 | ExistT of 'a * 'p
 
+                   
 type sumbool =
 | Left
 | Right
+
 
 module Nat =
  struct
@@ -95,11 +98,13 @@ type positive =
 | XO of positive
 | XH
 
+
 type z =
 | Z0
 | Zpos of positive
 | Zneg of positive
 
+            
 module Pos =
  struct
   (** val succ : positive -> positive **)
@@ -380,11 +385,14 @@ type 'cand pathT =
 | UnitT of 'cand * 'cand
 | ConsT of 'cand * 'cand * 'cand * 'cand pathT
 
+                                         
 type 'cand wins_type = 'cand -> (z, ('cand pathT, (('cand, 'cand) prod -> bool, __) sigT) prod) sigT
 
+                                                                                                
 type 'cand loses_type =
   (z, ('cand, ('cand pathT, (('cand, 'cand) prod -> bool, __) sigT) prod) sigT) sigT
 
+                                                                                
 (** val m : 'a1 list -> ('a1 -> 'a1 -> z) -> nat -> 'a1 -> 'a1 -> z **)
 
 let rec m cand_all0 marg n c d =
@@ -474,9 +482,11 @@ let wins_loses_type_dec cand_all0 dec_cand marg c =
   (match b with
    | True -> Inl (iterated_marg_wins_type cand_all0 dec_cand marg c)
    | False -> Inr (iterated_marg_loses_type cand_all0 dec_cand marg c))
-
+ 
+    
 type 'cand ballot = 'cand -> nat
 
+                               
 type 'cand count =
 | Ax of 'cand ballot list * ('cand -> 'cand -> z)
 | Cvalid of 'cand ballot * 'cand ballot list * ('cand -> 'cand -> z) * ('cand -> 'cand -> z)
@@ -486,6 +496,7 @@ type 'cand count =
 | Fin of ('cand -> 'cand -> z) * 'cand ballot list * ('cand -> bool)
    * ('cand -> ('cand wins_type, 'cand loses_type) sum) * 'cand count
 
+                                                                
 (** val forall_exists_fin_dec : 'a1 list -> ('a1 -> nat) -> sumbool **)
 
 let rec forall_exists_fin_dec l f =
@@ -547,11 +558,13 @@ type cand =
 | C
 | D
 
+
 (** val cand_all : cand list **)
 
 let cand_all =
   Cons (A, (Cons (B, (Cons (C, (Cons (D, Nil)))))))
 
+       
 (** val cand_eq_dec : cand -> cand -> sumbool **)
 
 let cand_eq_dec a b =
