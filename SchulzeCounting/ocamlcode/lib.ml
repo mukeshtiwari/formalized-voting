@@ -435,6 +435,7 @@ let c_wins cand_all0 marg c =
     Z.leb (m cand_all0 marg (length cand_all0) d c) (m cand_all0 marg (length cand_all0) c d))
     cand_all0
 
+    
 (** val iterated_marg_wins_type :
     'a1 list -> ('a1 -> 'a1 -> sumbool) -> ('a1 -> 'a1 -> z) -> 'a1 -> 'a1 wins_type **)
 
@@ -489,10 +490,10 @@ let wins_loses_type_dec cand_all0 dec_cand marg c =
   (match b with
    | True -> Inl (iterated_marg_wins_type cand_all0 dec_cand marg c)
    | False -> Inr (iterated_marg_loses_type cand_all0 dec_cand marg c))
- 
-    
-type 'cand ballot = 'cand -> nat
 
+  
+type 'cand ballot = 'cand -> nat
+[@@deriving show]
                                
 type 'cand count =
 | Ax of 'cand ballot coqlist * ('cand -> 'cand -> z)
@@ -502,7 +503,7 @@ type 'cand count =
    * 'cand count
 | Fin of ('cand -> 'cand -> z) * 'cand ballot coqlist * ('cand -> bool)
    * ('cand -> ('cand wins_type, 'cand loses_type) sum) * 'cand count
-
+[@@deriving show]
                                                                 
 (** val forall_exists_fin_dec : 'a1 list -> ('a1 -> nat) -> sumbool **)
 
@@ -521,6 +522,8 @@ let ballot_valid_dec cand_all0 b =
 
 (** val update_marg : 'a1 ballot -> ('a1 -> 'a1 -> z) -> 'a1 -> 'a1 -> z **)
 
+
+     
 let update_marg p m0 c d =
   match Nat.ltb (p c) (p d) with
   | True -> Z.add (m0 c d) (Zpos XH)
@@ -553,11 +556,37 @@ let all_ballots_counted cand_all0 bs =
 (** val schulze_winners :
     'a1 list -> ('a1 -> 'a1 -> sumbool) -> 'a1 ballot list -> ('a1 -> bool, ('a1 count, __) sigT) sigT **)
 
+let rec all_pairs l =
+  match l with
+  | [] -> []
+  | h :: t -> (h, h) :: all_pairs t
+              @ List.map (fun x -> (h, x)) t
+              @ List.map (fun x -> (x, h)) t
+    
+let rec lin_search c d l dec_cand =
+  match l with
+  | [] -> Z0
+  | (c1, c2, k) :: t ->
+     match dec_cand c c1, dec_cand d c2 with
+     | Left, Left -> k
+     | _, _ -> lin_search c d t dec_cand
+
+let rec listify m cand_all0 =
+  List.map (fun (c, d) -> (c, d, m c d)) (all_pairs cand_all0)
+                                                
+                            
+let rec coqocaml l = 
+  match l with
+  | Nil -> []
+  | Cons (h, t) -> h :: coqocaml t
+                   
 let schulze_winners cand_all0 dec_cand bs =
   let ExistT (i, t) = all_ballots_counted cand_all0 bs in
   let ExistT (m0, p) = t in
-  ExistT ((c_wins cand_all0 m0), (ExistT ((Fin (m0, i, (c_wins cand_all0 m0),
-  (wins_loses_type_dec cand_all0 dec_cand m0), p)), __)))
+  let l = listify m0 (coqocaml cand_all0) in
+  let w = fun c d -> lin_search c d l dec_cand in 
+  ExistT ((c_wins cand_all0 w), (ExistT ((Fin (w, i, (c_wins cand_all0 w),
+  (wins_loses_type_dec cand_all0 dec_cand w), p)), __)))
 
 type cand =
 | A
@@ -597,3 +626,6 @@ let cand_eq_dec a b =
 
 let schulze_winners_pf =
   schulze_winners cand_all cand_eq_dec
+
+let schulze_margin_pf =
+  all_ballots_counted cand_all 

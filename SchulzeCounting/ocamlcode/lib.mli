@@ -207,3 +207,6 @@ val cand_all : cand coqlist
 val cand_eq_dec : cand -> cand -> sumbool
 
 val schulze_winners_pf : cand ballot coqlist -> (cand -> bool, (cand count, __) sigT) sigT
+
+val schulze_margin_pf : cand ballot coqlist ->
+                        (cand ballot coqlist, (cand -> cand -> z, cand count) sigT) sigT
