@@ -839,6 +839,7 @@ Section Schulze.
                                     (fun _ _ : cand => eq_refl)).
 
 
+    (* memoization part to run it faster *)
 
     Definition listify (m : cand -> cand -> Z) :=
       map (fun s => (fst s, snd s, m (fst s) (snd s))) (all_pairs cand_all). 
@@ -868,12 +869,11 @@ Section Schulze.
       destruct (dec_cand d a2). subst. auto.
       auto. auto.
     Qed.
-
+    
     Require Import Coq.Logic.FunctionalExtensionality.
     Theorem ext : forall m,  (forall c d, w m c d = m c d) -> w m = m.
     Proof.
-      intros.  extensionality a.  extensionality b.
-      auto.     
+      intros. extensionality a. extensionality b. auto.     
     Qed.
     
     
@@ -885,13 +885,13 @@ Section Schulze.
               let g := fun c d => linear_search c d m l in _).
       pose proof (ext m (equivalent_m_w m)) as H.
       rewrite <- H in p. 
-      refine ( existT _ (c_wins g) (existT _ (fin _ _ _ _ (wins_loses_type_dec g) p
-                                                  (c_wins_true_type g) (c_wins_false_type g)) I)).
+      refine (existT _ (c_wins g) (existT _ (fin _ _ _ _ (wins_loses_type_dec g) p
+                                                 (c_wins_true_type g) (c_wins_false_type g)) I)).
     Defined.
     
     
-   
-    (*
+    
+  (*
     (* The main theorem: for every list of ballots, we can find a boolean function that decides
      winners, together with evidences of the correctness of this determination *)
     Definition schulze_winners (bs : list ballot) :
@@ -900,17 +900,17 @@ Section Schulze.
       let (m, p) := t in
       existT _ (c_wins m) (existT _ (fin _ _ _ _ (wins_loses_type_dec m) p
                                          (c_wins_true_type m) (c_wins_false_type m)) I).
-    *)
+   *)
     
-      
+    
   End Count.
-
+  
 End Schulze.
 
 
 
 Section Candidate.
-
+  
   Inductive cand := A | B | C | D.
   Definition cand_all := [A; B; C; D].
 
