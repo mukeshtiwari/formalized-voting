@@ -6,4 +6,4 @@ Require Import ZArith.
 Require Import EqNat.
 
 Extraction Language Ocaml.
-Extraction "Lib.ml" schulze_winners_pf.
+Extraction "lib.ml" schulze_winners_pf.

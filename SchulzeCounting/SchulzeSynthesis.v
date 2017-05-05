@@ -728,7 +728,7 @@ Section Schulze.
                      else m c d).
 
 
-    (*
+    
     Definition listify_v (m : cand -> cand -> Z) :=
       map (fun s => (fst s, snd s, m (fst s) (snd s))) (all_pairs cand_all). 
 
@@ -748,9 +748,10 @@ Section Schulze.
     
 
     Definition update_marg_listify (p : ballot) (m : cand -> cand -> Z) : cand -> cand -> Z :=
-      fun c d =>
-        let t := update_marg p m in 
-        linear_search_v c d t (listify_v t).
+      let t := update_marg p m in
+      let l := listify_v t in
+      fun c d => linear_search_v c d t l.
+    
     
     
 
@@ -770,7 +771,7 @@ Section Schulze.
       intros p m c d.  unfold update_marg_listify.
       rewrite <- equivalent_m_w_v. 
       auto.      
-    Qed. *)
+    Qed.
       
     (* correctness of update_marg above *)
     Lemma update_marg_corr: forall m (p : ballot) (c d : cand),
@@ -795,14 +796,14 @@ Section Schulze.
       apply Nat.ltb_lt in H2. omega. apply Nat.ltb_ge in H2. omega.
     Qed.
 
-    (*
+    
      Lemma update_marg_corr_listify: forall m (p : ballot) (c d : cand),
         ((p c < p d)%nat -> update_marg_listify p m c d = m c d + 1) /\
         ((p c = p d)%nat -> update_marg_listify p m c d = m c d) /\
         ((p c > p d)%nat -> update_marg_listify p m c d = m c d - 1).
      Proof.
        intros m p c d. rewrite <- equiv_cor. apply update_marg_corr.
-     Qed. *)
+     Qed. 
 
     
     (* every partial state of vote tallying can be progressed to a state where
@@ -819,8 +820,8 @@ Section Schulze.
           fun inbs m Hc =>
             match ballot_valid_dec h with
             | left Hv =>
-              let w := update_marg h m in 
-              F t inbs w (cvalid bs h t m w inbs Hc Hv (update_marg_corr m h))
+              let w := update_marg_listify h m in 
+              F t inbs w (cvalid bs h t m w inbs Hc Hv (update_marg_corr_listify m h))
             | right Hi =>  F t (h :: inbs) m (cinvalid bs h t m inbs Hc Hi)
             end
         end.
@@ -840,7 +841,7 @@ Section Schulze.
 
 
     (* memoization part to run it faster *)
-
+    (*
     Definition listify (m : cand -> cand -> Z) :=
       map (fun s => (fst s, snd s, m (fst s) (snd s))) (all_pairs cand_all). 
     
@@ -887,11 +888,11 @@ Section Schulze.
       rewrite <- H in p. 
       refine (existT _ (c_wins g) (existT _ (fin _ _ _ _ (wins_loses_type_dec g) p
                                                  (c_wins_true_type g) (c_wins_false_type g)) I)).
-    Defined.
+    Defined. *)
     
     
     
-  (*
+  
     (* The main theorem: for every list of ballots, we can find a boolean function that decides
      winners, together with evidences of the correctness of this determination *)
     Definition schulze_winners (bs : list ballot) :
@@ -900,7 +901,7 @@ Section Schulze.
       let (m, p) := t in
       existT _ (c_wins m) (existT _ (fin _ _ _ _ (wins_loses_type_dec m) p
                                          (c_wins_true_type m) (c_wins_false_type m)) I).
-   *)
+   
     
     
   End Count.
