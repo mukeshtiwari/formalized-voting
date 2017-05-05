@@ -5,5 +5,5 @@ Require Import Coq.Strings.String.
 Require Import ZArith.
 Require Import EqNat.
 
-Extraction Language Haskell.
-Extraction "Lib.hs" schulze_winners_pf.
+Extraction Language Ocaml.
+Extraction "Lib.ml" schulze_winners_pf.

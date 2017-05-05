@@ -588,7 +588,7 @@ Section Schulze.
       apply forallb_false_type in c_wins_val.
       destruct c_wins_val as [d [H1 H2]]. apply Z.leb_gt in H2. exists d. auto.
     Defined.
-
+    
     (* aligning c_wins with type level evidence *)
     Lemma c_wins_true_type:
       forall c : cand, c_wins c = true <-> (exists x : wins_type c, wins_loses_type_dec c = inl x).
@@ -613,8 +613,11 @@ Section Schulze.
       apply c_wins_false. apply loses_prop_iterated_marg. auto.
     Qed.
 
+  
+    
   End Evote.
-
+  
+  
   Section Count.
 
     (* votes put numbers next to candidates when filling in a ballot. We understand
@@ -724,8 +727,51 @@ Section Schulze.
                      then (m c d -1)%Z
                      else m c d).
 
-   
+
+    (*
+    Definition listify_v (m : cand -> cand -> Z) :=
+      map (fun s => (fst s, snd s, m (fst s) (snd s))) (all_pairs cand_all). 
+
+
+    Fixpoint linear_search_v (c d : cand) (m : cand -> cand -> Z) l :=
+      match l with
+      | [] => m c d
+      | (c1, c2, k) :: t =>
+        match dec_cand c c1, dec_cand d c2 with
+        | left _, left _ => k
+        | _, _ => linear_search_v c d m t
+        end
+      end.
     
+   
+
+    
+
+    Definition update_marg_listify (p : ballot) (m : cand -> cand -> Z) : cand -> cand -> Z :=
+      fun c d =>
+        let t := update_marg p m in 
+        linear_search_v c d t (listify_v t).
+    
+    
+
+
+    Theorem equivalent_m_w_v : forall c d m, linear_search_v c d m (listify_v m) = m c d.
+    Proof.
+      unfold  listify_v.
+      intros. induction (all_pairs cand_all); simpl; auto.
+      destruct a as (a1, a2). simpl in *.
+      destruct (dec_cand c a1).
+      destruct (dec_cand d a2). subst. auto.
+      auto. auto.
+    Qed.
+
+    Corollary equiv_cor : forall p m c d, update_marg p m c d = update_marg_listify p m c d.
+    Proof.
+      intros p m c d.  unfold update_marg_listify.
+      rewrite <- equivalent_m_w_v. 
+      auto.      
+    Qed. *)
+      
     (* correctness of update_marg above *)
     Lemma update_marg_corr: forall m (p : ballot) (c d : cand),
         ((p c < p d)%nat -> update_marg p m c d = m c d + 1) /\
@@ -749,7 +795,16 @@ Section Schulze.
       apply Nat.ltb_lt in H2. omega. apply Nat.ltb_ge in H2. omega.
     Qed.
 
+    (*
+     Lemma update_marg_corr_listify: forall m (p : ballot) (c d : cand),
+        ((p c < p d)%nat -> update_marg_listify p m c d = m c d + 1) /\
+        ((p c = p d)%nat -> update_marg_listify p m c d = m c d) /\
+        ((p c > p d)%nat -> update_marg_listify p m c d = m c d - 1).
+     Proof.
+       intros m p c d. rewrite <- equiv_cor. apply update_marg_corr.
+     Qed. *)
 
+    
     (* every partial state of vote tallying can be progressed to a state where
        the margin function is fully constructed, i.e. all ballots are counted *)
 
@@ -764,8 +819,8 @@ Section Schulze.
           fun inbs m Hc =>
             match ballot_valid_dec h with
             | left Hv =>
-              F t inbs (update_marg h m)
-                (cvalid bs h t m (update_marg h m) inbs Hc Hv (update_marg_corr m h))
+              let w := update_marg h m in 
+              F t inbs w (cvalid bs h t m w inbs Hc Hv (update_marg_corr m h))
             | right Hi =>  F t (h :: inbs) m (cinvalid bs h t m inbs Hc Hi)
             end
         end.
@@ -783,7 +838,60 @@ Section Schulze.
                                 (ax bs bs (fun _ _ : cand => 0) eq_refl
                                     (fun _ _ : cand => eq_refl)).
 
-  
+
+
+    Definition listify (m : cand -> cand -> Z) :=
+      map (fun s => (fst s, snd s, m (fst s) (snd s))) (all_pairs cand_all). 
+    
+
+    Fixpoint linear_search (c d : cand) (m : cand -> cand -> Z) l :=
+      match l with
+      | [] => m c d
+      | (c1, c2, k) :: t =>
+        match dec_cand c c1, dec_cand d c2 with
+        | left _, left _ => k
+        | _, _ => linear_search c d m t
+        end
+      end.
+    
+    Definition w m (c d : cand) :=
+      let l := listify m in
+      linear_search c d m l.
+    
+    
+    Theorem equivalent_m_w : forall m c d, w m c d = m c d.
+    Proof.
+      unfold w. unfold listify.
+      intros. induction (all_pairs cand_all); simpl; auto.
+      destruct a as (a1, a2). simpl in *.
+      destruct (dec_cand c a1).
+      destruct (dec_cand d a2). subst. auto.
+      auto. auto.
+    Qed.
+
+    Require Import Coq.Logic.FunctionalExtensionality.
+    Theorem ext : forall m,  (forall c d, w m c d = m c d) -> w m = m.
+    Proof.
+      intros.  extensionality a.  extensionality b.
+      auto.     
+    Qed.
+    
+    
+    Definition schulze_winners (bs : list ballot) :
+      existsT (f : cand -> bool) (p : Count bs (winners f)), True.
+      refine (let (i, t) := all_ballots_counted bs in
+              let (m, p) := t in
+              let l := listify m in
+               let w := fun c d => linear_search c d m l in _).
+      pose proof (ext m (equivalent_m_w m)) as H.
+      rewrite <- H in p.
+      refine ( existT _ (c_wins w) (existT _ (fin _ _ _ _ (wins_loses_type_dec w) p
+                                                  (c_wins_true_type w) (c_wins_false_type w)) I)).
+    Defined.
+    
+    
+   
+    (*
     (* The main theorem: for every list of ballots, we can find a boolean function that decides
      winners, together with evidences of the correctness of this determination *)
     Definition schulze_winners (bs : list ballot) :
@@ -792,6 +900,7 @@ Section Schulze.
       let (m, p) := t in
       existT _ (c_wins m) (existT _ (fin _ _ _ _ (wins_loses_type_dec m) p
                                          (c_wins_true_type m) (c_wins_false_type m)) I).
+    *)
     
       
   End Count.

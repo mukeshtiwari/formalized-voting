@@ -252,8 +252,7 @@ Defined.
    such that f x = false *)
 Lemma forallb_false_type : forall (A : Type) (f : A -> bool) (l : list A),
     forallb f l = false -> existsT x, In x l /\ f x = false.
-Proof.
- 
+Proof. 
   refine (fun A f =>
             fix F l :=
             match l as l0 return (forallb f l0 = false ->
@@ -269,5 +268,5 @@ Proof.
   simpl in H. rewrite H1 in H. simpl in H. pose proof (F t H) as Ft.
   destruct Ft as [x [Fin Fx]]. exists x. intuition.
 Defined.
-
 (* End of List Lemma file *)
+
