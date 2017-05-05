@@ -882,11 +882,11 @@ Section Schulze.
       refine (let (i, t) := all_ballots_counted bs in
               let (m, p) := t in
               let l := listify m in
-               let w := fun c d => linear_search c d m l in _).
+              let g := fun c d => linear_search c d m l in _).
       pose proof (ext m (equivalent_m_w m)) as H.
-      rewrite <- H in p.
-      refine ( existT _ (c_wins w) (existT _ (fin _ _ _ _ (wins_loses_type_dec w) p
-                                                  (c_wins_true_type w) (c_wins_false_type w)) I)).
+      rewrite <- H in p. 
+      refine ( existT _ (c_wins g) (existT _ (fin _ _ _ _ (wins_loses_type_dec g) p
+                                                  (c_wins_true_type g) (c_wins_false_type g)) I)).
     Defined.
     
     
