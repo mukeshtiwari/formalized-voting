@@ -119,51 +119,143 @@ Section Schulze.
         specialize (Hmp d). destruct Hmp; [intuition | omega].
     Qed.
 
-    (* M is the iterated margin function and maps a pair of candidates c, d to the
-       strength of the strongest path of length at most (n + 1) *)
-    Fixpoint M (n : nat) (c d : cand) : Z :=
+    
+    Definition listify (m : cand -> cand -> Z) :=
+      map (fun s => (fst s, snd s, m (fst s) (snd s))) (all_pairs cand_all). 
+    
+
+    (*
+    Definition linear_search : forall (c d : cand) (l : list (cand * cand * Z)),  l <> nil ->  Z.
+      refine (fun c d =>
+                fix F l :=
+                match l with
+                | [] => fun Ht => _
+                | (c1, c2, k) :: t =>
+                  fun Ht =>
+                    match dec_cand c c1, dec_cand d c2 with
+                    | left _, left _ => k
+                    | _, _ => _
+                    end
+                end). admit. *)
+                
+    
+    Fixpoint linear_search (c d : cand) (m : cand -> cand -> Z) l :=
+      match l with
+      | [] => m c d
+      | (c1, c2, k) :: t =>
+        match dec_cand c c1, dec_cand d c2 with
+        | left _, left _ => k
+        | _, _ => linear_search c d m t
+        end
+      end.
+
+  
+    
+    Theorem equivalent_m : forall c d m, linear_search c d m (listify m) = m c d.
+    Proof.
+      unfold  listify.
+      intros. induction (all_pairs cand_all); simpl; auto.
+      destruct a as (a1, a2). simpl in *.
+      destruct (dec_cand c a1).
+      destruct (dec_cand d a2). subst. auto.
+      auto. auto.
+    Qed.
+    
+    Fixpoint M_old (n : nat) (c d : cand) : Z :=
       match n with
       | 0%nat => marg c d
       | S n' =>
-        Z.max (M n' c d) (maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all))
+        Z.max (M_old n' c d) (maxlist (map (fun x : cand => Z.min (marg c x) (M_old n' x d)) cand_all))
+      end.
+    
+    (* M is the iterated margin function and maps a pair of candidates c, d to the
+       strength of the strongest path of length at most (n + 1) *)
+    Fixpoint M (n : nat) : cand -> cand -> Z :=
+      match n with
+      | 0%nat => marg
+      | S n' =>
+        let l := listify (fun c d =>
+                            Z.max
+                              (M n' c d)
+                              (maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all))) in
+        fun c d => 
+          linear_search c d (fun c d =>
+                            Z.max
+                              (M n' c d)
+                              (maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all))) l 
       end.
 
+    
+
+    Lemma M_M_new_equal : forall n c d , M n c d = M_old n c d. 
+    Proof.
+      induction n. simpl. auto.
+      intros. simpl. rewrite equivalent_m.
+      assert (Ht : maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all) =
+      maxlist (map (fun x : cand => Z.min (marg c x) (M_old n x d)) cand_all)).
+      apply f_equal.
+      clear cand_not_nil. clear cand_fin.
+      induction cand_all. auto.
+      simpl. pose proof (IHn a d). rewrite H. apply f_equal. auto.
+      rewrite Ht. rewrite IHn.
+      auto.
+    Qed.
+    
     (* partial correctness of iterated margin function: if the strength M n c d
        of the strongest path of length <= n+1 between c and d is at least s, then
        c and d can be joined by a type-level path of this strength *)
-    Definition iterated_marg_patht : forall n s c d, M n c d >= s -> PathT s c d :=
-      fix F n s c d :=
-        match n as m return (M m c d >= s -> PathT s c d) with
-        | O =>
-          fun Hm : M 0 c d >= s => unitT s c d Hm
-        | S n' =>
-          fun Hm : M (S n') c d >= s =>
-            let t1 := M n' c d in
-            let t2 := maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) in
-            let cm := t1 ?= t2  in
-            match
-              cm as cv
-              return
-              (match cv with
-               | Eq => t1
-               | Lt => t2
-               | Gt => t1
-               end >= s -> PathT s c d)
-            with
-            | Eq => fun Heq : M n' c d >= s => F n' s c d Heq
-            | Lt =>
-              fun Hlt : maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) >= s =>
-                match max_of_nonempty_list_type cand cand_all cand_not_nil dec_cand s _ Hlt with
-                | existT _ x (conj H1 H2) =>
-                  match proj1 (z_min_lb _ _ _) H2 with
-                  | conj H3 H4 => (consT s c x d H3  (F n' s x d H4))
-                  end
-                end
-            | Gt => fun Hgt : M n' c d >= s =>  F n' s c d Hgt
-            end Hm
-        end.
-            
-   
+    Theorem iterated_marg_patht : forall n s c d, M n c d >= s -> PathT s c d.
+    Proof.
+      induction n.
+      intros s c d H. constructor. auto.
+      intros s c d H. simpl in H. rewrite equivalent_m in H.
+      unfold Z.max in H.
+      destruct 
+      (M n c d
+         ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all)).
+      apply IHn. auto.
+      apply max_of_nonempty_list_type in H. destruct H as [x [H1 H2]].
+      apply z_min_lb in H2. destruct H2.
+      specialize (IHn _ _ _ H0). specialize (consT _ _ _ _ H IHn). auto.
+      apply cand_not_nil. apply dec_cand. apply IHn. assumption.
+    Defined.
+    
+    (*
+      refine (
+          fix F n s c d :=
+            match n as m return (M m c d >= s -> PathT s c d) with
+            | O =>
+              fun Hm : M 0 c d >= s => unitT s c d Hm
+            | S n' =>
+              fun Hm : M (S n') c d >= s =>
+                let t1 := M n' c d in
+                let t2 := maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) in
+                let cm := t1 ?= t2  in
+                match
+                  cm as cv
+                  return
+                  (match cv with
+                   | Eq => t1
+                   | Lt => t2
+                   | Gt => t1
+                   end >= s -> PathT s c d)
+                with
+                | Eq => fun Heq : M n' c d >= s => F n' s c d Heq
+                | Lt =>
+                  fun Hlt : maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all) >= s =>
+                    match max_of_nonempty_list_type cand cand_all cand_not_nil dec_cand s _ Hlt with
+                    | existT _ x (conj H1 H2) =>
+                      match proj1 (z_min_lb _ _ _) H2 with
+                      | conj H3 H4 => (consT s c x d H3  (F n' s x d H4))
+                      end
+                    end
+                | Gt => fun Hgt : M n' c d >= s =>  F n' s c d Hgt
+                end _
+            end).
+      simpl in Hm. rewrite equivalent_m in Hm.
+      apply z_max_lb in Hm. destruct Hm. *)
+      
+      
 
     
     (* as type level paths induce prop-level paths, the same as above also holds for prop-level
@@ -182,7 +274,7 @@ Section Schulze.
     Proof.
       intros s c d H. induction H.
       exists 0%nat. auto. destruct IHPath.
-      exists (S x). simpl. apply z_max_lb. right.
+      exists (S x). simpl.  rewrite equivalent_m. apply z_max_lb. right.
       apply max_of_nonempty_list.
       apply cand_not_nil. apply dec_cand. exists d.
       split. pose proof (cand_fin d). auto.
@@ -193,7 +285,7 @@ Section Schulze.
     Lemma monotone_M : forall (n m : nat) c d, (n <= m)%nat  -> M n c d <= M m c d.
     Proof.
       intros n m c d H. induction H; simpl; try omega.
-      apply Z.ge_le. apply z_max_lb with (m := M m c d).
+      apply Z.ge_le. rewrite equivalent_m.  apply z_max_lb with (m := M m c d).
       left. omega.
     Qed.
 
@@ -213,9 +305,9 @@ Section Schulze.
       { destruct l. intros. reflexivity.
         simpl in *. inversion H. }
       specialize (H1 H). subst. simpl in *. auto.
-      intros. simpl in *. destruct l. simpl in *. apply z_max_lb.
+      intros. simpl in *. destruct l. simpl in *. rewrite equivalent_m. apply z_max_lb.
       left. apply IHk with []. simpl. omega. simpl. auto.
-      simpl in *. apply z_min_lb in H0. destruct H0.
+      simpl in *. apply z_min_lb in H0. destruct H0. rewrite equivalent_m.
       apply z_max_lb. right. apply max_of_nonempty_list.
       apply cand_not_nil. apply dec_cand. exists c0. split. specialize (cand_fin c0). trivial.
       apply z_min_lb. split.
@@ -228,7 +320,8 @@ Section Schulze.
     Proof.
       split. generalize dependent s. generalize dependent d.
       generalize dependent c. induction k. simpl. intros. exists []. simpl. intuition.
-      simpl. intros. pose proof (proj1 (z_max_lb (M k c d) _ s) H). destruct H0.
+      simpl. intros. rewrite equivalent_m in H.  pose proof (proj1 (z_max_lb (M k c d) _ s) H).
+      destruct H0.
       specialize (IHk c d s H0). destruct IHk as [l [H1 H2]]. exists l. omega. clear H.
       pose proof
            (max_of_nonempty_list _ cand_all cand_not_nil dec_cand s
@@ -409,7 +502,7 @@ Section Schulze.
             clear Heqs. clear Heqr.  
             induction (length cand_all); simpl in Hx.
             intuition.
-            apply IHn. apply Z.max_lub_iff in Hx. intuition.
+            apply IHn. rewrite equivalent_m in Hx.  apply Z.max_lub_iff in Hx. intuition.
           * apply forallb_forall. intros y Hy. apply orb_true_iff.
             simpl in *.
             assert (A : marg x y <= s \/ marg x y > s) by omega.
@@ -540,8 +633,9 @@ Section Schulze.
       apply andb_true_iff. split. unfold marg_lt. simpl. apply Z.ltb_lt.
       clear H. clear Heqs.
       induction (length cand_all). simpl in *. omega.
-      simpl in H0. apply Z.max_lub_lt_iff in H0. destruct H0. apply IHn. auto.
-      simpl in HE.
+      simpl in H0. rewrite equivalent_m in H0.
+      apply Z.max_lub_lt_iff in H0. destruct H0. apply IHn. auto.
+      simpl in HE. rewrite equivalent_m in HE.
       apply Z.max_lub_lt_iff in HE. destruct HE as [H1 H2]. assumption. assumption.
 
       apply forallb_forall. intros y Hy.
