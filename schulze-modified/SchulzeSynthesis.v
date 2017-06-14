@@ -122,44 +122,85 @@ Section Schulze.
     
     Definition listify (m : cand -> cand -> Z) :=
       map (fun s => (fst s, snd s, m (fst s) (snd s))) (all_pairs cand_all). 
-    
 
-    (*
-    Definition linear_search : forall (c d : cand) (l : list (cand * cand * Z)),  l <> nil ->  Z.
-      refine (fun c d =>
-                fix F l :=
-                match l with
-                | [] => fun Ht => _
-                | (c1, c2, k) :: t =>
-                  fun Ht =>
-                    match dec_cand c c1, dec_cand d c2 with
-                    | left _, left _ => k
-                    | _, _ => _
-                    end
-                end). admit. *)
+    Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
+        In a1 l -> In a2 l -> In (a1, a2) (all_pairs l).
+    Proof.
+      intros A a1 a2 l H1 H2. induction l.
+      inversion H1. simpl.
+      destruct H1 as [H3 | H3].
+      {
+        destruct H2 as [H4 | H4].
+        left. congruence.
+        right. apply in_app_iff. right.
+        apply in_app_iff. left.
+        rewrite H3. apply in_map. assumption.
+      }
+      {
+        destruct H2 as [H4 | H4].
+        right. apply in_app_iff.
+        right. apply in_app_iff.
+        right. rewrite H4. apply in_map_iff.
+        exists a1. split. auto. auto.
+        right. apply in_app_iff. left.
+        apply IHl. assumption. assumption.
+      }
+    Qed.
+    
+    Lemma in_pairs : forall a b, In a cand_all -> In b cand_all -> In (a, b) (all_pairs cand_all).
+    Proof.
+      intros a b H1 H2. apply all_pairsin; auto.
+    Qed.
+    
+      
+      
                 
     
-    Fixpoint linear_search (c d : cand) (m : cand -> cand -> Z) l :=
+    Fixpoint linear_search (c d : cand) l :=
       match l with
-      | [] => m c d
+      | [] => marg c d
       | (c1, c2, k) :: t =>
         match dec_cand c c1, dec_cand d c2 with
         | left _, left _ => k
-        | _, _ => linear_search c d m t
+        | _, _ => linear_search c d t
         end
       end.
 
-  
     
-    Theorem equivalent_m : forall c d m, linear_search c d m (listify m) = m c d.
+    Theorem equivalent_m : forall c d m, linear_search c d (listify m) = m c d.
     Proof.
+      unfold listify. intros c d m.
+      assert (H1 : forall c1 c2, In (c1, c2) (all_pairs cand_all)).
+      intros c1 c2. apply in_pairs; auto.
+      specialize (H1 c d).
+
+      induction (all_pairs cand_all).
+      intros. simpl. inversion H1. 
+      
+      intros. simpl.
+      destruct a as (a1, a2). simpl in *.
+      destruct (dec_cand c a1).
+      destruct (dec_cand d a2). subst. auto.
+      destruct H1. inversion H. symmetry in H2. unfold not in n.
+      specialize (n H2). inversion n.
+      apply IHl. auto.
+      destruct H1. inversion H. unfold not in n. symmetry in H1.
+      specialize (n H1). inversion n.
+      apply IHl. auto.
+    Qed.
+    
+      
+    (*Proof.
       unfold  listify.
-      intros. induction (all_pairs cand_all); simpl; auto.
+      pose proof all_pairs_notempty as Ht.
+      intros. induction (all_pairs cand_all). unfold not in Ht. pose proof (Ht eq_refl).
+      inversion H.
+      
       destruct a as (a1, a2). simpl in *.
       destruct (dec_cand c a1).
       destruct (dec_cand d a2). subst. auto.
       auto. auto.
-    Qed.
+    Qed.*)
     
     Fixpoint M_old (n : nat) (c d : cand) : Z :=
       match n with
@@ -170,27 +211,61 @@ Section Schulze.
     
     (* M is the iterated margin function and maps a pair of candidates c, d to the
        strength of the strongest path of length at most (n + 1) *)
+    (*
     Fixpoint M (n : nat) : cand -> cand -> Z :=
       match n with
       | 0%nat => marg
       | S n' =>
         let l := listify (fun c d =>
-                            Z.max
-                              (M n' c d)
-                              (maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all))) in
+                            let u := M n' c d in
+                            let t := (maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d))
+                                                   cand_all)) in
+
+                            Z.max u t) in
         fun c d => 
           linear_search c d (fun c d =>
                             Z.max
                               (M n' c d)
                               (maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all))) l 
-      end.
-
+      end. *)
     
 
+    Fixpoint MM n :=
+      match n with
+      | O => listify marg
+      | S n' =>
+        let uu := MM n' in
+        listify (fun c d =>
+                   let u := linear_search c d uu in
+                   let t := maxlist
+                              (map (fun x => Z.min (marg c x) (linear_search x d uu)) cand_all) in
+                   Z.max u t)
+      end.
+
+    Definition M n : cand -> cand -> Z :=
+      let l := MM n in
+      fun c d => linear_search c d l.
+
+ 
+    Lemma M_M_new_equal : forall n c d , M n c d = M_old n c d. 
+    Proof.
+      induction n. unfold M. simpl. intros c d. rewrite equivalent_m. auto.
+      intros c d.  unfold M in *. simpl. rewrite equivalent_m.
+      assert (Ht: maxlist (map (fun x : cand => Z.min (marg c x) (linear_search x d (MM n))) cand_all) =
+                  maxlist (map (fun x : cand => Z.min (marg c x) (M_old n x d)) cand_all)).
+      apply f_equal.
+      clear cand_not_nil. clear cand_fin.
+      induction cand_all. auto. simpl. pose proof (IHn a d).
+      rewrite H. apply f_equal. auto.
+      rewrite Ht. rewrite IHn.
+      auto.
+    Qed.
+    
+    (*
     Lemma M_M_new_equal : forall n c d , M n c d = M_old n c d. 
     Proof.
       induction n. simpl. auto.
-      intros. simpl. rewrite equivalent_m.
+      intros. simpl.  rewrite equivalent_m.
       assert (Ht : maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all) =
       maxlist (map (fun x : cand => Z.min (marg c x) (M_old n x d)) cand_all)).
       apply f_equal.
@@ -199,7 +274,7 @@ Section Schulze.
       simpl. pose proof (IHn a d). rewrite H. apply f_equal. auto.
       rewrite Ht. rewrite IHn.
       auto.
-    Qed.
+    Qed. *)
     
     (* partial correctness of iterated margin function: if the strength M n c d
        of the strongest path of length <= n+1 between c and d is at least s, then
@@ -207,18 +282,28 @@ Section Schulze.
     Theorem iterated_marg_patht : forall n s c d, M n c d >= s -> PathT s c d.
     Proof.
       induction n.
-      intros s c d H. constructor. auto.
-      intros s c d H. simpl in H. rewrite equivalent_m in H.
+      intros s c d H. constructor. unfold M in *. simpl in *. rewrite equivalent_m in H.  auto.
+      intros s c d H. unfold M in *. simpl in H. rewrite equivalent_m in H.
       unfold Z.max in H.
-      destruct 
-      (M n c d
-         ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all)).
+      destruct (linear_search c d (MM n)
+        ?= maxlist (map (fun x : cand => Z.min (marg c x) (linear_search x d (MM n))) cand_all)).
       apply IHn. auto.
       apply max_of_nonempty_list_type in H. destruct H as [x [H1 H2]].
       apply z_min_lb in H2. destruct H2.
       specialize (IHn _ _ _ H0). specialize (consT _ _ _ _ H IHn). auto.
       apply cand_not_nil. apply dec_cand. apply IHn. assumption.
     Defined.
+
+    (*
+      destruct 
+      (M n c d
+         ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all)).
+      apply IHn.  auto.
+      apply max_of_nonempty_list_type in H. destruct H as [x [H1 H2]].
+      apply z_min_lb in H2. destruct H2.
+      specialize (IHn _ _ _ H0). specialize (consT _ _ _ _ H IHn). auto.
+      apply cand_not_nil. apply dec_cand. apply IHn. assumption.
+    Defined. *)
     
     (*
       refine (
@@ -272,9 +357,9 @@ Section Schulze.
     Lemma path_iterated_marg : forall (s : Z) (c d : cand),
         Path s c d -> exists n, M n c d >= s.
     Proof.
-      intros s c d H. induction H.
-      exists 0%nat. auto. destruct IHPath.
-      exists (S x). simpl.  rewrite equivalent_m. apply z_max_lb. right.
+      intros s c d H.  induction H.
+      exists 0%nat. unfold M. simpl. rewrite equivalent_m. auto. destruct IHPath.
+      exists (S x). unfold M in *. simpl.  rewrite equivalent_m. apply z_max_lb. right.
       apply max_of_nonempty_list.
       apply cand_not_nil. apply dec_cand. exists d.
       split. pose proof (cand_fin d). auto.
@@ -284,8 +369,8 @@ Section Schulze.
     (* monotonicity of the iterated margin function *)
     Lemma monotone_M : forall (n m : nat) c d, (n <= m)%nat  -> M n c d <= M m c d.
     Proof.
-      intros n m c d H. induction H; simpl; try omega.
-      apply Z.ge_le. rewrite equivalent_m.  apply z_max_lb with (m := M m c d).
+      intros n m c d H.  induction H; simpl; try omega.
+      apply Z.ge_le. unfold M at 1. simpl. rewrite equivalent_m.  apply z_max_lb with (m := M m c d).
       left. omega.
     Qed.
 
@@ -304,10 +389,15 @@ Section Schulze.
       induction k. intros. assert ((length l <= 0)%nat -> l = []).
       { destruct l. intros. reflexivity.
         simpl in *. inversion H. }
-      specialize (H1 H). subst. simpl in *. auto.
-      intros. simpl in *. destruct l. simpl in *. rewrite equivalent_m. apply z_max_lb.
+      specialize (H1 H). subst. simpl in *. unfold M in *. simpl. rewrite equivalent_m. auto.
+      intros. simpl in *. destruct l. simpl in *.
+      unfold M in *. simpl.
+ 
+      rewrite equivalent_m. apply z_max_lb.
       left. apply IHk with []. simpl. omega. simpl. auto.
-      simpl in *. apply z_min_lb in H0. destruct H0. rewrite equivalent_m.
+      simpl in *. apply z_min_lb in H0. destruct H0.
+      unfold M in *.  simpl.
+      rewrite equivalent_m.
       apply z_max_lb. right. apply max_of_nonempty_list.
       apply cand_not_nil. apply dec_cand. exists c0. split. specialize (cand_fin c0). trivial.
       apply z_min_lb. split.
@@ -320,7 +410,11 @@ Section Schulze.
     Proof.
       split. generalize dependent s. generalize dependent d.
       generalize dependent c. induction k. simpl. intros. exists []. simpl. intuition.
-      simpl. intros. rewrite equivalent_m in H.  pose proof (proj1 (z_max_lb (M k c d) _ s) H).
+      unfold M in *. simpl in H. rewrite equivalent_m in H. auto.
+      
+      simpl. intros. unfold M in *. simpl in H.
+
+      rewrite equivalent_m in H.  pose proof (proj1 (z_max_lb (M k c d) _ s) H).
       destruct H0.
       specialize (IHk c d s H0). destruct IHk as [l [H1 H2]]. exists l. omega. clear H.
       pose proof
@@ -500,9 +594,11 @@ Section Schulze.
           split.
           * apply Z.ltb_lt. simpl in *.
             clear Heqs. clear Heqr.  
-            induction (length cand_all); simpl in Hx.
+            induction (length cand_all); simpl in Hx. unfold M in Hx. simpl in Hx.
+            rewrite equivalent_m in Hx.
             intuition.
-            apply IHn. rewrite equivalent_m in Hx.  apply Z.max_lub_iff in Hx. intuition.
+            apply IHn. unfold M in Hx. simpl in Hx.
+            rewrite equivalent_m in Hx.  apply Z.max_lub_iff in Hx. intuition.
           * apply forallb_forall. intros y Hy. apply orb_true_iff.
             simpl in *.
             assert (A : marg x y <= s \/ marg x y > s) by omega.
@@ -632,9 +728,11 @@ Section Schulze.
       intros. apply Z.ltb_lt in H0. unfold W.
       apply andb_true_iff. split. unfold marg_lt. simpl. apply Z.ltb_lt.
       clear H. clear Heqs.
-      induction (length cand_all). simpl in *. omega.
+      induction (length cand_all). unfold M in *. simpl in *.  rewrite equivalent_m in H0.  omega.
+      unfold M in H0.
       simpl in H0. rewrite equivalent_m in H0.
       apply Z.max_lub_lt_iff in H0. destruct H0. apply IHn. auto.
+      unfold M in HE.
       simpl in HE. rewrite equivalent_m in HE.
       apply Z.max_lub_lt_iff in HE. destruct HE as [H1 H2]. assumption. assumption.
 
@@ -1007,8 +1105,8 @@ Extraction M.
 
 Section Candidate.
   
-  Inductive cand := A | B | C | D.
-  Definition cand_all := [A; B; C; D].
+  Inductive cand := A | B | C | D | E | F | G | H | I | J.
+  Definition cand_all := [A; B; C; D; E; F; G; H; I; J].
 
   Lemma cand_finite : forall c, In c cand_all.
   Proof.
@@ -1023,7 +1121,7 @@ Section Candidate.
   Defined.
 
   Lemma cand_not_empty : cand_all <> nil.
-  Proof. unfold cand_all. intuition. inversion H.
+  Proof. unfold cand_all. intros H. inversion H.
   Qed.
 
 End Candidate.

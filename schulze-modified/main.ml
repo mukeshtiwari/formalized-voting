@@ -30,7 +30,7 @@ let cc c =
   | 'H' -> H
   | 'I' -> I
   | 'J' -> J
-  | 'K' -> K
+  (*| 'K' -> K
   | 'L' -> L
   | 'N' -> N
   | 'P' -> P
@@ -41,13 +41,13 @@ let cc c =
   | 'V' -> V
   | 'X' -> X
   | 'Y' -> Y
-  | 'Z' -> Z
+  | 'Z' -> Z *)
   | _ -> failwith "failed"
             
 let balfun l = 
    match l with
-   | [(A, b1); (B, b2); (C, b3); (D, b4); (E, b5); (F, b6); (G, b7); (H, b8); (I, b9); (J, b10); (K, b11); (L, b12); (N, b13); (P, b14); (Q, b15); (R, b16); (T, b17); (U, b18); (V, b19); 
-      (X, b20); (Y, b21); (Z, b22)] -> 
+   | [(A, b1); (B, b2); (C, b3); (D, b4); (E, b5); (F, b6); (G, b7); (H, b8); (I, b9); (J, b10)(*; (K, b11); (L, b12); (N, b13); (P, b14); (Q, b15); (R, b16); (T, b17); (U, b18); (V, b19); 
+      (X, b20); (Y, b21); (Z, b22)*)] -> 
       let
         f c = match c with
         | A -> b1
@@ -60,7 +60,7 @@ let balfun l =
         | H -> b8
         | I -> b9
         | J -> b10
-        | K -> b11
+        (*| K -> b11
         | L -> b12
         | N -> b13
         | P -> b14
@@ -71,7 +71,7 @@ let balfun l =
         | V -> b19
         | X -> b20
         | Y -> b21
-        | Z -> b22
+        | Z -> b22*)
         | _ -> failwith "failed to match"
       in  f
    | _ -> failwith "failed to match pattern" 

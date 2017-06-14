@@ -43,7 +43,7 @@ let show_cand = function
   | Lib.H -> "H"
   | Lib.I -> "I"
   | Lib.J -> "J"
-  | Lib.K -> "K"
+  (*| Lib.K -> "K"
   | Lib.L -> "L"
   | Lib.N -> "N"
   | Lib.P -> "P"
@@ -54,7 +54,7 @@ let show_cand = function
   | Lib.V -> "V"
   | Lib.X -> "X"
   | Lib.Y -> "Y"
-  | Lib.Z -> "Z"
+  | Lib.Z -> "Z"*)
 
 let compare x y =
   match Lib.cand_eq_dec x y with
