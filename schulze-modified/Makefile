@@ -33,5 +33,5 @@ MainNative : lib.ml lib.mli derivation.ml main.ml
 	ocamlbuild  -use-ocamlfind -r -use-menhir main.native	
 
 MainByte: lib.ml lib.mli derivation.ml main.ml
-	ocamlbuild  -use-ocamlfind -r main.byte
+	ocamlbuild  -use-ocamlfind -r -use-menhir main.byte
 
