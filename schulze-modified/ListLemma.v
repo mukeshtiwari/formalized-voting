@@ -25,6 +25,29 @@ Fixpoint all_pairs {A: Type} (l: list A): list (A * A) :=
                    ++ (map (fun x => (x, c)) cs)
   end.
 
+Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
+    In a1 l -> In a2 l -> In (a1, a2) (all_pairs l).
+Proof.
+  intros A a1 a2 l H1 H2. induction l.
+  inversion H1. simpl.
+  destruct H1 as [H3 | H3].
+  {
+    destruct H2 as [H4 | H4].
+    left. congruence.
+    right. apply in_app_iff. right.
+    apply in_app_iff. left.
+    rewrite H3. apply in_map. assumption.
+  }
+  {
+    destruct H2 as [H4 | H4].
+    right. apply in_app_iff.
+    right. apply in_app_iff.
+    right. rewrite H4. apply in_map_iff.
+    exists a1. split. auto. auto.
+    right. apply in_app_iff. left.
+    apply IHl. assumption. assumption.
+  }
+Qed.
 (* maxlist return the maximum number in list l. 0 in case of empty list *)
 Fixpoint maxlist (l : list Z) : Z :=
   match l with

@@ -123,38 +123,13 @@ Section Schulze.
     Definition listify (m : cand -> cand -> Z) :=
       map (fun s => (fst s, snd s, m (fst s) (snd s))) (all_pairs cand_all). 
 
-    Lemma all_pairsin: forall {A : Type} (a1 a2 : A) (l : list A),
-        In a1 l -> In a2 l -> In (a1, a2) (all_pairs l).
-    Proof.
-      intros A a1 a2 l H1 H2. induction l.
-      inversion H1. simpl.
-      destruct H1 as [H3 | H3].
-      {
-        destruct H2 as [H4 | H4].
-        left. congruence.
-        right. apply in_app_iff. right.
-        apply in_app_iff. left.
-        rewrite H3. apply in_map. assumption.
-      }
-      {
-        destruct H2 as [H4 | H4].
-        right. apply in_app_iff.
-        right. apply in_app_iff.
-        right. rewrite H4. apply in_map_iff.
-        exists a1. split. auto. auto.
-        right. apply in_app_iff. left.
-        apply IHl. assumption. assumption.
-      }
-    Qed.
+   
     
     Lemma in_pairs : forall a b, In a cand_all -> In b cand_all -> In (a, b) (all_pairs cand_all).
     Proof.
       intros a b H1 H2. apply all_pairsin; auto.
     Qed.
-    
-      
-      
-                
+                      
     
     Fixpoint linear_search (c d : cand) l :=
       match l with
@@ -173,10 +148,8 @@ Section Schulze.
       assert (H1 : forall c1 c2, In (c1, c2) (all_pairs cand_all)).
       intros c1 c2. apply in_pairs; auto.
       specialize (H1 c d).
-
       induction (all_pairs cand_all).
-      intros. simpl. inversion H1. 
-      
+      intros. simpl. inversion H1.
       intros. simpl.
       destruct a as (a1, a2). simpl in *.
       destruct (dec_cand c a1).
@@ -190,17 +163,7 @@ Section Schulze.
     Qed.
     
       
-    (*Proof.
-      unfold  listify.
-      pose proof all_pairs_notempty as Ht.
-      intros. induction (all_pairs cand_all). unfold not in Ht. pose proof (Ht eq_refl).
-      inversion H.
-      
-      destruct a as (a1, a2). simpl in *.
-      destruct (dec_cand c a1).
-      destruct (dec_cand d a2). subst. auto.
-      auto. auto.
-    Qed.*)
+
     
     Fixpoint M_old (n : nat) (c d : cand) : Z :=
       match n with
@@ -211,24 +174,6 @@ Section Schulze.
     
     (* M is the iterated margin function and maps a pair of candidates c, d to the
        strength of the strongest path of length at most (n + 1) *)
-    (*
-    Fixpoint M (n : nat) : cand -> cand -> Z :=
-      match n with
-      | 0%nat => marg
-      | S n' =>
-        let l := listify (fun c d =>
-                            let u := M n' c d in
-                            let t := (maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d))
-                                                   cand_all)) in
-
-                            Z.max u t) in
-        fun c d => 
-          linear_search c d (fun c d =>
-                            Z.max
-                              (M n' c d)
-                              (maxlist (map (fun x : cand => Z.min (marg c x) (M n' x d)) cand_all))) l 
-      end. *)
-    
 
     Fixpoint MM n :=
       match n with
@@ -261,20 +206,6 @@ Section Schulze.
       auto.
     Qed.
     
-    (*
-    Lemma M_M_new_equal : forall n c d , M n c d = M_old n c d. 
-    Proof.
-      induction n. simpl. auto.
-      intros. simpl.  rewrite equivalent_m.
-      assert (Ht : maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all) =
-      maxlist (map (fun x : cand => Z.min (marg c x) (M_old n x d)) cand_all)).
-      apply f_equal.
-      clear cand_not_nil. clear cand_fin.
-      induction cand_all. auto.
-      simpl. pose proof (IHn a d). rewrite H. apply f_equal. auto.
-      rewrite Ht. rewrite IHn.
-      auto.
-    Qed. *)
     
     (* partial correctness of iterated margin function: if the strength M n c d
        of the strongest path of length <= n+1 between c and d is at least s, then
@@ -294,17 +225,6 @@ Section Schulze.
       apply cand_not_nil. apply dec_cand. apply IHn. assumption.
     Defined.
 
-    (*
-      destruct 
-      (M n c d
-         ?= maxlist (map (fun x : cand => Z.min (marg c x) (M n x d)) cand_all)).
-      apply IHn.  auto.
-      apply max_of_nonempty_list_type in H. destruct H as [x [H1 H2]].
-      apply z_min_lb in H2. destruct H2.
-      specialize (IHn _ _ _ H0). specialize (consT _ _ _ _ H IHn). auto.
-      apply cand_not_nil. apply dec_cand. apply IHn. assumption.
-    Defined. *)
-    
     (*
       refine (
           fix F n s c d :=
@@ -1099,9 +1019,6 @@ Section Schulze.
   End Count.
   
 End Schulze.
-
-Check M.
-Extraction M.
 
 Section Candidate.
   
