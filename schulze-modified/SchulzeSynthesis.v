@@ -3,7 +3,7 @@ Require Import Coq.Lists.List.
 Require Import Coq.Arith.Le.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Compare_dec.
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import Bool.Sumbool.
 Require Import Bool.Bool.
 Require Import Coq.Logic.ConstructiveEpsilon.
@@ -110,13 +110,13 @@ Section Schulze.
       intros k f Hcc x s y p. induction p.
       (* unit path *)
       + intros Hin; specialize (Hcc (c, d) Hin); apply andb_true_iff in Hcc;
-          destruct Hcc as [Hccl Hccr]; apply Zlt_is_lt_bool in Hccl; simpl in Hccl;  omega.
+          destruct Hcc as [Hccl Hccr]; apply Zlt_is_lt_bool in Hccl; simpl in Hccl;  lia.
       (* non unit path *)
       + intros Hin; specialize (Hcc (c, e) Hin); apply andb_true_iff in Hcc;
           destruct Hcc as [Hccl Hccr]; unfold marg_lt in Hccl; simpl in Hccl.
         assert (Hmp : forall m, f (m, (snd (c, e))) = true \/ marg (fst (c, e)) m < k)
           by (apply mp_log; auto); simpl in Hmp.
-        specialize (Hmp d). destruct Hmp; [intuition | omega].
+        specialize (Hmp d). destruct Hmp; [intuition | lia].
     Qed.
 
     
@@ -289,9 +289,9 @@ Section Schulze.
     (* monotonicity of the iterated margin function *)
     Lemma monotone_M : forall (n m : nat) c d, (n <= m)%nat  -> M n c d <= M m c d.
     Proof.
-      intros n m c d H.  induction H; simpl; try omega.
+      intros n m c d H.  induction H; simpl; try lia.
       apply Z.ge_le. unfold M at 1. simpl. rewrite equivalent_m.  apply z_max_lb with (m := M m c d).
-      left. omega.
+      left. lia.
     Qed.
 
     (* Here, we view paths as lists of candidates, and str computes the strength of
@@ -314,14 +314,14 @@ Section Schulze.
       unfold M in *. simpl.
  
       rewrite equivalent_m. apply z_max_lb.
-      left. apply IHk with []. simpl. omega. simpl. auto.
+      left. apply IHk with []. simpl. lia. simpl. auto.
       simpl in *. apply z_min_lb in H0. destruct H0.
       unfold M in *.  simpl.
       rewrite equivalent_m.
       apply z_max_lb. right. apply max_of_nonempty_list.
       apply cand_not_nil. apply dec_cand. exists c0. split. specialize (cand_fin c0). trivial.
       apply z_min_lb. split.
-      omega. apply IHk with l. omega. omega.
+      lia. apply IHk with l. lia. lia.
     Qed.
 
     (* characterisation of the iterated margin function in terms of paths *)
@@ -336,18 +336,18 @@ Section Schulze.
 
       rewrite equivalent_m in H.  pose proof (proj1 (z_max_lb (M k c d) _ s) H).
       destruct H0.
-      specialize (IHk c d s H0). destruct IHk as [l [H1 H2]]. exists l. omega. clear H.
+      specialize (IHk c d s H0). destruct IHk as [l [H1 H2]]. exists l. lia. clear H.
       pose proof
            (max_of_nonempty_list _ cand_all cand_not_nil dec_cand s
                                  (fun x : cand => Z.min (marg c x) (M k x d))).
       destruct H. clear H1. specialize (H H0). destruct H as [e [H1 H2]].
       pose proof (proj1 (z_min_lb _ _ s) H2). destruct H.
       specialize (IHk e d s H3). destruct IHk as [l [H4 H5]].
-      exists (e :: l). simpl. split. omega.
+      exists (e :: l). simpl. split. lia.
       apply z_min_lb. intuition.
       (* otherway *)
       intros. destruct H as [l [H1 H2]].
-      pose proof (path_len_iterated_marg k c d s l H1 H2). omega.
+      pose proof (path_len_iterated_marg k c d s l H1 H2). lia.
     Qed.
 
     (* every path of strength >= s can be split into two paths of strength >= s *)
@@ -389,10 +389,10 @@ Section Schulze.
       pose proof (Z.eq_le_incl _ _ Heqs). apply Z.le_ge in H0.
       pose proof (proj1 (iterated_marg_char _ _ _ _) H0). destruct H1 as [l [H1 H2]].
       (* number of candidates <= length Evote.cand_all \/ > length Evote.cand_all *)
-      assert ((length l <= n)%nat \/ (length l > n)%nat) by omega.
+      assert ((length l <= n)%nat \/ (length l > n)%nat) by lia.
       destruct H3 as [H3 | H3].
       pose proof (proj2 (iterated_marg_char n c d s)
-                        (ex_intro (fun l => (length l <= n)%nat /\ str c l d >= s) l (conj H3 H2))). omega.
+                        (ex_intro (fun l => (length l <= n)%nat /\ str c l d >= s) l (conj H3 H2))). lia.
       (* length l > length Evote.cand_all and there are candidates. Remove the duplicate
          candidate *)
       rewrite <- Hn in H3. assert (covers cand cand_all l).
@@ -401,11 +401,11 @@ Section Schulze.
       destruct H5 as [a [l1 [l2 [l3 H5]]]].
       pose proof (path_cut  _ _ _ _ _ _ _ _ H5 H2).
       remember (l1 ++ a :: l3) as l0.
-      assert ((length l0 <= n)%nat \/ (length l0 > n)%nat) by omega.
+      assert ((length l0 <= n)%nat \/ (length l0 > n)%nat) by lia.
       destruct H7.
       pose proof (iterated_marg_char n c d s). destruct H8.
       assert ((exists l : list cand, (length l <= n)%nat /\ str c l d >= s)).
-      exists l0. intuition. specialize (H9 H10).  omega.
+      exists l0. intuition. specialize (H9 H10).  lia.
       rewrite Hn in H3.
       specialize (list_and_num _ _ _ H3); intros. destruct H8 as [p H8].
       specialize (list_and_num _ _ _ H7); intros. destruct H9 as [k' H9].
@@ -413,16 +413,16 @@ Section Schulze.
       { rewrite Heql0, H5.
         rewrite app_length. rewrite app_length.
         simpl. rewrite app_length. simpl.
-        omega. }
+        lia. }
       rewrite H9 in H10. rewrite H8 in H10.
-      assert (((k' + n) < (p + n))%nat -> (k' < p)%nat) by omega.
-      specialize (H11 H10). assert (k' < k)%nat by omega.
+      assert (((k' + n) < (p + n))%nat -> (k' < p)%nat) by lia.
+      specialize (H11 H10). assert (k' < k)%nat by lia.
       specialize (H k' H12 n c d Hn).
       pose proof (iterated_marg_char (length l0) c d (str c l0 d)).
       destruct H13.
       assert ((exists l : list cand, (length l <= length l0)%nat /\ str c l d >= str c l0 d)).
-      { exists l0. omega. }
-      specialize (H14 H15). clear H13. rewrite <- H9 in H. omega.
+      { exists l0. lia. }
+      specialize (H14 H15). clear H13. rewrite <- H9 in H. lia.
     Qed.
 
     (* the iterated margin function reaches a fixpoint after n iterations, where
@@ -431,14 +431,14 @@ Section Schulze.
         M n c d <= M (length cand_all) c d.
     Proof.
       intros c d n. assert ((n <= (length cand_all))%nat \/
-                            (n >= (length cand_all))%nat) by omega.
+                            (n >= (length cand_all))%nat) by lia.
       destruct H. apply monotone_M. assumption.
       remember ((length cand_all)) as v.
       assert ((n >= v)%nat -> exists p, (n = p + v)%nat).
-      { intros. induction H. exists 0%nat. omega.
-        assert ((v <= m)%nat -> (m >= v)%nat) by omega.
+      { intros. induction H. exists 0%nat. lia.
+        assert ((v <= m)%nat -> (m >= v)%nat) by lia.
         specialize (H1 H). specialize (IHle H1). destruct IHle as [p H2].
-        exists (S p). omega. }
+        exists (S p). lia. }
       specialize (H0 H). destruct H0 as [p H0].
       subst. apply  iterated_marg_stabilises. auto.
     Qed.
@@ -470,10 +470,10 @@ Section Schulze.
     Proof.
       split; intros. unfold c_wins in H.
       apply forallb_false in H. destruct H as [x [H1 H2]].
-      exists x. apply Z.leb_gt in H2. omega.
+      exists x. apply Z.leb_gt in H2. lia.
       destruct H as [d H]. unfold c_wins. apply forallb_false.
       exists d. split. pose proof (cand_fin d). assumption.
-      apply Z.leb_gt. omega.
+      apply Z.leb_gt. lia.
     Qed.
 
 
@@ -488,7 +488,7 @@ Section Schulze.
       apply Z.le_ge in Heqs.
       pose proof (iterated_marg_path _ _ _ _ Heqs). specialize (H2 s H).
       apply  path_iterated_marg in H1. destruct H1 as [n H1].
-      pose proof (iterated_marg_fp c d n). omega.
+      pose proof (iterated_marg_fp c d n). lia.
     Qed.
 
     (* winning in terms of the iterated margin function gives the type-level winning condition *)
@@ -521,18 +521,18 @@ Section Schulze.
             rewrite equivalent_m in Hx.  apply Z.max_lub_iff in Hx. intuition.
           * apply forallb_forall. intros y Hy. apply orb_true_iff.
             simpl in *.
-            assert (A : marg x y <= s \/ marg x y > s) by omega.
+            assert (A : marg x y <= s \/ marg x y > s) by lia.
             destruct A as [A1 | A2].
-            left. apply Z.ltb_lt. simpl. omega.
+            left. apply Z.ltb_lt. simpl. lia.
             right. apply Z.leb_le.
-            assert (B : M (length cand_all) y z <= r \/ M (length cand_all) y z >= r + 1) by omega.
+            assert (B : M (length cand_all) y z <= r \/ M (length cand_all) y z >= r + 1) by lia.
             destruct B as [B1 | B2].
             intuition.
             apply iterated_marg_path in B2.
-            assert (A3 : marg x y >= r + 1) by omega.
+            assert (A3 : marg x y >= r + 1) by lia.
             pose proof (cons _ _ _ _ A3 B2) as C.
             apply  path_iterated_marg in C. destruct C as [n C].
-            pose proof (iterated_marg_fp x z n). omega.
+            pose proof (iterated_marg_fp x z n). lia.
     Defined.
     
      
@@ -553,7 +553,7 @@ Section Schulze.
       destruct (H d) as [k [H1 [f [H3 H4]]]].
       exists k. split. apply path_equivalence. auto.
       intros l H5. pose proof (coclosed_path _ _ H4).
-      pose proof (H0 l _ _ H5 H3). omega.
+      pose proof (H0 l _ _ H5 H3). lia.
     Qed.
 
     (* the losing condition in terms of the iterated margin function *)
@@ -566,7 +566,7 @@ Section Schulze.
       pose proof (Z.eq_le_incl _ _ Heqs) as H3.
       apply Z.le_ge in H3. apply iterated_marg_path in H3. specialize (H2 s H3).
       apply  path_iterated_marg in H1. destruct H1 as [n H1].
-      pose proof (iterated_marg_fp d c n). omega.
+      pose proof (iterated_marg_fp d c n). lia.
     Qed.
 
     (* existential quantifiers over finite lists can be reified into Sigma-types for
@@ -640,15 +640,15 @@ Section Schulze.
       apply reify_opponent. assumption.
       destruct HE as [d HE].
       remember (M (length cand_all) d c) as s. exists s, d.
-      split. assert (H1 : M (length cand_all) d c >= s) by omega.
+      split. assert (H1 : M (length cand_all) d c >= s) by lia.
       apply iterated_marg_patht in H1. auto.
       exists (fun x => M (length cand_all) (fst x) (snd x) <? s).
-      simpl in *. split. apply Z.ltb_lt. omega.
+      simpl in *. split. apply Z.ltb_lt. lia.
       unfold coclosed. intros x; destruct x as (x, z); simpl in *.
       intros. apply Z.ltb_lt in H0. unfold W.
       apply andb_true_iff. split. unfold marg_lt. simpl. apply Z.ltb_lt.
       clear H. clear Heqs.
-      induction (length cand_all). unfold M in *. simpl in *.  rewrite equivalent_m in H0.  omega.
+      induction (length cand_all). unfold M in *. simpl in *.  rewrite equivalent_m in H0.  lia.
       unfold M in H0.
       simpl in H0. rewrite equivalent_m in H0.
       apply Z.max_lub_lt_iff in H0. destruct H0. apply IHn. auto.
@@ -658,14 +658,14 @@ Section Schulze.
 
       apply forallb_forall. intros y Hy.
       apply orb_true_iff. unfold marg_lt. simpl.
-      assert (marg x y < s \/ marg x y >= s) by omega.
+      assert (marg x y < s \/ marg x y >= s) by lia.
       destruct H1. left. apply Z.ltb_lt. auto.
       right. apply Z.ltb_lt.
-      assert (M (length cand_all) y z < s \/ M (length cand_all) y z >= s) by omega.
+      assert (M (length cand_all) y z < s \/ M (length cand_all) y z >= s) by lia.
       destruct H2. auto.
       apply iterated_marg_path in H2.  pose proof (Evote.cons _ _ _ _ H1 H2).
       apply  path_iterated_marg in H3. destruct H3 as [n H3].
-      pose proof (iterated_marg_fp x z n). omega.
+      pose proof (iterated_marg_fp x z n). lia.
     Defined.
 
     (* prop-level losing implies type-level losing *)
@@ -682,7 +682,7 @@ Section Schulze.
       destruct H as [k [d [Hp [f [Hf Hc]]]]].
       exists k, d. split. apply path_equivalence. auto.
       intros l H. pose proof (coclosed_path k f Hc).
-      pose proof (H0 l _ _ H Hf). omega.
+      pose proof (H0 l _ _ H Hf). lia.
     Qed.
 
     (* decidability of type-level winning *)
@@ -695,7 +695,7 @@ Section Schulze.
       remember (M (length cand_all) d c) as s. apply iterated_marg_path in H.
       exists s. split. assumption.
       intros. rewrite Heqs. apply  path_iterated_marg in H0. destruct H0 as [n H0].
-      apply Z.ge_le in H0. pose proof (iterated_marg_fp d c n). omega.
+      apply Z.ge_le in H0. pose proof (iterated_marg_fp d c n). lia.
       right. apply iterated_marg_loses_type. unfold c_wins in c_wins_val.
       apply forallb_false_type in c_wins_val.
       destruct c_wins_val as [d [H1 H2]]. apply Z.leb_gt in H2. exists d. auto.
@@ -707,7 +707,7 @@ Section Schulze.
     Proof.
       split; intros. destruct (wins_loses_type_dec c) eqn:Ht. exists w. auto.
       pose proof (loses_type_prop c l). unfold loses_prop in H0.
-      apply loses_prop_iterated_marg  in H0. pose proof (proj1 (c_wins_true c) H). destruct H0. specialize (H1 x). omega.
+      apply loses_prop_iterated_marg  in H0. pose proof (proj1 (c_wins_true c) H). destruct H0. specialize (H1 x). lia.
       destruct H. pose proof (wins_type_prop c x). unfold wins_prop in H0.
       apply c_wins_true. apply wins_prop_iterated_marg. auto.
     Qed.
@@ -719,7 +719,7 @@ Section Schulze.
       split; intros. destruct (wins_loses_type_dec c) eqn:Ht.
       pose proof (wins_type_prop c w).
       pose proof (proj1 (c_wins_false c) H). unfold wins_prop in H0.
-      pose proof (wins_prop_iterated_marg c H0). destruct H1. specialize (H2 x). omega.
+      pose proof (wins_prop_iterated_marg c H0). destruct H1. specialize (H2 x). lia.
       exists l. auto.
       destruct H. pose proof (loses_type_prop c x). unfold loses_prop in H0.
       apply c_wins_false. apply loses_prop_iterated_marg. auto.
@@ -893,19 +893,19 @@ Section Schulze.
     Proof.
       intros m p c d.
       split; intros; unfold update_marg.
-      destruct (p c <? p d)%nat eqn: H1. omega.
+      destruct (p c <? p d)%nat eqn: H1. lia.
       destruct (p d <? p c)%nat eqn: H2. apply Nat.ltb_lt in H2.
-      apply Nat.ltb_ge in H1. omega.
-      apply Nat.ltb_ge in H2. apply Nat.ltb_ge in H1. omega.
+      apply Nat.ltb_ge in H1. lia.
+      apply Nat.ltb_ge in H2. apply Nat.ltb_ge in H1. lia.
       split; intros.
       destruct (p c <? p d)%nat eqn: H1.
-      apply Nat.ltb_lt in H1. omega.
+      apply Nat.ltb_lt in H1. lia.
       apply Nat.ltb_ge in H1. destruct (p d <? p c)%nat eqn: H2. apply Nat.ltb_lt in H2.
-      apply Nat.ltb_ge in H1. omega. apply Nat.ltb_ge in H2. omega.
+      apply Nat.ltb_ge in H1. lia. apply Nat.ltb_ge in H2. lia.
       unfold update_marg.
-      destruct (p c <? p d)%nat eqn:H1. apply Nat.ltb_lt in H1. omega.
+      destruct (p c <? p d)%nat eqn:H1. apply Nat.ltb_lt in H1. lia.
       apply Nat.ltb_ge in H1. destruct (p d <? p c)%nat eqn: H2.
-      apply Nat.ltb_lt in H2. omega. apply Nat.ltb_ge in H2. omega.
+      apply Nat.ltb_lt in H2. lia. apply Nat.ltb_ge in H2. lia.
     Qed.
 
     
