@@ -3,7 +3,7 @@ Require Import Coq.Lists.List.
 Require Import Coq.Arith.Le.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Compare_dec.
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Import ListNotations.
 
 
@@ -205,10 +205,10 @@ Module Fixpoints.
     simpl. destruct (bool_dec (p1 x) true).
     rewrite e. simpl.
     unfold pred_subset in Hss. specialize (Hss x e). rewrite Hss.
-    simpl. omega.
+    simpl. lia.
     assert (Hp1t: p1 x = false) by apply (not_true_is_false (p1 x) n).
     rewrite Hp1t.
-    destruct (bool_dec (p2 x) true). rewrite e. simpl. omega.
+    destruct (bool_dec (p2 x) true). rewrite e. simpl. lia.
     assert (Hp2f: p2 x = false) by apply (not_true_is_false (p2 x) n0).
     rewrite Hp2f. assumption.
   Qed.
@@ -262,10 +262,10 @@ Module Fixpoints.
   Proof.
     intros Hmon n k. induction k as [| k IHk].
     (* k = 0 *)
-    replace (n+0)%nat with n. apply subset_refl. omega.
+    replace (n+0)%nat with n. apply subset_refl. lia.
     apply (subset_trans (iter O n empty_ss) (iter O(n+k) empty_ss) (iter O (n + S k) empty_ss)).
     assumption. replace (n + S k)%nat with ((n+k)+1)%nat.
-    apply inc_chain. assumption. omega.
+    apply inc_chain. assumption. lia.
   Qed.
 
   (* the operator is congruential on predicates *)
@@ -307,7 +307,7 @@ Module Fixpoints.
     assert (Hl2: length (filter (iter O n empty_ss) l2) <=
                  length (filter (iter O (n+1) empty_ss) l2)).
     apply pred_filter, inc_chain. assumption.
-    omega.
+    lia.
   Qed.
 
   (* for finite types, either a fixpoint is reached or the n+1-st iterate has >= n+1 elements *)
@@ -320,15 +320,15 @@ Module Fixpoints.
     destruct (iter_aux O l Hmon Hfin 0).
     left; assumption.
     right. unfold ge; unfold ge in H.
-    transitivity (card l (iter O 0 empty_ss) + 1)%nat. omega. assumption.
+    transitivity (card l (iter O 0 empty_ss) + 1)%nat. lia. assumption.
     (* step case *)
     destruct IHn as [Hfix | Hnfix].
     left. simpl. apply op_cong. assumption. assumption.
     assert (pred_eeq (iter O (n+1) empty_ss) (iter O (n+1+1) empty_ss)
             \/ card l (iter O (n + 1 + 1) empty_ss) >= card l (iter O (n + 1) empty_ss) + 1).
     apply (iter_aux O l Hmon Hfin (n + 1)).
-    destruct H as [Hl | Hr]. left. replace (S n) with (plus n 1). assumption. omega.
-    right. replace (S n) with (plus n 1). omega. omega.
+    destruct H as [Hl | Hr]. left. replace (S n) with (plus n 1). assumption. lia.
+    right. replace (S n) with (plus n 1). lia. lia.
   Qed.
 
 
@@ -340,23 +340,23 @@ Module Fixpoints.
     intros A O k Hmon Hiter m.
     induction m as [| m IHm].
     (* m = 0 *)
-    replace (plus k 0) with k. apply eeq_refl. omega.
+    replace (plus k 0) with k. apply eeq_refl. lia.
     (* S m *)
     assert (H: pred_eeq (O (iter O k empty_ss)) (O (iter O (k + m) empty_ss))) by
         apply (op_cong O Hmon (iter O k empty_ss) (iter O (plus k m) empty_ss) IHm).
     apply (eeq_trans (iter O k empty_ss) (iter O (k+1) empty_ss) (iter O (k + S m) empty_ss)).
     assumption.
     replace (k + S m)%nat with (S (k+m))%nat. replace (k+1)%nat with (S k). simpl. assumption.
-    omega. omega.
+    lia. lia.
   Qed.
 
   (* trivia about filter *)
   Theorem length_filter : forall (A : Type) (f : A -> bool) (l : list A),
       length (filter f l) <= length l.
   Proof.
-    intros A f l. induction l. simpl. omega.
-    simpl. destruct (f a). simpl; omega.
-    omega.
+    intros A f l. induction l. simpl. lia.
+    simpl. destruct (f a). simpl; lia.
+    lia.
   Qed.
 
   (* for a type with at most k elements, we need at most k iterations to reach a fixpoint *)
@@ -365,14 +365,14 @@ Module Fixpoints.
   Proof.
     intros Hmon Hboun; unfold bounded_card in Hboun.
     destruct Hboun as [l [Hin Hlen]]. intros n.
-    assert (Hle : k < n \/ k >= n) by omega.
+    assert (Hle : k < n \/ k >= n) by lia.
     destruct Hle as [Hlel | Hler].
     (* case k < n *)
     destruct (iter_fp O l Hmon Hin k) as [L | R].
     (* case O^k bot = O^k+1 bot *)
     assert (Ht : pred_eeq (iter O k empty_ss) (iter O (k + (n-k)) empty_ss)).
     apply fp_reached. assumption. assumption.
-    replace (plus k (n - k)) with n in Ht. destruct Ht as [Ht1 Ht2]. assumption. omega.
+    replace (plus k (n - k)) with n in Ht. destruct Ht as [Ht1 Ht2]. assumption. lia.
     (* case too many elements *)
     unfold card in R.
     assert (Hlen2: length (filter (iter O (k + 1) empty_ss) l) <= length l) by
@@ -380,11 +380,11 @@ Module Fixpoints.
     unfold ge in R. assert (Hc: k+1 <= k).
     transitivity (length (filter (iter O (k + 1) empty_ss) l)). assumption.
     transitivity (length l). assumption. assumption.
-    assert (False). omega. inversion H.
+    assert (False). lia. inversion H.
     (* case k >= n *)
     Check inc_chain_trans. 
     replace k with (n + (k-n))%nat.
-    apply inc_chain_trans. assumption. omega.
+    apply inc_chain_trans. assumption. lia.
   Qed.
 
   (* start of greatest fixed point *)
@@ -414,10 +414,10 @@ Module Fixpoints.
   Proof.
     intros Hmon n k. induction k as [| k IHk].
     (* k = 0 *)
-    replace (n+0)%nat with n. apply subset_refl. omega.
+    replace (n+0)%nat with n. apply subset_refl. lia.
     apply subset_trans with (q := iter O (n + k) full_ss).
     replace (n + S k)%nat with ((n+k)+1)%nat.
-    apply dec_chain. assumption. omega. assumption.
+    apply dec_chain. assumption. lia. assumption.
   Qed.
 
 
@@ -446,7 +446,7 @@ Module Fixpoints.
     apply pred_filter, dec_chain. assumption.
     assert (Hl2: length (filter (iter O (n + 1) full_ss) l2) <=
                  length (filter (iter O n full_ss) l2)).
-    apply pred_filter, dec_chain. assumption. omega.
+    apply pred_filter, dec_chain. assumption. lia.
   Qed.
 
   (* for finite types, either a fixpoint is reached or the n+1-st iterate + n+1 <=
@@ -461,16 +461,16 @@ Module Fixpoints.
     left. assumption.
     right. replace (0 + 1)%nat with 1 in *.
     transitivity (card l (iter O 0 full_ss))%nat.
-    (* This is really bizzare. Omega is not able to solve obvious goal so unfold pred in *
+    (* This is really bizzare. lia is not able to solve obvious goal so unfold pred in *
        to change implicit arguments as suggested by jrw*)
-    unfold pred in *. omega. apply length_filter. omega.
+    unfold pred in *. lia. apply length_filter. lia.
     destruct IHn as [Hfix | Hnfix].
     left. simpl. apply op_cong. auto. auto.
     assert (pred_eeq (iter O (n + 1 + 1) full_ss) (iter O (n + 1) full_ss) \/
             card l (iter O (n + 1) full_ss) >= card l (iter O (n + 1 + 1) full_ss) + 1).
     apply (iter_aux_dec O l Hmon Hfin (n + 1)).
-    destruct H as [Hl | Hr]. left. replace (S n) with (n + 1)%nat. auto. omega.
-    right. replace (S n) with (n + 1) %nat. omega. omega.
+    destruct H as [Hl | Hr]. left. replace (S n) with (n + 1)%nat. auto. lia.
+    right. replace (S n) with (n + 1) %nat. lia. lia.
   Qed.
 
   (* once we have a greatest fixpoint, iterations don't add things *)
@@ -480,12 +480,12 @@ Module Fixpoints.
   Proof.
     intros A O k Hmon Hiter m.
     induction m as [|m IHm].
-    replace (k + 0)%nat with k. apply eeq_refl. omega.
+    replace (k + 0)%nat with k. apply eeq_refl. lia.
     assert (H: pred_eeq (O (iter O (k + m) full_ss)) (O (iter O k full_ss))) by
         apply (op_cong O Hmon (iter O (plus k m) full_ss) (iter O k full_ss) IHm).
     apply (eeq_trans (iter O (k + S m) full_ss) (iter O (k+1) full_ss) (iter O k full_ss)).
     replace (k + S m)%nat with (1 + (k + m))%nat. replace (k + 1)%nat with (1 + k)%nat.
-    simpl. assumption. omega. omega. auto.
+    simpl. assumption. lia. lia. auto.
   Qed.
 
   (* for a type with at most k elements, we need at most k iterations to reach a fixpoint *)
@@ -494,20 +494,20 @@ Module Fixpoints.
   Proof.
     intros Hmon Hboun; unfold bounded_card in Hboun.
     destruct Hboun as [l [Hin Hlen]]. intros n.
-    assert (Hle : k < n \/ k >= n) by omega.
+    assert (Hle : k < n \/ k >= n) by lia.
     destruct Hle as [Hlel | Hler].
     (* case k < n *)
     destruct (iter_fp_gfp O l Hmon Hin k) as [L | R].
     assert (Ht : pred_eeq (iter O (k + (n - k)) full_ss) (iter O k full_ss)).
     apply fp_reached_gfp. assumption. assumption.
     replace (k + (n - k))%nat with n in Ht. destruct Ht as [Ht1 Ht2]. assumption.
-    omega. omega.
-    replace k with (n + (k-n))%nat. apply dec_chain_trans. assumption. omega.
+    lia. lia.
+    replace k with (n + (k-n))%nat. apply dec_chain_trans. assumption. lia.
   Qed.
 
 
   Definition least_fixed_point (A : Type) (l : list A) (H : forall a : A, In a l)
-             (O : Op A) (Hmon : mon O) :=  iter O (length l) empty_ss.
+             (V : Op A) (Hmon : mon V) :=  iter V (length l) empty_ss.
 
   Definition greatest_fixed_point (A : Type) (l : list A) (H : forall a : A, In a l)
              (O : Op A) (Hmon : mon O) := iter O (length l) full_ss.
@@ -523,10 +523,10 @@ Module Fixpoints.
     unfold least_fixed_point.
     replace (O (iter O (length l) empty_ss)) with  (iter O (length l + 1) empty_ss).
     apply inc_chain. assumption. replace (length l + 1)%nat with (S (length l)).
-    reflexivity. omega. unfold least_fixed_point.
+    reflexivity. lia. unfold least_fixed_point.
     replace (O (iter O (length l) empty_ss)) with  (iter O (length l + 1) empty_ss).
     apply iter_fin. assumption. unfold bounded_card. exists l. split. assumption.
-    omega.  replace (length l + 1)%nat with (S (length l)). reflexivity. omega.
+    lia.  replace (length l + 1)%nat with (S (length l)). reflexivity. lia.
   Qed.
 
   Lemma greatest_fixed_point_is_fixed_point :
@@ -536,11 +536,11 @@ Module Fixpoints.
     intros A l H O Hmon. split. unfold greatest_fixed_point.
     replace (O (iter O (length l) full_ss)) with (iter O (length l + 1) full_ss).
     apply iter_fin_gfp. assumption. unfold bounded_card. exists l. intuition.
-    replace (length l + 1)%nat with (S (length l)). reflexivity. omega.
+    replace (length l + 1)%nat with (S (length l)). reflexivity. lia.
     unfold greatest_fixed_point.
     replace (O (iter O (length l) full_ss)) with (iter O (length l + 1) full_ss).
     apply dec_chain. assumption. replace (length l + 1)%nat with (S (length l)).
-    simpl. reflexivity. omega.
+    simpl. reflexivity. lia.
   Qed.
    
   Lemma fixed_point_temp_for_now : forall (A : Type) (O : Op A) (Hmon : mon O) (f : pred A),

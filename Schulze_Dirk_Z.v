@@ -3,7 +3,7 @@ Require Import Coq.Lists.List.
 Require Import Coq.Arith.Le.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Compare_dec.
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import Bool.Sumbool.
 Require Import Bool.Bool.
 Require Import Coq.Logic.ConstructiveEpsilon.
@@ -170,7 +170,7 @@ Section Evote.
     apply andb_true_iff in Hcc. destruct Hcc as [Hccl Hccr].
     unfold el in Hccl. simpl in Hccl.
     pose proof  (Zlt_is_lt_bool (edge c d) k).
-    destruct H0. specialize (H1 Hccl). omega.
+    destruct H0. specialize (H1 Hccl). lia.
     (* non unit path *)
     intros Hin. unfold coclosed in Hcc. specialize (Hcc (c, e) Hin).
     unfold W in Hcc. apply andb_true_iff in Hcc. destruct Hcc as [Hccl Hccr].
@@ -178,7 +178,7 @@ Section Evote.
     assert (Hmp: forall m, f (m, (snd (c, e))) = true \/ edge (fst (c, e)) m < k).
     apply mp_log. assumption. simpl in Hmp. specialize (Hmp d).
     destruct Hmp. specialize (IHp H0). assumption.
-    omega.
+    lia.
   Qed.
 
   
@@ -191,7 +191,7 @@ Section Evote.
     intros s p. destruct Hc as [l [Hin Hcc]].
     assert (Ht : s < k + 1). 
     apply coclosed_path with (f := l) (x := d) (y := c); assumption.
-    omega.
+    lia.
   Qed.
 
   (*
@@ -231,14 +231,14 @@ Section Evote.
     let c := snd p in
     existsb (fun b  => andb (elg k (a, b)) (f (b, c))) cand_all.
 
-  Definition O k := fun f => (fun p => orb (elg k p) (mpg k p f)).
+  Definition V k := fun f => (fun p => orb (elg k p) (mpg k p f)).
   
   Theorem wins_evi_2 : forall k n c d,
-      Fixpoints.iter (O k) n (fun _ : cand * cand => false) (c, d) = true ->
+      Fixpoints.iter (V k) n (fun _ : cand * cand => false) (c, d) = true ->
       Path k c d.
   Proof.
     intros k n.  induction n. intros c d H. inversion H.
-    intros c d H. simpl in H. unfold O in H at 1.
+    intros c d H. simpl in H. unfold V in H at 1.
     apply orb_true_iff in H. destruct H as [H | H].
     constructor 1. unfold elg in H. simpl in H.
     apply Zge_is_le_bool. replace (k <=? edge c d) with (edge c d >=? k).
@@ -254,16 +254,17 @@ Section Evote.
 
   
   Theorem wins_evi: forall k c d,
-      Path k c d <-> exists (n : nat), Fixpoints.iter (O k) n (fun _ => false) (c, d) = true.
+      Path k c d <-> exists (n : nat), Fixpoints.iter (V k) n (fun _ => false) (c, d) = true.
   Proof.
+    
     intros k c d.  split. intros Hp. induction Hp.
-    exists 1%nat. simpl. unfold O. unfold elg. simpl.
+    exists 1%nat. simpl. unfold V. unfold elg. simpl.
     apply orb_true_iff. left. pose proof (Zge_is_le_bool (edge c d) k). 
     destruct H0. specialize (H0 H). replace (edge c d >=? k) with (k <=? edge c d). 
     auto. symmetry. apply Z.geb_leb.
     destruct IHHp as [n IHHp].
-    exists (S n). simpl. unfold O at 1.
-    replace (mpg k (c, e) (Fixpoints.iter (O k) n (fun _ : cand * cand => false))) with true.
+    exists (S n). simpl. unfold V at 1.
+    replace (mpg k (c, e) (Fixpoints.iter (V k) n (fun _ : cand * cand => false))) with true.
     apply orb_true_iff.  right. reflexivity.
     symmetry. unfold mpg. simpl.
     apply existsb_exists. exists d. split.
@@ -276,10 +277,10 @@ Section Evote.
   Qed.
 
 
-  Lemma monotone_operator : forall k, Fixpoints.mon (O k).
+  Lemma monotone_operator : forall k, Fixpoints.mon (V k).
   Proof.
     intros k. unfold Fixpoints.mon. intros p1 p2 H.
-    unfold O. unfold Fixpoints.pred_subset.
+    unfold V. unfold Fixpoints.pred_subset.
     unfold Fixpoints.pred_subset in H. intros a H1.
     apply orb_true_iff in H1. destruct H1 as [H1 | H1].
     apply orb_true_iff. left. assumption.
@@ -355,10 +356,10 @@ Section Evote.
     replace (n * S n) with (n * n + n).
     repeat rewrite plus_assoc. replace (n + n * n + n) with (n * n + n + n).
     assert (Ht : length l <= n -> length (all_pairs l)  <= n * n -> 
-                 length (all_pairs l) + length l + length l <= n * n + n + n) by omega.
+                 length (all_pairs l) + length l + length l <= n * n + n + n) by lia.
     apply Ht. assumption. clear Ht.
     apply IHl. assumption.
-    omega. rewrite mult_n_Sm. auto.
+    lia. rewrite mult_n_Sm. auto.
   Qed.
 
   Lemma length_cand : forall {A : Type} n , 
@@ -398,12 +399,12 @@ Section Evote.
   Proof.
     intros k c d.
     pose (cc := mult (length cand_all)  (length cand_all)%nat).
-    destruct (bool_dec ((Fixpoints.iter (O k) cc (fun _  => false)) (c, d)) true) as [H | H].
+    destruct (bool_dec ((Fixpoints.iter (V k) cc (fun _  => false)) (c, d)) true) as [H | H].
     left. apply (wins_evi_2 k cc c d). assumption.
     apply not_true_is_false in H. right. intros Hp.
     apply wins_evi in Hp. destruct Hp as [n Hp].
-    assert (Ht : Fixpoints.pred_subset (Fixpoints.iter (O k) n (fun _ => false))
-                                       (Fixpoints.iter (O k) cc (fun _ => false))).
+    assert (Ht : Fixpoints.pred_subset (Fixpoints.iter (V k) n (fun _ => false))
+                                       (Fixpoints.iter (V k) cc (fun _ => false))).
     apply Fixpoints.iter_fin. apply monotone_operator. 
     apply length_cand. unfold Fixpoints.bounded_card.
     exists cand_all. split. apply cand_fin. auto.
@@ -414,25 +415,23 @@ Section Evote.
   Theorem path_lfp : forall (c d : cand) (k : Z),
       Fixpoints.least_fixed_point
         (cand * cand) (all_pairs cand_all)
-        (all_pairs_universal cand_all cand_fin) (O k) (monotone_operator k) (c, d) = true 
+        (all_pairs_universal cand_all cand_fin) (V k) (monotone_operator k) (c, d) = true 
       <-> Path k c d.
   Proof.
     split. intros H. apply wins_evi. exists (length (all_pairs cand_all)). assumption.
     intros H. apply wins_evi in H. destruct H as [n H].
     unfold Fixpoints.least_fixed_point,Fixpoints.empty_ss.
     remember (length (all_pairs cand_all)) as v.    
-    specialize (Fixpoints.iter_fin v (O k) (monotone_operator k)); intros.
+    specialize (Fixpoints.iter_fin v (V k) (monotone_operator k)); intros.
     unfold Fixpoints.bounded_card in H0.
     assert (Ht : (exists l : list (cand * cand), (forall a : cand * cand, In a l) /\ length l <= v)).
     {
       exists (all_pairs cand_all). split. apply (all_pairs_universal cand_all cand_fin).
-      omega.
+      lia.
     }
     specialize (H0 Ht n). auto.
   Qed.
 
-  Check O.
-  Check W.
 
   Lemma forallb_false : forall (A : Type) (f : A -> bool) (l : list A), 
                         forallb f l = false <-> (exists x, In x l /\ f x = false).
@@ -449,11 +448,11 @@ Section Evote.
   Qed.
 
 
-  Lemma duality_operator : forall k, Fixpoints.dual_op (O k) (W k).
+  Lemma duality_operator : forall k, Fixpoints.dual_op (V k) (W k).
   Proof.
     intros k. unfold Fixpoints.dual_op. intros p.
     unfold Fixpoints.pred_eeq. split.
-    unfold Fixpoints.pred_subset. intros. unfold O in H.
+    unfold Fixpoints.pred_subset. intros. unfold V in H.
     apply orb_true_iff in H. unfold Fixpoints.complement.
     apply negb_true_iff. unfold W. apply andb_false_iff.
     destruct H as [H | H]. unfold elg in H. destruct a as (a1, a2). simpl in H.
@@ -470,7 +469,7 @@ Section Evote.
     unfold el. simpl. apply Z.ltb_ge. assumption.
     apply negb_false_iff. assumption. symmetry. apply Z.geb_leb.
     (* other way *)
-    unfold Fixpoints.pred_subset. intros. unfold O.
+    unfold Fixpoints.pred_subset. intros. unfold V.
     apply orb_true_iff. unfold Fixpoints.complement in H.
     apply negb_true_iff in H. unfold W in H. apply andb_false_iff in H.
     destruct H as [H | H]. unfold el in H. destruct a as (a1, a2).
@@ -506,10 +505,10 @@ Section Evote.
     assert (Hlfp : Fixpoints.lfp (Fixpoints.least_fixed_point
                                     (cand * cand) (all_pairs cand_all)
                                     (all_pairs_universal cand_all cand_fin)
-                                    (O k) (monotone_operator k)) (O k)).
+                                    (V k) (monotone_operator k)) (V k)).
     split. apply Fixpoints.least_fixed_point_is_fixed_point.
     apply Fixpoints.least_fixed_point_is_least.
-    specialize (Fixpoints.operator_equality (cand * cand) (O k) (W k) (monotone_operator_w k)
+    specialize (Fixpoints.operator_equality (cand * cand) (V k) (W k) (monotone_operator_w k)
                                             (duality_operator k) _ _ Hlfp Hgfp); intros.
     unfold Fixpoints.greatest_fixed_point in *.
     unfold Fixpoints.least_fixed_point in *.
@@ -518,8 +517,8 @@ Section Evote.
     remember (length (all_pairs cand_all)) as v.
     destruct H0. unfold Fixpoints.pred_subset in H0.
     assert (Ht: exists l : list (cand * cand), (forall a : cand * cand, In a l) /\ length l <= v).
-    exists (all_pairs cand_all). split. apply all_pairs_universal. apply cand_fin. omega.
-    specialize (Fixpoints.iter_fin v (O k) (monotone_operator k) Ht); intros.
+    exists (all_pairs cand_all). split. apply all_pairs_universal. apply cand_fin. lia.
+    specialize (Fixpoints.iter_fin v (V k) (monotone_operator k) Ht); intros.
     specialize (H2 n). unfold Fixpoints.pred_subset in H2.
     specialize (H2 (c, d) Hp). specialize (H0 (c, d) H2).
     unfold Fixpoints.complement in H0.
@@ -529,7 +528,7 @@ Section Evote.
     assert (Ht :
               Fixpoints.least_fixed_point
                 (cand * cand) (all_pairs cand_all)
-                (all_pairs_universal cand_all cand_fin) (O k) (monotone_operator k) (c, d) = true 
+                (all_pairs_universal cand_all cand_fin) (V k) (monotone_operator k) (c, d) = true 
               <-> Path k c d). apply path_lfp.
     assert (Hl : forall (A B : Prop), (A <-> B) -> (~A <-> ~B)) by intuition.
     apply Hl in Ht. apply Ht in H. clear Hl. clear Ht.
@@ -545,10 +544,10 @@ Section Evote.
     assert (Hlfp : Fixpoints.lfp (Fixpoints.least_fixed_point
                                     (cand * cand) (all_pairs cand_all)
                                     (all_pairs_universal cand_all cand_fin)
-                                    (O k) (monotone_operator k)) (O k)).
+                                    (V k) (monotone_operator k)) (V k)).
     split. apply Fixpoints.least_fixed_point_is_fixed_point.
     apply Fixpoints.least_fixed_point_is_least.
-    specialize (Fixpoints.operator_equality (cand * cand) (O k) (W k) (monotone_operator_w k)
+    specialize (Fixpoints.operator_equality (cand * cand) (V k) (W k) (monotone_operator_w k)
                                             (duality_operator k) _ _ Hlfp Hgfp); intros.
     apply Fixpoints.eeq_complement in H0. 
     assert
@@ -575,17 +574,17 @@ Section Evote.
     forall (l k : Z) c d, (l >= k -> Path l c d -> Path k c d)%Z.
   Proof.
     intros l k c d Hl Hp. induction Hp.
-    constructor 1. omega.
-    constructor 2 with (d := d). omega. assumption.
+    constructor 1. lia.
+    constructor 2 with (d := d). lia. assumption.
   Qed.
   
   Lemma path_l_less_than_k :
     forall k c d, (forall l, Path l c d -> l <= k)%Z <-> ~Path (k + 1) c d.
   Proof.
     intros k c d. split; intros H. unfold not; intros Hk.
-    specialize (H (k + 1) Hk)%Z. omega.
+    specialize (H (k + 1) Hk)%Z. lia.
 
-    intros l Hp. assert ( Ht: (l <= k)%Z \/ (l >= (k + 1))%Z ) by omega.
+    intros l Hp. assert ( Ht: (l <= k)%Z \/ (l >= (k + 1))%Z ) by lia.
     destruct Ht. assumption.
     specialize (path_lk l (k + 1) c d H0 Hp); intros. congruence.
   Qed. 
@@ -595,7 +594,7 @@ Section Evote.
   Proof.
     intros c d k. unfold constructive_prop.
     remember (all_pairs cand_all) as v.
-    destruct (bool_dec ((Fixpoints.iter (O k) (length v) (fun _  => false)) (c, d)) true) as [H | H].
+    destruct (bool_dec ((Fixpoints.iter (V k) (length v) (fun _  => false)) (c, d)) true) as [H | H].
     destruct (bool_dec ((Fixpoints.iter (W (k + 1)) (length v) (fun _  => true)) (d, c)) true)
       as [H1 | H1].
     
@@ -631,22 +630,24 @@ Section Evote.
       inversion H.
   Qed.
   
+
   Lemma pathT_fixpoint : forall k n c d,
-      Fixpoints.iter (O k) n (fun _ => false) (c, d) = true ->
+      Fixpoints.iter (V k) n Fixpoints.empty_ss (c, d) = true ->
       PathT k c d.
   Proof.
+    unfold Fixpoints.empty_ss.
     intros k. induction n.
     intros c d H. inversion H.
-    intros c d H. simpl in H. unfold O in H at 1.
+    intros c d H. simpl in H. unfold V in H at 1.
     destruct (elg k (c, d)) eqn:Ht. unfold elg in Ht.
     simpl in Ht. constructor 1. apply Zge_is_le_bool.
     replace (k <=? edge c d)%Z with (edge c d >=? k)%Z.
     auto. apply Z.geb_leb.
-    destruct (mpg k (c, d) (Fixpoints.iter (O k) n (fun _ : cand * cand => false))) eqn:Ht1.
+    destruct (mpg k (c, d) (Fixpoints.iter (V k) n (fun _ : cand * cand => false))) eqn:Ht1.
     unfold mpg in Ht1.  simpl in Ht1.
     specialize (existsb_exists_type _
                (fun b : cand =>
-                  elg k (c, b) && Fixpoints.iter (O k) n (fun _ : cand * cand => false) (b, d))
+                  elg k (c, b) && Fixpoints.iter (V k) n (fun _ : cand * cand => false) (b, d))
                cand_all Ht1); intros H1.
     destruct H1 as [m H1]. constructor 2 with (d := m). destruct H1.
     apply andb_true_iff in H1. destruct H1. unfold elg in H1. simpl in H1.
@@ -657,23 +658,20 @@ Section Evote.
   Qed.
 
   
-  Fixpoint f_Z_nat (n : Z) : nat :=
+  Definition f_Z_nat (n : Z) : nat :=
     match n with
     | Z0 => 0
     | Zpos p => 2 * Z.to_nat (Zpos p) - 1
     | Zneg p => 2 * Z.to_nat (Zpos p)
     end.
 
-  Eval compute in (f_Z_nat 10).
-  Eval compute in (f_Z_nat (-2)).
   
-  Fixpoint f_nat_Z (n : nat) : Z :=
+  Definition f_nat_Z (n : nat) : Z :=
     match n with
     | 0 => Z0
     | _ => if even n then  -1 * Z.of_nat (div n 2) else Z.of_nat ((div (S n) 2))
     end.
 
-  Eval compute in f_nat_Z (f_Z_nat (-2)).
   
   Lemma identity_Z_nat : forall n, f_nat_Z (f_Z_nat n) = n.
   Proof.
@@ -684,23 +682,23 @@ Section Evote.
     replace (S x + (S x + 0) - 1) with (S (x + x)).
     unfold f_nat_Z. destruct (NPeano.Nat.even (S (x + x))) eqn:Ht.
     pose proof (even_spec (S (x + x))). destruct H0.
-    specialize (H0 Ht). inversion H0. omega.
-    replace (S (S (x + x))) with (2 * (S x)) by omega.
+    specialize (H0 Ht). inversion H0. lia.
+    replace (S (S (x + x))) with (2 * (S x)) by lia.
     rewrite Nat.mul_comm. rewrite Nat.div_mul.
-    rewrite <- H. apply positive_nat_Z. omega. omega.
+    rewrite <- H. apply positive_nat_Z. lia. lia.
     
     simpl. specialize (Pos2Nat.is_succ p); intros.
-    destruct H. rewrite H. replace (S x + (S x + 0)) with (S (S (x + x))) by omega.
+    destruct H. rewrite H. replace (S x + (S x + 0)) with (S (S (x + x))) by lia.
     unfold f_nat_Z. destruct (NPeano.Nat.even (S (S (x + x)))) eqn:Ht. 
-    replace (S (S (x + x))) with (2 * (S x)) by omega.        
+    replace (S (S (x + x))) with (2 * (S x)) by lia.        
     rewrite Nat.mul_comm. rewrite Nat.div_mul.
     rewrite <- H. rewrite <- (Pos2Z.opp_pos p).
-    do 2 rewrite Z.opp_eq_mul_m1. f_equal. apply positive_nat_Z. omega.
+    do 2 rewrite Z.opp_eq_mul_m1. f_equal. apply positive_nat_Z. lia.
     simpl in Ht. 
     assert (T : forall n, NPeano.Nat.even (n + n) = true).
     {
       induction n; auto. 
-      replace (S n + S n) with  (S (S (n + n))) by omega. 
+      replace (S n + S n) with  (S (S (n + n))) by lia. 
       simpl. auto.
     }
     specialize (T x). rewrite Ht in T. inversion T.
@@ -715,29 +713,32 @@ Section Evote.
     specialize (constructive_indefinite_ground_description
                   _ f_Z_nat f_nat_Z identity_Z_nat
                (constructive_prop c d) (constructive_deci c d) H); intros H1.
-    destruct H1 as [n H1]. exists n. split. unfold constructive_prop in H1.
-    destruct H1 as [H1 H2]. specialize (wins_evi n c d); intros H3.
+    destruct H1 as [k H1]. exists k. split. unfold constructive_prop in H1.
+    destruct H1 as [H1 H2]. specialize (wins_evi k c d); intros H3.
     destruct H3 as [H3 H4]. specialize (H3 H1).
     remember (all_pairs cand_all) as v.
-    assert (Ht1 : Fixpoints.iter (O n) (length v) Fixpoints.empty_ss (c, d) = true).
+   
+    assert (Ht1 : Fixpoints.iter (V k) (length v) Fixpoints.empty_ss (c, d) = true).
     assert (Ht2 : (exists l : list (cand * cand), (forall a : cand * cand, In a l) /\ length l <= (length v))).
     {
       exists (all_pairs cand_all). split. apply (all_pairs_universal cand_all cand_fin).
-      rewrite Heqv. omega.
+      rewrite Heqv. lia.
     }
     destruct H3 as [n0 H5].
-    assert (Ht3 : Fixpoints.pred_subset (Fixpoints.iter (O n) n0 Fixpoints.empty_ss)
-                                        (Fixpoints.iter (O n) (length v) Fixpoints.empty_ss)).
-    apply (Fixpoints.iter_fin (length v) (O n) (monotone_operator n) Ht2).
+    assert (Ht3 : Fixpoints.pred_subset (Fixpoints.iter (V k) n0 Fixpoints.empty_ss)
+                                        (Fixpoints.iter (V k) (length v) Fixpoints.empty_ss)).
+    apply (Fixpoints.iter_fin (length v) (V k) (monotone_operator k) Ht2).
     unfold Fixpoints.pred_subset in Ht3. specialize (Ht3 (c, d) H5). assumption.
     apply pathT_fixpoint with (n := length v). auto.
+    
 
     (* second one *)
     exists (Fixpoints.greatest_fixed_point (cand * cand) (all_pairs cand_all)
                                       (all_pairs_universal cand_all cand_fin)
-                                      (W (n + 1)) (monotone_operator_w (n + 1))).  split.
+                                      (W (k + 1)) (monotone_operator_w (k + 1))).
+    split.
     unfold constructive_prop in H1. destruct H1 as [H1 H2].
-    apply path_gfp; intros H3. specialize (H2 (n + 1)%Z H3). omega.
+    apply path_gfp; intros H3. specialize (H2 (k + 1)%Z H3). lia.
     apply Fixpoints.fixed_point_is_coclosed.
     apply Fixpoints.greatest_fixed_point_is_fixed_point.
   Qed.    

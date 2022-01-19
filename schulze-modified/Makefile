@@ -27,7 +27,7 @@ benchByte : MainByte rand.pl
 
 
 clean:
-	rm -rf _build *.vo *.glob lib.ml lib.mli main.native main.byte 2>/dev/null || true
+	rm -rf _build *.vo *.vos *.vok *.glob lib.ml lib.mli main.native main.byte 2>/dev/null || true
 
 MainNative : lib.ml lib.mli derivation.ml main.ml
 	ocamlbuild  -use-ocamlfind -r -use-menhir main.native	
