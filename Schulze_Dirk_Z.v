@@ -637,13 +637,13 @@ Section Evote.
   Proof.
     unfold Fixpoints.empty_ss.
     intros k. induction n.
-    intros c d H. inversion H.
+    intros c d H. simpl in H. inversion H.
     intros c d H. simpl in H. unfold V in H at 1.
     destruct (elg k (c, d)) eqn:Ht. unfold elg in Ht.
     simpl in Ht. constructor 1. apply Zge_is_le_bool.
     replace (k <=? edge c d)%Z with (edge c d >=? k)%Z.
     auto. apply Z.geb_leb.
-    destruct (mpg k (c, d) (Fixpoints.iter (V k) n (fun _ : cand * cand => false))) eqn:Ht1.
+    destruct (mpg k (c, d) (Fixpoints.iter (V k) n (fun _ : cand * cand => false))) eqn:Ht1. 
     unfold mpg in Ht1.  simpl in Ht1.
     specialize (existsb_exists_type _
                (fun b : cand =>
@@ -656,6 +656,31 @@ Section Evote.
     destruct H1. apply IHn. apply andb_true_iff in H1. firstorder.
     inversion H.
   Qed.
+
+  Lemma pathT_fixpoint_rev : forall k c d,
+      PathT k c d ->
+      exists n, Fixpoints.iter (V k) n Fixpoints.empty_ss (c, d) = true.
+  Proof.
+    intros k c d. intros Hp. induction Hp.
+    exists 1%nat. simpl. unfold V. unfold elg. simpl.
+    apply orb_true_iff. left. pose proof (Zge_is_le_bool (edge c d) k). 
+    destruct H. specialize (H g). replace (edge c d >=? k) with (k <=? edge c d)%Z. 
+    auto. symmetry. apply Z.geb_leb.
+    destruct IHHp as [n IHHp].
+    exists (S n). simpl. unfold V at 1.
+    unfold Fixpoints.empty_ss.
+    replace (mpg k (c, e) (Fixpoints.iter (V k) n (fun _ : cand * cand => false))) with true.
+    apply orb_true_iff.  right. reflexivity.
+    symmetry. unfold mpg. simpl.
+    apply existsb_exists. exists d. split.
+    apply cand_fin. apply andb_true_iff. split. unfold elg. simpl.
+    pose proof (Zge_is_le_bool (edge c d) k).
+    destruct H. specialize (H g). replace (edge c d >=? k) with (k <=? edge c d)%Z. 
+    auto. symmetry. apply Z.geb_leb. assumption.
+  Qed.
+
+  
+
 
   
   Definition f_Z_nat (n : Z) : nat :=
